@@ -1,0 +1,313 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+
+{% block title %}User Management | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="user-management-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header management-header">
+        <div>
+            <span class="page-eyebrow">ACCOUNT MANAGEMENT</span>
+            <h1>User Management</h1>
+            <p>View and manage registered Basic User accounts.</p>
+        </div>
+    </div>
+
+    <!-- SEARCH AND FILTER -->
+    <section class="management-filter-card">
+
+        <form method="get" class="management-search-form">
+
+            <div class="management-search-field">
+                <label for="search">Search Users</label>
+
+                <div class="management-search-input">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-4-4"/>
+                    </svg>
+
+                    <input
+                        type="search"
+                        id="search"
+                        name="search"
+                        value="{{ search_query|default:'' }}"
+                        placeholder="Search by username, name, email or department"
+                    >
+                </div>
+            </div>
+
+            <div class="management-search-actions">
+                <button type="submit" class="management-search-button">
+                    Search
+                </button>
+
+                {% if search_query %}
+                    <a href="{% url 'user_management' %}"
+                       class="management-clear-button">
+                        Clear
+                    </a>
+                {% endif %}
+            </div>
+
+        </form>
+
+    </section>
+
+    <!-- REGISTERED USERS -->
+    <section class="management-table-card">
+
+        <div class="management-table-heading">
+            <div>
+                <h2>Registered Users</h2>
+                <p>Basic User account directory</p>
+            </div>
+
+            <span class="management-count">
+                {{ users|length }} shown
+            </span>
+        </div>
+
+        {% if users %}
+
+            <div class="management-table-scroll">
+                <table class="management-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for account in users %}
+                            <tr>
+                                <td>
+                                    <div class="management-user-cell">
+
+                                        <div class="management-avatar">
+                                            {{ account.username|slice:":1"|upper }}
+                                        </div>
+
+                                        <div class="management-user-details">
+                                            <strong>
+                                                {{ account.get_full_name|default:account.username }}
+                                            </strong>
+                                            <span>@{{ account.username }}</span>
+                                        </div>
+
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="management-email">
+                                        {{ account.email|default:"—" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ account.department|default:"—" }}
+                                </td>
+
+                                <td>
+                                    {% if account.is_active %}
+                                        <span class="management-status is-active">
+                                            <span class="management-status-dot"></span>
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="management-status is-inactive">
+                                            <span class="management-status-dot"></span>
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="management-row-actions">
+
+                                        <a
+                                            href="{% url 'admin_user_detail' account.id %}"
+                                            class="management-view-button">
+                                            View
+                                        </a>
+
+                                        <button
+                                            type="button"
+                                            class="{% if account.is_active %}management-deactivate-button{% else %}management-activate-button{% endif %}"
+                                            data-user-name="{{ account.username }}"
+                                            data-user-action="{% if account.is_active %}Deactivate{% else %}Activate{% endif %}"
+                                            data-form-id="status-form-{{ account.id }}"
+                                            onclick="openStatusModal(this)">
+                                            {% if account.is_active %}
+                                                Deactivate
+                                            {% else %}
+                                                Activate
+                                            {% endif %}
+                                        </button>
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'toggle_user_status' account.id %}"
+                                            id="status-form-{{ account.id }}"
+                                            class="management-action-form"
+                                            hidden>
+                                            {% csrf_token %}
+                                        </form>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+
+            <div class="management-empty-state">
+                <div class="management-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="28" height="28"
+                         fill="none" stroke="currentColor"
+                         stroke-width="1.8" stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-4-4"/>
+                    </svg>
+                </div>
+
+                <h3>No users found</h3>
+
+                <p>
+                    {% if search_query %}
+                        No accounts match your search. Try another keyword.
+                    {% else %}
+                        No Basic User accounts are available yet.
+                    {% endif %}
+                </p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+<!-- STATUS CONFIRMATION MODAL -->
+<div class="admin-modal-backdrop"
+     id="statusConfirmModal"
+     hidden>
+
+    <div class="admin-modal management-confirm-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="statusModalTitle">
+
+        <div class="admin-modal-header">
+            <h2 id="statusModalTitle">Confirm Account Status</h2>
+
+            <button type="button"
+                    class="admin-modal-close"
+                    aria-label="Close modal"
+                    onclick="closeStatusModal()">
+                ×
+            </button>
+        </div>
+
+        <div class="admin-modal-body">
+            <p id="statusModalMessage"></p>
+            <p class="management-modal-note">
+                This will update the user's account access.
+            </p>
+        </div>
+
+        <div class="admin-modal-footer">
+            <button type="button"
+                    class="management-modal-cancel"
+                    onclick="closeStatusModal()">
+                Cancel
+            </button>
+
+            <button type="button"
+                    id="confirmStatusButton"
+                    class="admin-modal-primary"
+                    onclick="confirmStatusChange()">
+                Confirm
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_script %}
+<script>
+let selectedStatusForm = null;
+let previousFocus = null;
+
+function openStatusModal(button) {
+    const modal = document.getElementById("statusConfirmModal");
+    const message = document.getElementById("statusModalMessage");
+    const confirmButton = document.getElementById("confirmStatusButton");
+
+    const username = button.dataset.userName;
+    const action = button.dataset.userAction;
+    const formId = button.dataset.formId;
+
+    selectedStatusForm = document.getElementById(formId);
+    previousFocus = button;
+
+    message.textContent =
+        `Are you sure you want to ${action.toLowerCase()} the account "${username}"?`;
+
+    confirmButton.textContent = action + " Account";
+
+    modal.hidden = false;
+    document.body.classList.add("modal-open");
+
+    confirmButton.focus();
+}
+
+function closeStatusModal() {
+    document.getElementById("statusConfirmModal").hidden = true;
+    document.body.classList.remove("modal-open");
+
+    selectedStatusForm = null;
+
+    if (previousFocus) {
+        previousFocus.focus();
+    }
+}
+
+function confirmStatusChange() {
+    if (selectedStatusForm) {
+        selectedStatusForm.submit();
+    }
+}
+
+document.addEventListener("keydown", function (event) {
+    const modal = document.getElementById("statusConfirmModal");
+
+    if (event.key === "Escape" && !modal.hidden) {
+        closeStatusModal();
+    }
+});
+
+document.getElementById("statusConfirmModal")
+    .addEventListener("click", function (event) {
+        if (event.target === this) {
+            closeStatusModal();
+        }
+    });
+</script>
+{% endblock %}

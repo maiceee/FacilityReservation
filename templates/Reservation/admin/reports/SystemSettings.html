@@ -1,0 +1,119 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
+
+{% block title %}System Settings | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/admin/system-admin.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+
+<div class="system-page">
+
+    <div class="system-page-header">
+        <div>
+            <span class="page-eyebrow">SYSTEM ADMINISTRATION</span>
+            <h1>System Settings</h1>
+            <p>Configure reservation limits and booking restrictions.</p>
+        </div>
+    </div>
+
+    <section class="system-settings-card">
+
+        <div class="system-settings-heading">
+
+            <span class="system-settings-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8"
+                     stroke-linecap="round"
+                     stroke-linejoin="round">
+                    <path d="M4 7h16M4 17h16"/>
+                    <circle cx="9" cy="7" r="3" fill="white"/>
+                    <circle cx="15" cy="17" r="3" fill="white"/>
+                </svg>
+            </span>
+
+            <div>
+                <h2>Reservation Configuration</h2>
+                <p>Adjust the rules applied to new facility reservations.</p>
+            </div>
+
+        </div>
+
+        <form method="post"
+              class="system-settings-form"
+              onsubmit="return confirm('Save these booking settings?');">
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="system-form-alert" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="system-settings-field">
+
+                <label for="{{ form.max_event_duration_hours.id_for_label }}">
+                    Maximum Event Duration
+                    <span class="system-required">*</span>
+                </label>
+
+                <p class="system-field-description">
+                    Maximum number of hours allowed for a single event booking.
+                </p>
+
+                <div class="system-number-input">
+                    {{ form.max_event_duration_hours }}
+                    <span>Hours</span>
+                </div>
+
+                {% for error in form.max_event_duration_hours.errors %}
+                    <span class="system-field-error" role="alert">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+
+            </div>
+
+            <div class="system-settings-field">
+
+                <label for="{{ form.advance_booking_days.id_for_label }}">
+                    Advance Booking Window
+                    <span class="system-required">*</span>
+                </label>
+
+                <p class="system-field-description">
+                    Maximum number of days in advance a user can submit a reservation.
+                </p>
+
+                <div class="system-number-input">
+                    {{ form.advance_booking_days }}
+                    <span>Days</span>
+                </div>
+
+                {% for error in form.advance_booking_days.errors %}
+                    <span class="system-field-error" role="alert">
+                        {{ error }}
+                    </span>
+                {% endfor %}
+
+            </div>
+
+            <div class="system-settings-footer">
+                <button type="submit" class="system-primary-btn">
+                    Save Settings
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

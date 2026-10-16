@@ -1,0 +1,299 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}CampusSpace | Admin{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'Reservation/css/admin/admin.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="admin-page">
+
+<div class="layout">
+
+    <input type="checkbox"
+           id="sidebar-toggle"
+           class="sidebar-toggle"
+           aria-label="Toggle sidebar">
+
+    <aside class="sidebar" id="admin-sidebar">
+
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="4"/>
+                    <path d="M8 8h8M8 12h8M8 16h5"/>
+                </svg>
+            </div>
+
+            <div class="sidebar-brand-text">
+                <strong>CampusSpace</strong>
+                <span>ADMINISTRATION</span>
+            </div>
+        </div>
+
+        <div class="sidebar-section-label">WORKSPACE</div>
+
+        <nav class="sidebar-nav" aria-label="Admin navigation">
+
+            <a href="{% url 'admin_dashboard' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    </svg>
+                </span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{% url 'user_management' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'user_management' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="8" r="3"/>
+                        <path d="M3 20v-2a6 6 0 0 1 12 0v2"/>
+                        <path d="M17 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5v1"/>
+                    </svg>
+                </span>
+                <span>User Management</span>
+            </a>
+
+            <a href="{% url 'facility_list' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'facility_list' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="3" width="16" height="18" rx="2"/>
+                        <path d="M9 21v-5h6v5M8 7h2m4 0h2M8 11h2m4 0h2"/>
+                    </svg>
+                </span>
+                <span>Facilities</span>
+            </a>
+
+            <a href="{% url 'category_list' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="8" height="8" rx="2"/>
+                        <rect x="13" y="3" width="8" height="8" rx="2"/>
+                        <rect x="3" y="13" width="8" height="8" rx="2"/>
+                        <rect x="13" y="13" width="8" height="8" rx="2"/>
+                    </svg>
+                </span>
+                <span>Categories</span>
+            </a>
+
+            <a href="{% url 'amenity_list' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'amenity_list' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 3 2.8 5.7L21 9.6l-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>
+                    </svg>
+                </span>
+                <span>Amenities</span>
+            </a>
+
+            <div class="sidebar-section-label sidebar-section-inner">
+                OPERATIONS
+            </div>
+
+            <a href="{% url 'reservation_queue' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'reservation_queue' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                        <path d="M8 9h8M8 13h8M8 17h5"/>
+                    </svg>
+                </span>
+                <span>Reservations</span>
+            </a>
+
+            <a href="{% url 'admin_calendar' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'admin_calendar' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path d="M7 3v4M17 3v4M3 10h18"/>
+                    </svg>
+                </span>
+                <span>Calendar</span>
+            </a>
+
+            <a href="{% url 'closure_list' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'closure_list' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M6 18 18 6"/>
+                    </svg>
+                </span>
+                <span>Facility Closures</span>
+            </a>
+
+            <a href="{% url 'reports' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 20V10M10 20V4M16 20v-8M22 20V7"/>
+                    </svg>
+                </span>
+                <span>Reports</span>
+            </a>
+
+            <div class="sidebar-section-label sidebar-section-inner">
+                SYSTEM
+            </div>
+
+            <a href="{% url 'audit_logs' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'audit_logs' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 6h12M8 12h12M8 18h12"/>
+                        <path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"/>
+                    </svg>
+                </span>
+                <span>Audit Logs</span>
+            </a>
+
+            <a href="{% url 'system_settings' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'system_settings' %}active{% endif %}">
+                <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 2-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-3v-.8a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2-2 .1-.1A1.7 1.7 0 0 0 7.2 15a1.7 1.7 0 0 0-1.6-1H5v-3h.6a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L6.8 8l2-2 .1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V4h3v.8a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2 2-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.6v3H21a1.7 1.7 0 0 0-1.6 1Z"/>
+                    </svg>
+                </span>
+                <span>System Settings</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-profile">
+                <div class="profile-avatar">
+                    {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
+                </div>
+
+                <div class="profile-info">
+                    <strong>
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </strong>
+                    <span>Administrator</span>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'logout' %}" class="logout-form">
+                {% csrf_token %}
+
+                <button type="submit" class="logout-button">
+                    <span class="nav-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.8"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 17l5-5-5-5M15 12H3"/>
+                            <path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6"/>
+                        </svg>
+                    </span>
+                    <span>Sign Out</span>
+                </button>
+            </form>
+
+        </div>
+
+    </aside>
+
+    <label for="sidebar-toggle"
+           class="sidebar-overlay"
+           aria-label="Close navigation"></label>
+
+    <div class="main-shell">
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <label for="sidebar-toggle"
+                       class="mobile-menu-button"
+                       aria-label="Toggle navigation">
+                    ☰
+                </label>
+
+                <div class="topbar-heading">
+                    <span class="topbar-eyebrow">CAMPUSSPACE ADMIN</span>
+                    <strong>Campus Facility Management</strong>
+                </div>
+
+            </div>
+
+            <div class="topbar-right">
+                <span class="topbar-role">Administrator</span>
+
+                <div class="topbar-avatar">
+                    {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
+                </div>
+            </div>
+
+        </header>
+
+        <main class="content">
+
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}"
+                             role="status">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+
+        </main>
+
+    </div>
+
+</div>
+
+{% block extra_script %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,264 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+
+{% block title %}Facility Categories | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="master-data-page">
+
+    <div class="master-data-header">
+        <div>
+            <span class="page-eyebrow">FACILITY MANAGEMENT</span>
+            <h1>Facility Categories</h1>
+            <p>Organize and manage campus facility categories.</p>
+        </div>
+
+        <a href="{% url 'category_create' %}"
+           class="master-add-button">
+            <span aria-hidden="true">+</span>
+            Add Category
+        </a>
+    </div>
+
+    <section class="master-table-card">
+
+        <div class="master-table-heading">
+            <div>
+                <h2>Category Directory</h2>
+                <p>Registered facility categories and their status</p>
+            </div>
+
+            <span class="management-count">
+                {{ categories|length }} shown
+            </span>
+        </div>
+
+        {% if categories %}
+
+            <div class="master-table-scroll">
+                <table class="master-table">
+
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for category in categories %}
+                            <tr>
+                                <td>
+                                    <div class="master-name-cell">
+
+                                        <div class="master-item-icon"
+                                             aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="1.8"
+                                                 stroke-linecap="round"
+                                                 stroke-linejoin="round">
+                                                <rect x="3" y="3"
+                                                      width="7" height="7" rx="1.5"/>
+                                                <rect x="14" y="3"
+                                                      width="7" height="7" rx="1.5"/>
+                                                <rect x="3" y="14"
+                                                      width="7" height="7" rx="1.5"/>
+                                                <rect x="14" y="14"
+                                                      width="7" height="7" rx="1.5"/>
+                                            </svg>
+                                        </div>
+
+                                        <strong>{{ category.name }}</strong>
+
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {% if category.is_active %}
+                                        <span class="management-status is-active">
+                                            <span class="management-status-dot"></span>
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="management-status is-inactive">
+                                            <span class="management-status-dot"></span>
+                                            Archived
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="master-row-actions">
+
+                                        <a href="{% url 'category_update' category.id %}"
+                                           class="master-edit-button">
+                                            Edit
+                                        </a>
+
+                                        {% if category.is_active %}
+                                            <button type="button"
+                                                    class="master-archive-button"
+                                                    data-category-name="{{ category.name }}"
+                                                    data-form-id="category-archive-{{ category.id }}"
+                                                    onclick="openCategoryArchive(this)">
+                                                Archive
+                                            </button>
+
+                                            <form method="post"
+                                                  action="{% url 'category_archive' category.id %}"
+                                                  id="category-archive-{{ category.id }}"
+                                                  class="master-action-form"
+                                                  hidden>
+                                                {% csrf_token %}
+                                            </form>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        {% else %}
+
+            <div class="master-empty-state">
+
+                <div class="master-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"
+                         width="28" height="28"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    </svg>
+                </div>
+
+                <h3>No categories available</h3>
+                <p>Add a facility category to get started.</p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+
+<div class="admin-modal-backdrop"
+     id="categoryArchiveModal"
+     hidden>
+
+    <div class="admin-modal master-confirm-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="categoryModalTitle">
+
+        <div class="admin-modal-header">
+            <h2 id="categoryModalTitle">Archive Category</h2>
+
+            <button type="button"
+                    class="admin-modal-close"
+                    aria-label="Close modal"
+                    onclick="closeCategoryArchive()">
+                ×
+            </button>
+        </div>
+
+        <div class="admin-modal-body">
+            <p id="categoryModalMessage"></p>
+
+            <p class="master-modal-note">
+                This category will be marked as archived.
+            </p>
+        </div>
+
+        <div class="admin-modal-footer">
+            <button type="button"
+                    class="master-modal-cancel"
+                    onclick="closeCategoryArchive()">
+                Cancel
+            </button>
+
+            <button type="button"
+                    id="confirmCategoryArchive"
+                    class="admin-modal-primary"
+                    onclick="submitCategoryArchive()">
+                Archive Category
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_script %}
+<script>
+let selectedCategoryArchiveForm = null;
+let categoryPreviousFocus = null;
+
+function openCategoryArchive(button) {
+    const modal = document.getElementById("categoryArchiveModal");
+    const message = document.getElementById("categoryModalMessage");
+
+    selectedCategoryArchiveForm = document.getElementById(
+        button.dataset.formId
+    );
+
+    categoryPreviousFocus = button;
+
+    message.textContent =
+        `Are you sure you want to archive "${button.dataset.categoryName}"?`;
+
+    modal.hidden = false;
+    document.body.classList.add("modal-open");
+
+    document.getElementById("confirmCategoryArchive").focus();
+}
+
+function closeCategoryArchive() {
+    document.getElementById("categoryArchiveModal").hidden = true;
+    document.body.classList.remove("modal-open");
+
+    selectedCategoryArchiveForm = null;
+
+    if (categoryPreviousFocus) {
+        categoryPreviousFocus.focus();
+    }
+}
+
+function submitCategoryArchive() {
+    if (selectedCategoryArchiveForm) {
+        selectedCategoryArchiveForm.submit();
+    }
+}
+
+document.addEventListener("keydown", function (event) {
+    const modal = document.getElementById("categoryArchiveModal");
+
+    if (event.key === "Escape" && !modal.hidden) {
+        closeCategoryArchive();
+    }
+});
+
+document.getElementById("categoryArchiveModal")
+    .addEventListener("click", function (event) {
+        if (event.target === this) {
+            closeCategoryArchive();
+        }
+    });
+</script>
+{% endblock %}

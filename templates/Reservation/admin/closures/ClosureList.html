@@ -1,0 +1,176 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
+
+{% block title %}Facility Closures | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/admin/closure-admin.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="closures-page">
+
+    <div class="closures-page-header">
+        <div>
+            <span class="page-eyebrow">FACILITY MANAGEMENT</span>
+            <h1>Facility Closures</h1>
+            <p>Manage facility closure periods and scheduling restrictions.</p>
+        </div>
+
+        <a href="{% url 'closure_create' %}"
+           class="closures-primary-btn">
+            <span class="closures-plus" aria-hidden="true">+</span>
+            Add Closure
+        </a>
+    </div>
+
+    <section class="closures-table-card">
+
+        <div class="closures-table-heading">
+            <div>
+                <h2>Closure Directory</h2>
+                <p>Registered closure periods and their current status</p>
+            </div>
+
+            <span class="closures-count">
+                {{ closures|length }} shown
+            </span>
+        </div>
+
+        {% if closures %}
+
+            <div class="closures-table-scroll">
+
+                <table class="closures-table">
+
+                    <thead>
+                        <tr>
+                            <th>Facility</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Created By</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for closure in closures %}
+
+                            <tr>
+
+                                <td>
+                                    <div class="closures-facility-cell">
+                                        <div class="closures-facility-icon"
+                                             aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="1.8"
+                                                 stroke-linecap="round"
+                                                 stroke-linejoin="round">
+                                                <rect x="4" y="3" width="16" height="18" rx="2"/>
+                                                <path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>
+                                            </svg>
+                                        </div>
+
+                                        <strong>{{ closure.facility.name }}</strong>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="closures-date">
+                                        {{ closure.start_datetime|date:"M d, Y" }}
+                                    </span>
+
+                                    <span class="closures-time">
+                                        {{ closure.start_datetime|date:"h:i A" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="closures-date">
+                                        {{ closure.end_datetime|date:"M d, Y" }}
+                                    </span>
+
+                                    <span class="closures-time">
+                                        {{ closure.end_datetime|date:"h:i A" }}
+                                    </span>
+                                </td>
+
+                                <td class="closures-reason">
+                                    {{ closure.reason }}
+                                </td>
+
+                                <td>
+                                    {% if closure.is_active %}
+                                        <span class="closures-status is-active">
+                                            <span class="closures-status-dot"></span>
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="closures-status is-archived">
+                                            <span class="closures-status-dot"></span>
+                                            Archived
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {{ closure.created_by.get_full_name|default:closure.created_by.username }}
+                                </td>
+
+                                <td>
+                                    {% if closure.is_active %}
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'closure_archive' closure.id %}"
+                                            class="closures-action-form"
+                                            onsubmit="return confirm('Archive this closure?');"
+                                        >
+                                            {% csrf_token %}
+
+                                            <button type="submit"
+                                                    class="closures-archive-btn">
+                                                Archive
+                                            </button>
+                                        </form>
+
+                                    {% else %}
+                                        <span class="closures-no-action">—</span>
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="closures-empty-state">
+                <div class="closures-empty-icon" aria-hidden="true">
+                    ▦
+                </div>
+
+                <h3>No facility closures available</h3>
+                <p>Create a closure to block a facility during a specific period.</p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

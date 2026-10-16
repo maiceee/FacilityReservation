@@ -1,0 +1,89 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+
+{% block title %}{{ page_title }} | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="master-form-page">
+
+    <div class="master-form-header">
+        <div>
+            <span class="page-eyebrow">FACILITY MANAGEMENT</span>
+            <h1>{{ page_title }}</h1>
+            <p>Enter the category information below.</p>
+        </div>
+
+        <a href="{% url 'category_list' %}"
+           class="master-back-button">
+            <span aria-hidden="true">←</span>
+            Back to Categories
+        </a>
+    </div>
+
+    <section class="master-form-card">
+
+        <div class="master-form-card-heading">
+            <div class="master-form-icon" aria-hidden="true">▧</div>
+
+            <div>
+                <h2>Category Information</h2>
+                <p>Manage the details of this facility category.</p>
+            </div>
+        </div>
+
+        <form method="post" class="master-detail-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="message error" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="master-form-group">
+
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="master-required">*</span>
+                        {% endif %}
+                    </label>
+
+                    <div class="master-field-control">
+                        {{ field }}
+                    </div>
+
+                    {% if field.help_text %}
+                        <div class="master-field-help">
+                            {{ field.help_text }}
+                        </div>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <div class="master-field-error" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+            {% endfor %}
+
+            <div class="master-form-footer">
+                <a href="{% url 'category_list' %}"
+                   class="master-cancel-button">
+                    Cancel
+                </a>
+
+                <button type="submit" class="master-save-button">
+                    Save Category
+                </button>
+            </div>
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,316 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+
+{% block title %}Reservation Details | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="reservation-ui">
+
+    <div class="reservation-page-header">
+        <div>
+            <span class="page-eyebrow">RESERVATION MANAGEMENT</span>
+            <h1>Reservation Details</h1>
+            <p>Review booking information and manage this reservation.</p>
+        </div>
+
+        <a href="{% url 'reservation_queue' %}"
+           class="reservation-back-link">
+            ← Back to Reservations
+        </a>
+    </div>
+
+    <section class="reservation-panel">
+
+        <div class="reservation-panel-header">
+            <div>
+                <h2>{{ reservation.event_name }}</h2>
+                <p>Reservation #{{ reservation.id }}</p>
+            </div>
+
+            <span class="status-badge status-{{ reservation.status|lower }}">
+                {{ reservation.get_status_display }}
+            </span>
+        </div>
+
+        <div class="reservation-info-grid">
+
+            <div class="reservation-info-item">
+                <span>Requested By</span>
+                <strong>
+                    {{ reservation.user.get_full_name|default:reservation.user.username }}
+                </strong>
+            </div>
+
+            <div class="reservation-info-item">
+                <span>Facility</span>
+                <strong>{{ reservation.facility.name }}</strong>
+            </div>
+
+            <div class="reservation-info-item">
+                <span>Expected Participants</span>
+                <strong>{{ reservation.expected_attendees }}</strong>
+            </div>
+
+            <div class="reservation-info-item">
+                <span>Start Schedule</span>
+                <strong>
+                    {{ reservation.start_datetime|date:"M d, Y h:i A" }}
+                </strong>
+            </div>
+
+            <div class="reservation-info-item">
+                <span>End Schedule</span>
+                <strong>
+                    {{ reservation.end_datetime|date:"M d, Y h:i A" }}
+                </strong>
+            </div>
+
+            <div class="reservation-info-item reservation-info-full">
+                <span>Event Purpose</span>
+                <strong>{{ reservation.purpose }}</strong>
+            </div>
+
+        </div>
+    </section>
+
+    {% if reservation.status == 'APPROVED' or reservation.status == 'CHECKED_IN' or reservation.status == 'COMPLETED' or reservation.status == 'NO_SHOW' %}
+        <section class="reservation-panel">
+            <div class="reservation-section-header">
+                <h2>Printable Documents</h2>
+                <p>Open a printable copy of this reservation.</p>
+            </div>
+
+            <div class="reservation-button-row">
+                <a href="{% url 'reservation_slip' reservation.id %}"
+                   target="_blank"
+                   rel="noopener"
+                   class="reservation-btn reservation-btn-primary">
+                    Reservation Slip ↗
+                </a>
+
+                {% if reservation.status == 'COMPLETED' %}
+                    <a href="{% url 'completion_summary' reservation.id %}"
+                       target="_blank"
+                       rel="noopener"
+                       class="reservation-btn reservation-btn-success">
+                        Completion Summary ↗
+                    </a>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
+
+    {% if reservation.status == 'PENDING' %}
+        <section class="reservation-panel">
+            <div class="reservation-section-header">
+                <h2>Review Reservation</h2>
+                <p>Approve or reject this pending request.</p>
+            </div>
+
+            <div class="reservation-review-grid">
+
+                <form method="post"
+                      action="{% url 'reservation_approve' reservation.id %}"
+                      class="reservation-action-form"
+                      onsubmit="return confirm('Approve this reservation?');">
+                    {% csrf_token %}
+
+                    <h3>Approve Request</h3>
+
+                    <label for="approval-note">
+                        Decision Note (optional)
+                    </label>
+
+                    <textarea id="approval-note"
+                              name="decision_reason"
+                              rows="4"
+                              placeholder="Add an optional note"></textarea>
+
+                    <button type="submit"
+                            class="reservation-btn reservation-btn-success">
+                        Approve Reservation
+                    </button>
+                </form>
+
+                <form method="post"
+                      action="{% url 'reservation_reject' reservation.id %}"
+                      class="reservation-action-form"
+                      onsubmit="return confirm('Reject this reservation?');">
+                    {% csrf_token %}
+
+                    <h3>Reject Request</h3>
+
+                    <label for="rejection-reason">
+                        Rejection Reason
+                    </label>
+
+                    <textarea id="rejection-reason"
+                              name="decision_reason"
+                              rows="4"
+                              required
+                              placeholder="Explain why this request is rejected"></textarea>
+
+                    <button type="submit"
+                            class="reservation-btn reservation-btn-danger">
+                        Reject Reservation
+                    </button>
+                </form>
+
+            </div>
+        </section>
+    {% endif %}
+
+    {% if reservation.status == 'APPROVED' %}
+        <section class="reservation-panel">
+            <div class="reservation-section-header">
+                <h2>Event Actions</h2>
+                <p>Manage the approved reservation.</p>
+            </div>
+
+            <div class="reservation-button-row">
+
+                <a href="{% url 'reservation_reschedule' reservation.id %}"
+                   class="reservation-btn reservation-btn-primary">
+                    Reschedule
+                </a>
+
+                <form method="post"
+                      action="{% url 'reservation_check_in' reservation.id %}"
+                      onsubmit="return confirm('Check in this event?');">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="reservation-btn reservation-btn-success">
+                        Check In
+                    </button>
+                </form>
+
+                <form method="post"
+                      action="{% url 'reservation_no_show' reservation.id %}"
+                      onsubmit="return confirm('Mark this reservation as No Show?');">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="reservation-btn reservation-btn-danger">
+                        Mark No Show
+                    </button>
+                </form>
+
+            </div>
+        </section>
+    {% endif %}
+
+    {% if reservation.status == 'CHECKED_IN' %}
+        <section class="reservation-panel">
+            <div class="reservation-section-header">
+                <h2>Complete Event</h2>
+                <p>Finalize this checked-in event.</p>
+            </div>
+
+            <form method="post"
+                  action="{% url 'reservation_complete' reservation.id %}"
+                  class="reservation-completion-form"
+                  onsubmit="return confirm('Complete this event?');">
+                {% csrf_token %}
+
+                <label for="incident-notes">Incident Notes</label>
+
+                <textarea id="incident-notes"
+                          name="incident_notes"
+                          rows="4"
+                          placeholder="Optional incident notes"></textarea>
+
+                <button type="submit"
+                        class="reservation-btn reservation-btn-success">
+                    Complete Event
+                </button>
+            </form>
+        </section>
+    {% endif %}
+
+    {% if reservation.decision_by %}
+        <section class="reservation-panel">
+            <div class="reservation-section-header">
+                <h2>Decision Information</h2>
+            </div>
+
+            <div class="reservation-info-grid">
+                <div class="reservation-info-item">
+                    <span>Reviewed By</span>
+                    <strong>
+                        {{ reservation.decision_by.get_full_name|default:reservation.decision_by.username }}
+                    </strong>
+                </div>
+
+                <div class="reservation-info-item">
+                    <span>Decision Time</span>
+                    <strong>
+                        {{ reservation.decision_at|date:"M d, Y h:i A" }}
+                    </strong>
+                </div>
+
+                <div class="reservation-info-item reservation-info-full">
+                    <span>Reason / Note</span>
+                    <strong>{{ reservation.decision_reason|default:"—" }}</strong>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {% if changes %}
+        <section class="reservation-panel">
+            <div class="reservation-section-header">
+                <h2>Rescheduling History</h2>
+                <p>Recorded schedule changes for this reservation.</p>
+            </div>
+
+            <div class="reservation-history-list">
+                {% for change in changes %}
+                    <div class="reservation-history-item">
+
+                        <div class="reservation-history-grid">
+                            <div class="reservation-info-item">
+                                <span>Previous Schedule</span>
+                                <strong>
+                                    {{ change.previous_start_datetime|date:"M d, Y h:i A" }}
+                                    –
+                                    {{ change.previous_end_datetime|date:"M d, Y h:i A" }}
+                                </strong>
+                            </div>
+
+                            <div class="reservation-info-item">
+                                <span>New Schedule</span>
+                                <strong>
+                                    {{ change.new_start_datetime|date:"M d, Y h:i A" }}
+                                    –
+                                    {{ change.new_end_datetime|date:"M d, Y h:i A" }}
+                                </strong>
+                            </div>
+
+                            <div class="reservation-info-item">
+                                <span>Changed By</span>
+                                <strong>
+                                    {{ change.changed_by.get_full_name|default:change.changed_by.username }}
+                                </strong>
+                            </div>
+
+                            <div class="reservation-info-item">
+                                <span>Reason</span>
+                                <strong>{{ change.reason }}</strong>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/admin/reservation-admin.css' %}">
+{% endblock %}

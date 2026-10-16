@@ -1,0 +1,259 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+
+{% block title %}Amenities | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="master-data-page">
+
+    <div class="master-data-header">
+        <div>
+            <span class="page-eyebrow">FACILITY MANAGEMENT</span>
+            <h1>Amenities</h1>
+            <p>Manage amenities available across campus facilities.</p>
+        </div>
+
+        <a href="{% url 'amenity_create' %}"
+           class="master-add-button">
+            <span aria-hidden="true">+</span>
+            Add Amenity
+        </a>
+    </div>
+
+    <section class="master-table-card">
+
+        <div class="master-table-heading">
+            <div>
+                <h2>Amenity Directory</h2>
+                <p>Available amenities and their current status</p>
+            </div>
+
+            <span class="management-count">
+                {{ amenities|length }} shown
+            </span>
+        </div>
+
+        {% if amenities %}
+
+            <div class="master-table-scroll">
+                <table class="master-table">
+
+                    <thead>
+                        <tr>
+                            <th>Amenity</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for amenity in amenities %}
+                            <tr>
+                                <td>
+                                    <div class="master-name-cell">
+
+                                        <div class="master-item-icon"
+                                             aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="1.8"
+                                                 stroke-linecap="round"
+                                                 stroke-linejoin="round">
+                                                <rect x="4" y="5"
+                                                      width="16" height="14"
+                                                      rx="2"/>
+                                                <path d="M8 9h8M8 13h5"/>
+                                            </svg>
+                                        </div>
+
+                                        <strong>{{ amenity.name }}</strong>
+
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {% if amenity.is_active %}
+                                        <span class="management-status is-active">
+                                            <span class="management-status-dot"></span>
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="management-status is-inactive">
+                                            <span class="management-status-dot"></span>
+                                            Archived
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="master-row-actions">
+
+                                        <a href="{% url 'amenity_update' amenity.id %}"
+                                           class="master-edit-button">
+                                            Edit
+                                        </a>
+
+                                        {% if amenity.is_active %}
+                                            <button type="button"
+                                                    class="master-archive-button"
+                                                    data-amenity-name="{{ amenity.name }}"
+                                                    data-form-id="amenity-archive-{{ amenity.id }}"
+                                                    onclick="openAmenityArchive(this)">
+                                                Archive
+                                            </button>
+
+                                            <form method="post"
+                                                  action="{% url 'amenity_archive' amenity.id %}"
+                                                  id="amenity-archive-{{ amenity.id }}"
+                                                  class="master-action-form"
+                                                  hidden>
+                                                {% csrf_token %}
+                                            </form>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        {% else %}
+
+            <div class="master-empty-state">
+
+                <div class="master-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"
+                         width="28" height="28"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <rect x="4" y="5"
+                              width="16" height="14"
+                              rx="2"/>
+                        <path d="M8 9h8M8 13h5"/>
+                    </svg>
+                </div>
+
+                <h3>No amenities available</h3>
+                <p>Add an amenity to get started.</p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+<div class="admin-modal-backdrop"
+     id="amenityArchiveModal"
+     hidden>
+
+    <div class="admin-modal master-confirm-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="amenityModalTitle">
+
+        <div class="admin-modal-header">
+            <h2 id="amenityModalTitle">Archive Amenity</h2>
+
+            <button type="button"
+                    class="admin-modal-close"
+                    aria-label="Close modal"
+                    onclick="closeAmenityArchive()">
+                ×
+            </button>
+        </div>
+
+        <div class="admin-modal-body">
+            <p id="amenityModalMessage"></p>
+
+            <p class="master-modal-note">
+                This amenity will be marked as archived.
+            </p>
+        </div>
+
+        <div class="admin-modal-footer">
+            <button type="button"
+                    class="master-modal-cancel"
+                    onclick="closeAmenityArchive()">
+                Cancel
+            </button>
+
+            <button type="button"
+                    id="confirmAmenityArchive"
+                    class="admin-modal-primary"
+                    onclick="submitAmenityArchive()">
+                Archive Amenity
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_script %}
+<script>
+let selectedAmenityArchiveForm = null;
+let amenityPreviousFocus = null;
+
+function openAmenityArchive(button) {
+    const modal = document.getElementById("amenityArchiveModal");
+    const message = document.getElementById("amenityModalMessage");
+
+    selectedAmenityArchiveForm = document.getElementById(
+        button.dataset.formId
+    );
+
+    amenityPreviousFocus = button;
+
+    message.textContent =
+        `Are you sure you want to archive "${button.dataset.amenityName}"?`;
+
+    modal.hidden = false;
+    document.body.classList.add("modal-open");
+
+    document.getElementById("confirmAmenityArchive").focus();
+}
+
+function closeAmenityArchive() {
+    document.getElementById("amenityArchiveModal").hidden = true;
+    document.body.classList.remove("modal-open");
+
+    selectedAmenityArchiveForm = null;
+
+    if (amenityPreviousFocus) {
+        amenityPreviousFocus.focus();
+    }
+}
+
+function submitAmenityArchive() {
+    if (selectedAmenityArchiveForm) {
+        selectedAmenityArchiveForm.submit();
+    }
+}
+
+document.addEventListener("keydown", function (event) {
+    const modal = document.getElementById("amenityArchiveModal");
+
+    if (event.key === "Escape" && !modal.hidden) {
+        closeAmenityArchive();
+    }
+});
+
+document.getElementById("amenityArchiveModal")
+    .addEventListener("click", function (event) {
+        if (event.target === this) {
+            closeAmenityArchive();
+        }
+    });
+</script>
+{% endblock %}

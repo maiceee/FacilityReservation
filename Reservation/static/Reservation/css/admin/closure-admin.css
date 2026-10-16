@@ -1,0 +1,580 @@
+
+
+.closures-page {
+    width: 100%;
+    min-width: 0;
+}
+
+.closures-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 26px;
+}
+
+.closures-page-header h1 {
+    margin: 8px 0;
+    color: #0f172a;
+    font-size: 28px;
+    letter-spacing: -0.7px;
+}
+
+.closures-page-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.closures-primary-btn,
+.closures-outline-btn,
+.closures-view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 43px;
+    padding: 10px 17px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.closures-primary-btn,
+.admin-page button.closures-primary-btn {
+    background: #b91c1c;
+    color: white;
+}
+
+.closures-primary-btn:hover,
+.admin-page button.closures-primary-btn:hover {
+    background: #991b1b;
+    color: white;
+    text-decoration: none;
+}
+
+.closures-outline-btn {
+    border-color: #e2e8f0;
+    background: white;
+    color: #475569;
+}
+
+.closures-outline-btn:hover {
+    background: #f8fafc;
+    color: #334155;
+    text-decoration: none;
+}
+
+.closures-plus {
+    font-size: 19px;
+    line-height: 0.8;
+}
+
+.closures-table-card,
+.closures-form-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.closures-table-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 22px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.closures-table-heading h2 {
+    margin: 0 0 7px;
+    color: #0f172a;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+}
+
+.closures-table-heading p {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.closures-count {
+    padding: 8px 11px;
+    border-radius: 7px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 11px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.closures-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.closures-table {
+    min-width: 1020px;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-page .closures-table th {
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    background: #f8fafc;
+    white-space: nowrap;
+}
+
+.admin-page .closures-table td {
+    padding: 18px 20px;
+    border-top: 1px solid #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.closures-facility-cell {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.closures-facility-icon {
+    display: grid;
+    place-items: center;
+    width: 39px;
+    height: 39px;
+    flex: 0 0 39px;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.closures-facility-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.closures-facility-cell strong {
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.closures-date,
+.closures-time {
+    display: block;
+    white-space: nowrap;
+}
+
+.closures-date {
+    color: #334155;
+    font-weight: 650;
+}
+
+.closures-time {
+    color: #94a3b8;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.closures-reason {
+    max-width: 230px;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+}
+
+.closures-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.closures-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.closures-status.is-active {
+    color: #15803d;
+    background: #dcfce7;
+}
+
+.closures-status.is-archived {
+    color: #64748b;
+    background: #f1f5f9;
+}
+
+.closures-action-form {
+    margin: 0;
+}
+
+.admin-page .closures-archive-btn {
+    padding: 9px 13px;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.admin-page .closures-archive-btn:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.closures-no-action {
+    color: #94a3b8;
+}
+
+
+.closures-empty-state {
+    padding: 55px 20px;
+    text-align: center;
+}
+
+.closures-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 16px;
+    border-radius: 14px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 24px;
+}
+
+.closures-empty-state h3 {
+    margin: 0 0 9px;
+    font-size: 15px;
+    color: #0f172a;
+}
+
+.closures-empty-state p {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+
+.closures-form-card {
+    max-width: 850px;
+}
+
+.closures-card-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 23px 25px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.closures-heading-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 11px;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.closures-heading-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.closures-card-heading h2 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.closures-card-heading p {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.closures-detail-form {
+    padding: 25px;
+}
+
+.closures-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.closures-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.closures-form-group:has(textarea) {
+    grid-column: 1 / -1;
+}
+
+.closures-form-group > label {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.closures-required {
+    color: #dc2626;
+    margin-left: 3px;
+}
+
+.admin-page .closures-field-control input:not([type="checkbox"]),
+.admin-page .closures-field-control select,
+.admin-page .closures-field-control textarea {
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 13px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: white;
+    color: #334155;
+    font-size: 13px;
+}
+
+.admin-page .closures-field-control textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.closures-field-help {
+    font-size: 11px;
+    line-height: 1.6;
+    color: #94a3b8;
+}
+
+.closures-field-error {
+    color: #dc2626;
+    font-size: 12px;
+}
+
+.closures-form-alert {
+    padding: 14px 17px;
+    margin-bottom: 22px;
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 12px;
+}
+
+.closures-form-alert p {
+    margin: 5px 0;
+}
+
+.closures-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 23px;
+    margin-top: 25px;
+    border-top: 1px solid #e2e8f0;
+}
+
+
+.closures-conflict-card {
+    max-width: 850px;
+    margin-top: 23px;
+    border: 1px solid #fecaca;
+    border-radius: 14px;
+    background: white;
+    overflow: hidden;
+}
+
+.closures-conflict-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 22px 24px;
+    border-bottom: 1px solid #fecaca;
+    background: #fef2f2;
+}
+
+.closures-warning-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 10px;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.closures-conflict-heading h2 {
+    margin: 0 0 7px;
+    font-size: 16px;
+    color: #991b1b;
+}
+
+.closures-conflict-heading p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #b91c1c;
+}
+
+.closures-conflict-list {
+    padding: 0 24px;
+}
+
+.closures-conflict-item {
+    padding: 24px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.closures-conflict-item:last-child {
+    border-bottom: 0;
+}
+
+.closures-conflict-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 19px;
+}
+
+.closures-conflict-label {
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.7px;
+}
+
+.closures-conflict-top h3 {
+    margin: 6px 0 0;
+    font-size: 15px;
+    color: #0f172a;
+}
+
+.closures-conflict-status {
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 11px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.closures-conflict-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 19px;
+    margin-bottom: 20px;
+}
+
+.closures-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.closures-info-item span {
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.closures-info-item strong {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.6;
+}
+
+.closures-view-btn {
+    min-height: 36px;
+    padding: 8px 13px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 11px;
+}
+
+.closures-view-btn:hover {
+    background: #fee2e2;
+    color: #991b1b;
+    text-decoration: none;
+}
+
+@media (max-width: 750px) {
+    .closures-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .closures-page-header h1 {
+        font-size: 25px;
+    }
+
+    .closures-form-grid,
+    .closures-conflict-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .closures-form-group:has(textarea) {
+        grid-column: auto;
+    }
+
+    .closures-card-heading,
+    .closures-detail-form,
+    .closures-conflict-heading {
+        padding: 19px;
+    }
+
+    .closures-conflict-list {
+        padding: 0 19px;
+    }
+
+    .closures-table-heading {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 420px) {
+    .closures-form-footer {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .closures-form-footer .closures-outline-btn,
+    .closures-form-footer .closures-primary-btn {
+        width: 100%;
+    }
+}

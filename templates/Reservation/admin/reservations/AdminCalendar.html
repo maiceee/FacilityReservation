@@ -1,0 +1,250 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
+
+{% block title %}Facility Calendar | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/admin/calendar-admin.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+
+<div class="calendar-page">
+
+    <div class="calendar-page-header">
+        <div>
+            <span class="page-eyebrow">SCHEDULE MANAGEMENT</span>
+            <h1>Facility Calendar</h1>
+            <p>View daily and weekly reservations, schedules, and facility closures.</p>
+        </div>
+    </div>
+
+    <section class="calendar-filter-card">
+
+        <form method="get" class="calendar-filter-form">
+
+            <div class="calendar-field">
+                <label for="view">Calendar View</label>
+                <select id="view" name="view">
+                    <option value="day"
+                        {% if view_mode == 'day' %}selected{% endif %}>
+                        Daily
+                    </option>
+                    <option value="week"
+                        {% if view_mode == 'week' %}selected{% endif %}>
+                        Weekly
+                    </option>
+                </select>
+            </div>
+
+            <div class="calendar-field">
+                <label for="date">Select Date</label>
+                <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value="{{ selected_date|date:'Y-m-d' }}"
+                >
+            </div>
+
+            <div class="calendar-field calendar-facility-field">
+                <label for="facility">Facility</label>
+                <select id="facility" name="facility">
+                    <option value="">All Facilities</option>
+
+                    {% for facility in facilities %}
+                        <option
+                            value="{{ facility.id }}"
+                            {% if facility_filter == facility.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ facility.facility_code }} – {{ facility.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="calendar-filter-actions">
+                <button type="submit" class="calendar-primary-btn">
+                    Apply Filters
+                </button>
+
+                <a href="{% url 'admin_calendar' %}"
+                   class="calendar-outline-btn">
+                    Reset
+                </a>
+            </div>
+
+        </form>
+
+    </section>
+
+    <section class="calendar-navigation-card">
+
+        <div class="calendar-navigation">
+
+            <a
+                class="calendar-outline-btn"
+                href="{% url 'admin_calendar' %}?view={{ view_mode }}&date={{ previous_date|date:'Y-m-d' }}{% if facility_filter %}&facility={{ facility_filter|urlencode }}{% endif %}"
+            >
+                ← Previous
+            </a>
+
+            <a
+                class="calendar-today-btn"
+                href="{% url 'admin_calendar' %}?view={{ view_mode }}&date={% now 'Y-m-d' %}{% if facility_filter %}&facility={{ facility_filter|urlencode }}{% endif %}"
+            >
+                Today
+            </a>
+
+            <a
+                class="calendar-outline-btn"
+                href="{% url 'admin_calendar' %}?view={{ view_mode }}&date={{ next_date|date:'Y-m-d' }}{% if facility_filter %}&facility={{ facility_filter|urlencode }}{% endif %}"
+            >
+                Next →
+            </a>
+
+        </div>
+
+        <div class="calendar-date-heading">
+
+            {% if view_mode == 'day' %}
+                <span class="calendar-view-label">DAILY SCHEDULE</span>
+                <h2>{{ selected_date|date:"l, F d, Y" }}</h2>
+            {% else %}
+                <span class="calendar-view-label">WEEKLY SCHEDULE</span>
+                <h2>
+                    {{ range_start|date:"M d, Y" }}
+                    –
+                    {{ range_end|date:"M d, Y" }}
+                </h2>
+            {% endif %}
+
+        </div>
+
+    </section>
+
+    <div class="calendar-days-grid {% if view_mode == 'day' %}calendar-single-day{% endif %}">
+
+        {% for day in calendar_days %}
+
+            <section class="calendar-day-card">
+
+                <div class="calendar-day-heading">
+                    <div>
+                        <span class="calendar-day-weekday">
+                            {{ day.date|date:"l" }}
+                        </span>
+
+                        <h3>{{ day.date|date:"M d, Y" }}</h3>
+                    </div>
+
+                    <div class="calendar-day-count">
+                        {{ day.reservations|length }}
+                        booking{{ day.reservations|length|pluralize }}
+                    </div>
+                </div>
+
+                <div class="calendar-day-content">
+
+                    {% for reservation in day.reservations %}
+
+                        <article class="calendar-event calendar-event-{{ reservation.status|lower }}">
+
+                            <div class="calendar-event-top">
+                                <h4>{{ reservation.event_name }}</h4>
+
+                                <span class="calendar-event-status calendar-status-{{ reservation.status|lower }}">
+                                    {{ reservation.get_status_display }}
+                                </span>
+                            </div>
+
+                            <div class="calendar-event-details">
+
+                                <div class="calendar-event-detail">
+                                    <span class="calendar-detail-label">Facility</span>
+                                    <strong>{{ reservation.facility.name }}</strong>
+                                </div>
+
+                                <div class="calendar-event-detail">
+                                    <span class="calendar-detail-label">Schedule</span>
+                                    <strong>
+                                        {{ reservation.start_datetime|date:"h:i A" }}
+                                        –
+                                        {{ reservation.end_datetime|date:"h:i A" }}
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                            <a
+                                href="{% url 'reservation_detail_admin' reservation.id %}"
+                                class="calendar-event-link"
+                            >
+                                View Reservation →
+                            </a>
+
+                        </article>
+
+                    {% endfor %}
+
+                    {% for closure in day.closures %}
+
+                        <article class="calendar-closure">
+
+                            <div class="calendar-event-top">
+                                <h4>Facility Closure</h4>
+
+                                <span class="calendar-closure-status">
+                                    CLOSED
+                                </span>
+                            </div>
+
+                            <div class="calendar-event-details">
+
+                                <div class="calendar-event-detail">
+                                    <span class="calendar-detail-label">Facility</span>
+                                    <strong>{{ closure.facility.name }}</strong>
+                                </div>
+
+                                <div class="calendar-event-detail">
+                                    <span class="calendar-detail-label">Schedule</span>
+                                    <strong>
+                                        {{ closure.start_datetime|date:"M d, h:i A" }}
+                                        –
+                                        {{ closure.end_datetime|date:"M d, h:i A" }}
+                                    </strong>
+                                </div>
+
+                                <div class="calendar-event-detail">
+                                    <span class="calendar-detail-label">Reason</span>
+                                    <strong>{{ closure.reason }}</strong>
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    {% endfor %}
+
+                    {% if not day.reservations and not day.closures %}
+                        <div class="calendar-empty-day">
+                            <div class="calendar-empty-icon" aria-hidden="true">▦</div>
+                            <p>No scheduled activity</p>
+                            <span>No reservations or closures for this date.</span>
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </section>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

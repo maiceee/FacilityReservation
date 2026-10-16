@@ -1,0 +1,238 @@
+
+{{% extends 'Reservation/admin/AdminBase.html' %}
+
+{% block title %}User Details | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="user-detail-page">
+
+    <!-- PAGE HEADER -->
+    <div class="user-detail-header">
+        <div>
+            <span class="page-eyebrow">ACCOUNT MANAGEMENT</span>
+            <h1>User Details</h1>
+            <p>View account information and reservation history.</p>
+        </div>
+
+        <a href="{% url 'user_management' %}"
+           class="user-detail-back">
+            <svg viewBox="0 0 24 24" width="17" height="17"
+                 fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+                <path d="m15 18-6-6 6-6M9 12h12"/>
+            </svg>
+            Back to Users
+        </a>
+    </div>
+
+    <!-- PROFILE OVERVIEW -->
+    <section class="user-detail-profile-card">
+
+        <div class="user-detail-profile-main">
+            <div class="user-detail-avatar">
+                {{ account.username|slice:":1"|upper }}
+            </div>
+
+            <div class="user-detail-identity">
+                <span class="user-detail-profile-label">
+                    USER PROFILE
+                </span>
+
+                <h2>
+                    {{ account.get_full_name|default:account.username }}
+                </h2>
+
+                <p>@{{ account.username }}</p>
+            </div>
+        </div>
+
+        <div class="user-detail-profile-status">
+            {% if account.is_active %}
+                <span class="management-status is-active">
+                    <span class="management-status-dot"></span>
+                    Active Account
+                </span>
+            {% else %}
+                <span class="management-status is-inactive">
+                    <span class="management-status-dot"></span>
+                    Inactive Account
+                </span>
+            {% endif %}
+        </div>
+
+    </section>
+
+    <!-- ACCOUNT INFORMATION -->
+    <section class="user-detail-info-card">
+
+        <div class="user-detail-section-heading">
+            <div>
+                <h2>Account Information</h2>
+                <p>Registered user information</p>
+            </div>
+        </div>
+
+        <div class="user-detail-info-grid">
+
+            <div class="user-detail-info-item">
+                <span class="user-detail-info-label">
+                    Username
+                </span>
+                <strong>{{ account.username }}</strong>
+            </div>
+
+            <div class="user-detail-info-item">
+                <span class="user-detail-info-label">
+                    Full Name
+                </span>
+                <strong>
+                    {{ account.get_full_name|default:"—" }}
+                </strong>
+            </div>
+
+            <div class="user-detail-info-item">
+                <span class="user-detail-info-label">
+                    Email Address
+                </span>
+                <strong>{{ account.email|default:"—" }}</strong>
+            </div>
+
+            <div class="user-detail-info-item">
+                <span class="user-detail-info-label">
+                    Department
+                </span>
+                <strong>{{ account.department|default:"—" }}</strong>
+            </div>
+
+            <div class="user-detail-info-item">
+                <span class="user-detail-info-label">
+                    Contact Number
+                </span>
+                <strong>
+                    {{ account.contact_number|default:"—" }}
+                </strong>
+            </div>
+
+            <div class="user-detail-info-item">
+                <span class="user-detail-info-label">
+                    Account Status
+                </span>
+
+                {% if account.is_active %}
+                    <strong class="user-detail-active-text">
+                        Active
+                    </strong>
+                {% else %}
+                    <strong class="user-detail-inactive-text">
+                        Inactive
+                    </strong>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- RESERVATION HISTORY -->
+    <section class="user-detail-history-card">
+
+        <div class="user-detail-section-heading">
+            <div>
+                <h2>Reservation History</h2>
+                <p>Previous and current facility reservation records</p>
+            </div>
+
+            <span class="management-count">
+                {{ reservation_history|length }} shown
+            </span>
+        </div>
+
+        {% if reservation_history %}
+
+            <div class="user-detail-table-scroll">
+                <table class="user-detail-history-table">
+
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Facility</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for reservation in reservation_history %}
+                            <tr>
+
+                                <td class="user-detail-event">
+                                    {{ reservation.event_name }}
+                                </td>
+
+                                <td>
+                                    {{ reservation.facility.name }}
+                                </td>
+
+                                <td>
+                                    {{ reservation.start_datetime|date:"M d, Y" }}
+                                    <span class="user-detail-time">
+                                        {{ reservation.start_datetime|date:"h:i A" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ reservation.end_datetime|date:"M d, Y" }}
+                                    <span class="user-detail-time">
+                                        {{ reservation.end_datetime|date:"h:i A" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="status-badge status-{{ reservation.status|lower }}">
+                                        {{ reservation.get_status_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <a
+                                        href="{% url 'reservation_detail_admin' reservation.id %}"
+                                        class="user-detail-view-link">
+                                        View Details →
+                                    </a>
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        {% else %}
+
+            <div class="user-detail-empty">
+                <div class="user-detail-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="27" height="27"
+                         fill="none" stroke="currentColor"
+                         stroke-width="1.8" stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path d="M7 3v4M17 3v4M3 10h18"/>
+                    </svg>
+                </div>
+
+                <h3>No reservation history</h3>
+                <p>This user has not made any facility reservations yet.</p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

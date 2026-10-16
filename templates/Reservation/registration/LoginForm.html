@@ -1,0 +1,148 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Campus Facility Reservation</title>
+    <link rel="stylesheet" href="{% static 'Reservation/css/auth/auth.css' %}?v=2">
+</head>
+<body class="auth-page">
+
+    <main class="auth-layout">
+
+        <section class="auth-brand">
+            <div class="brand-top">
+                <div class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <rect x="4" y="3" width="16" height="18" rx="2"/>
+                        <path d="M9 21v-5h6v5M8 7h2m4 0h2M8 11h2m4 0h2"/>
+                    </svg>
+                </div>
+
+                <div class="brand-name">
+                    <strong>CampusSpace</strong>
+                    <span>Facility Reservation System</span>
+                </div>
+            </div>
+
+            <div class="brand-content">
+                <span class="brand-eyebrow">
+                    SMART CAMPUS MANAGEMENT
+                </span>
+
+                <h1>
+                    Your campus.
+                    <span>Better organized.</span>
+                </h1>
+
+                <p>
+                    A smarter way to reserve campus facilities,
+                    manage schedules, and organize events
+                    in one convenient platform.
+                </p>
+
+                <div class="brand-features">
+                    <div class="brand-feature">
+                        <span class="feature-icon">✓</span>
+                        Easy facility reservations
+                    </div>
+
+                    <div class="brand-feature">
+                        <span class="feature-icon">✓</span>
+                        Organized event scheduling
+                    </div>
+
+                    <div class="brand-feature">
+                        <span class="feature-icon">✓</span>
+                        Convenient reservation tracking
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-bottom">
+                Campus Facility Reservation and Event Scheduling System
+            </div>
+        </section>
+
+        <section class="auth-main">
+            <div class="auth-form-wrapper">
+
+                <div class="mobile-brand">
+                    <div class="mobile-brand-mark">C</div>
+                    <strong>CampusSpace</strong>
+                </div>
+
+                <div class="auth-heading">
+                    <span class="auth-label">WELCOME BACK</span>
+                    <h2>Sign in to your account</h2>
+                    <p>
+                        Enter your credentials to access your dashboard.
+                    </p>
+                </div>
+
+                {% if form.errors %}
+                <div class="auth-alert" role="alert">
+                    Invalid username or password. Please try again.
+                </div>
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                    <div class="auth-alert" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" class="auth-form">
+                    {% csrf_token %}
+
+                    {% if next %}
+                    <input type="hidden"
+                           name="next"
+                           value="{{ next }}">
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="id_username">Username</label>
+                        {{ form.username }}
+                        {% for error in form.username.errors %}
+                            <small class="field-error">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password">Password</label>
+                        {{ form.password }}
+                        {% for error in form.password.errors %}
+                            <small class="field-error">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="auth-submit">
+                        Sign In
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+
+                <div class="auth-register">
+                    Don't have an account?
+                    <a href="{% url 'register' %}">Create an account</a>
+                </div>
+
+            </div>
+
+            <div class="auth-bottom">
+                © 2026 CampusSpace. All rights reserved.
+            </div>
+        </section>
+
+    </main>
+
+</body>
+</html>

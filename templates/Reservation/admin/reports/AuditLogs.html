@@ -1,0 +1,167 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
+
+{% block title %}Audit Logs | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/admin/system-admin.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+
+<div class="system-page">
+
+    <div class="system-page-header">
+        <div>
+            <span class="page-eyebrow">SYSTEM ADMINISTRATION</span>
+            <h1>Audit Logs</h1>
+            <p>Review important system activities and administrative actions.</p>
+        </div>
+    </div>
+
+    <section class="system-filter-card">
+
+        <form method="get" class="system-search-form">
+
+            <div class="system-field system-search-field">
+                <label for="audit-search">Search Audit Logs</label>
+
+                <div class="system-search-input-wrap">
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-4-4"/>
+                    </svg>
+
+                    <input
+                        id="audit-search"
+                        type="search"
+                        name="search"
+                        value="{{ search_query|default:'' }}"
+                        placeholder="Action, reference, description, or actor"
+                    >
+                </div>
+            </div>
+
+            <div class="system-search-actions">
+                <button type="submit" class="system-primary-btn">
+                    Search
+                </button>
+
+                {% if search_query %}
+                    <a href="{% url 'audit_logs' %}"
+                       class="system-outline-btn">
+                        Clear
+                    </a>
+                {% endif %}
+            </div>
+
+        </form>
+
+    </section>
+
+    <section class="system-table-card">
+
+        <div class="system-card-heading">
+            <div>
+                <h2>Activity History</h2>
+                <p>Recorded system actions and their associated details</p>
+            </div>
+
+            <span class="system-count">
+                {{ logs|length }} shown
+            </span>
+        </div>
+
+        {% if logs %}
+
+            <div class="system-table-scroll">
+
+                <table class="system-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Actor</th>
+                            <th>Action</th>
+                            <th>Reference</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+
+                                <td>
+                                    <span class="system-date">
+                                        {{ log.timestamp|date:"M d, Y" }}
+                                    </span>
+
+                                    <span class="system-time">
+                                        {{ log.timestamp|date:"h:i A" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="system-actor">
+                                        <span class="system-actor-avatar">
+                                            {% if log.actor %}
+                                                {{ log.actor.username|first|upper }}
+                                            {% else %}
+                                                S
+                                            {% endif %}
+                                        </span>
+
+                                        <strong>
+                                            {% if log.actor %}
+                                                {{ log.actor.username }}
+                                            {% else %}
+                                                System
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="system-action-badge">
+                                        {{ log.action }}
+                                    </span>
+                                </td>
+
+                                <td class="system-reference">
+                                    {{ log.reference|default:"—" }}
+                                </td>
+
+                                <td class="system-description">
+                                    {{ log.description|default:"—" }}
+                                </td>
+
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="system-empty-state">
+                <div class="system-empty-icon" aria-hidden="true">▤</div>
+                <h3>No audit log records found</h3>
+                <p>Try another search or check back after system activity.</p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

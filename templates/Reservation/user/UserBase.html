@@ -1,0 +1,223 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}CampusSpace{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'Reservation/css/user/user.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'Reservation/css/user/user-pages.css' %}?v=2">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="user-portal-body">
+
+<div class="user-layout">
+
+    <input
+        type="checkbox"
+        id="user-sidebar-toggle"
+        class="user-sidebar-toggle"
+        aria-label="Toggle navigation"
+    >
+
+    <aside class="user-sidebar">
+
+        <a href="{% url 'user_dashboard' %}" class="user-sidebar-brand">
+            <span class="user-brand-icon">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <rect x="4" y="3" width="16" height="18" rx="2"/>
+                    <path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>
+                </svg>
+            </span>
+
+            <span>
+                <strong>CampusSpace</strong>
+                <small>Facility Portal</small>
+            </span>
+        </a>
+
+        <div class="user-sidebar-section-label">
+            MAIN MENU
+        </div>
+
+        <nav class="user-sidebar-nav" aria-label="User navigation">
+
+            <a href="{% url 'user_dashboard' %}"
+               class="user-nav-link {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <rect x="3" y="3" width="8" height="8" rx="1"/>
+                    <rect x="13" y="3" width="8" height="8" rx="1"/>
+                    <rect x="3" y="13" width="8" height="8" rx="1"/>
+                    <rect x="13" y="13" width="8" height="8" rx="1"/>
+                </svg>
+                Dashboard
+            </a>
+
+            <a href="{% url 'browse_facilities' %}"
+               class="user-nav-link {% if request.resolver_match.url_name == 'browse_facilities' or request.resolver_match.url_name == 'facility_detail_user' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <rect x="4" y="3" width="16" height="18" rx="2"/>
+                    <path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>
+                </svg>
+                Browse Facilities
+            </a>
+
+            <a href="{% url 'reservation_create' %}"
+               class="user-nav-link {% if request.resolver_match.url_name == 'reservation_create' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <path d="M7 3v4M17 3v4M3 10h18M12 13v5M9.5 15.5h5"/>
+                </svg>
+                Request Reservation
+            </a>
+
+            <a href="{% url 'my_reservations' %}"
+               class="user-nav-link {% if request.resolver_match.url_name == 'my_reservations' or request.resolver_match.url_name == 'reservation_detail_user' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <path d="M8 6h13M8 12h13M8 18h13"/>
+                    <path d="m3 6 1.5 1.5L6 5M3 12l1.5 1.5L6 11M3 18l1.5 1.5L6 17"/>
+                </svg>
+                My Reservations
+            </a>
+
+        </nav>
+
+        <div class="user-sidebar-section-label user-account-label">
+            ACCOUNT
+        </div>
+
+        <nav class="user-sidebar-nav" aria-label="Account navigation">
+
+            <a href="{% url 'user_profile' %}"
+               class="user-nav-link {% if request.resolver_match.url_name == 'user_profile' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
+                </svg>
+                My Profile
+            </a>
+
+        </nav>
+
+        <div class="user-sidebar-bottom">
+
+            <div class="user-sidebar-profile">
+                <span class="user-sidebar-avatar">
+                    {{ request.user.username|first|upper }}
+                </span>
+
+                <div class="user-sidebar-profile-info">
+                    <strong>
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </strong>
+                    <span>Basic User</span>
+                </div>
+            </div>
+
+            <form method="post"
+                  action="{% url 'logout' %}"
+                  class="user-sidebar-logout-form">
+                {% csrf_token %}
+
+                <button type="submit" class="user-sidebar-logout">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <path d="M10 17l5-5-5-5M15 12H3"/>
+                        <path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6"/>
+                    </svg>
+                    Sign Out
+                </button>
+            </form>
+
+        </div>
+
+    </aside>
+
+    <label for="user-sidebar-toggle"
+           class="user-sidebar-overlay"
+           aria-label="Close navigation"></label>
+
+    <div class="user-main">
+
+        <header class="user-topbar">
+
+            <div class="user-topbar-left">
+                <label for="user-sidebar-toggle"
+                       class="user-mobile-menu"
+                       aria-label="Open navigation">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" aria-hidden="true">
+                        <path d="M4 7h16M4 12h16M4 17h16"/>
+                    </svg>
+                </label>
+
+                <div>
+                    <span class="user-topbar-eyebrow">CAMPUS FACILITY PORTAL</span>
+                    <strong>Facility Reservation System</strong>
+                </div>
+            </div>
+
+            <a href="{% url 'user_profile' %}"
+               class="user-topbar-profile">
+                <span class="user-topbar-avatar">
+                    {{ request.user.username|first|upper }}
+                </span>
+
+                <span class="user-topbar-name">
+                    {{ request.user.first_name|default:request.user.username }}
+                </span>
+            </a>
+
+        </header>
+
+        <main class="user-main-content">
+
+            {% if messages %}
+                <div class="user-flash-messages">
+                    {% for message in messages %}
+                        <div class="user-flash-message {{ message.tags }}"
+                             role="status">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+
+        </main>
+
+    </div>
+
+</div>
+
+{% block extra_script %}{% endblock %}
+
+</body>
+</html>

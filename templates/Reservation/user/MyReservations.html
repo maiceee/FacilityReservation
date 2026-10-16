@@ -1,0 +1,144 @@
+
+{% extends 'Reservation/user/UserBase.html' %}
+
+{% block title %}My Reservations | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="user-modern-page">
+
+    <div class="user-page-header user-page-header-actions">
+
+        <div>
+            <span class="user-section-eyebrow">MY BOOKINGS</span>
+
+            <h1>My Reservations</h1>
+
+            <p>
+                View and manage your facility reservation requests.
+            </p>
+        </div>
+
+        <a href="{% url 'reservation_create' %}"
+           class="user-primary-button">
+            + New Reservation
+        </a>
+
+    </div>
+
+    <section class="user-data-card">
+
+        <div class="user-data-heading">
+
+            <div>
+                <h2>Reservation History</h2>
+                <p>Track your bookings and their current statuses.</p>
+            </div>
+
+            <span class="user-results-count">
+                {{ reservations|length }} shown
+            </span>
+
+        </div>
+
+        {% if reservations %}
+
+            <div class="user-table-scroll">
+
+                <table class="user-modern-table">
+
+                    <thead>
+                        <tr>
+                            <th>Event</th>
+                            <th>Facility</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for reservation in reservations %}
+
+                            <tr>
+
+                                <td>
+                                    <strong class="user-table-primary">
+                                        {{ reservation.event_name }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ reservation.facility.name }}
+                                </td>
+
+                                <td>
+                                    <span class="user-table-date">
+                                        {{ reservation.start_datetime|date:"M d, Y" }}
+                                    </span>
+                                    <span class="user-table-time">
+                                        {{ reservation.start_datetime|date:"h:i A" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="user-table-date">
+                                        {{ reservation.end_datetime|date:"M d, Y" }}
+                                    </span>
+                                    <span class="user-table-time">
+                                        {{ reservation.end_datetime|date:"h:i A" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="user-status-badge user-status-{{ reservation.status|lower }}">
+                                        {{ reservation.get_status_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <a
+                                        href="{% url 'reservation_detail_user' reservation.id %}"
+                                        class="user-table-link"
+                                    >
+                                        View Details →
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="user-empty-state">
+
+                <h3>No reservations yet</h3>
+
+                <p>
+                    You haven't submitted any facility
+                    reservation requests yet.
+                </p>
+
+                <a href="{% url 'reservation_create' %}"
+                   class="user-primary-button">
+                    Request a Facility
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

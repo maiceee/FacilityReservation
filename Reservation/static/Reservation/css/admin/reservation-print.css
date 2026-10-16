@@ -1,0 +1,234 @@
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 36px 20px;
+    background: #f5f1ef;
+    color: #292524;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.print-document {
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 44px;
+    background: #fff;
+    border: 1px solid #e7e5e4;
+    border-radius: 14px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.06);
+}
+
+.print-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 26px;
+    border-bottom: 2px solid #b91c1c;
+}
+
+.print-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 62px;
+    height: 62px;
+    background: #b91c1c;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.print-eyebrow {
+    margin: 0 0 6px;
+    color: #b91c1c;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+}
+
+.print-header h1 {
+    margin: 0 0 6px;
+    font-size: 25px;
+    letter-spacing: -0.6px;
+}
+
+.print-header p:last-child {
+    margin: 0;
+    color: #78716c;
+    font-size: 12px;
+}
+
+.print-ref {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 25px 0;
+    padding: 15px 18px;
+    background: #faf7f5;
+    border: 1px solid #e7e5e4;
+    border-radius: 9px;
+}
+
+.print-ref span {
+    color: #78716c;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.print-ref strong {
+    color: #b91c1c;
+    font-size: 18px;
+}
+
+.print-section {
+    margin-top: 28px;
+    break-inside: avoid;
+}
+
+.print-section h2 {
+    margin: 0 0 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e7e5e4;
+    color: #292524;
+    font-size: 15px;
+}
+
+.print-section dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 28px;
+    margin: 0;
+}
+
+.print-section dl > div {
+    min-width: 0;
+}
+
+.print-section dt {
+    margin-bottom: 7px;
+    color: #78716c;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.print-section dd {
+    margin: 0;
+    color: #292524;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.print-status {
+    display: inline-block;
+    padding: 6px 11px;
+    background: #fee2e2;
+    color: #991b1b;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.print-signatures {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 60px;
+    margin-top: 75px;
+}
+
+.print-signatures > div {
+    padding-top: 12px;
+    border-top: 1px solid #57534e;
+    text-align: center;
+}
+
+.print-signatures span {
+    color: #57534e;
+    font-size: 11px;
+}
+
+.print-footer {
+    margin-top: 45px;
+    padding-top: 18px;
+    border-top: 1px solid #e7e5e4;
+    color: #78716c;
+    font-size: 10px;
+    text-align: center;
+}
+
+.print-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.print-actions button {
+    padding: 13px 24px;
+    background: #b91c1c;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.print-actions button:hover {
+    background: #991b1b;
+}
+
+@media (max-width: 600px) {
+    .print-document {
+        padding: 24px 18px;
+    }
+
+    .print-section dl {
+        grid-template-columns: 1fr;
+    }
+
+    .print-signatures {
+        gap: 20px;
+    }
+}
+
+@page {
+    size: A4;
+    margin: 15mm;
+}
+
+@media print {
+    body {
+        padding: 0;
+        background: #fff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .print-document {
+        max-width: none;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .print-actions {
+        display: none !important;
+    }
+
+    .print-section,
+    .print-signatures {
+        break-inside: avoid;
+    }
+}

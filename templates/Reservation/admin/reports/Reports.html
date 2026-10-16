@@ -1,0 +1,220 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
+
+{% block title %}Reports & Analytics | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/admin/report-admin.css' %}?v=6">
+{% endblock %}
+
+{% block content %}
+<div class="ra-page">
+
+    <header class="ra-header">
+        <div class="ra-header-copy">
+            <span class="ra-eyebrow">SYSTEM INSIGHTS</span>
+            <h1>Reports &amp; Analytics</h1>
+            <p>Monitor reservation activity and facility utilization.</p>
+        </div>
+
+        <a href="{% url 'export_reservations_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}"
+           class="ra-export-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+                <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3"/>
+            </svg>
+            Export CSV
+        </a>
+    </header>
+
+    <section class="ra-card">
+        <div class="ra-section-heading">
+            <div>
+                <h2>Report Filters</h2>
+                <p>Select a date range to view matching records.</p>
+            </div>
+        </div>
+
+        <form method="get" class="ra-filter-form">
+            <div class="ra-field">
+                <label for="ra-start-date">Start Date</label>
+                <input type="date" id="ra-start-date" name="start_date"
+                       value="{{ start_date }}">
+            </div>
+
+            <div class="ra-field">
+                <label for="ra-end-date">End Date</label>
+                <input type="date" id="ra-end-date" name="end_date"
+                       value="{{ end_date }}">
+            </div>
+
+            <div class="ra-filter-actions">
+                <button type="submit" class="ra-primary-btn">Apply Filter</button>
+                <a href="{% url 'reports' %}" class="ra-clear-btn">Clear</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="ra-summary-grid">
+        <article class="ra-summary-card">
+            <div class="ra-summary-top">
+                <span class="ra-summary-label">Total Reservations</span>
+                <span class="ra-summary-icon ra-icon-red" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path d="M7 3v4M17 3v4M3 10h18"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="ra-summary-value">{{ total_reservations }}</div>
+            <p>Reservations within the selected date range</p>
+        </article>
+
+        <article class="ra-summary-card">
+            <div class="ra-summary-top">
+                <span class="ra-summary-label">Completed Events</span>
+                <span class="ra-summary-icon ra-icon-green" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="m8 12 3 3 5-6"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="ra-summary-value">{{ completed_reservations }}</div>
+            <p>Successfully completed reservations</p>
+        </article>
+
+        <article class="ra-summary-card">
+            <div class="ra-summary-top">
+                <span class="ra-summary-label">Total Booked Hours</span>
+                <span class="ra-summary-icon ra-icon-blue" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 7v5l3 2"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="ra-summary-value">
+                {{ total_booked_hours }} <span class="ra-value-unit">hrs</span>
+            </div>
+            <p>Recorded facility booking duration</p>
+        </article>
+    </section>
+
+    <section class="ra-card ra-report-card">
+        <div class="ra-section-heading">
+            <div>
+                <h2>Reservation Report</h2>
+                <p>Detailed records of facility booking activity.</p>
+            </div>
+            <span class="ra-count">{{ reservations|length }} total</span>
+        </div>
+
+        {% if reservations %}
+        <div class="ra-table-scroll">
+            <table class="ra-table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Requester</th>
+                        <th>Facility</th>
+                        <th>Participants</th>
+                        <th>Schedule</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations %}
+                    <tr>
+                        <td class="ra-event-name">{{ reservation.event_name }}</td>
+                        <td>{{ reservation.user.get_full_name|default:reservation.user.username }}</td>
+                        <td>{{ reservation.facility.name }}</td>
+                        <td>
+                            <span class="ra-participants-badge">{{ reservation.expected_attendees }}</span>
+                        </td>
+                        <td>
+                            <span class="ra-schedule-date">{{ reservation.start_datetime|date:"M d, Y" }}</span>
+                            <small class="ra-schedule-time">
+                                {{ reservation.start_datetime|date:"h:i A" }} - {{ reservation.end_datetime|date:"h:i A" }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ reservation.status|lower }}">
+                                {{ reservation.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="ra-empty-state">
+            <div class="ra-empty-icon" aria-hidden="true">▤</div>
+            <h3>No reservation records found</h3>
+            <p>Try changing the selected date range.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="ra-card ra-report-card">
+        <div class="ra-section-heading">
+            <div>
+                <h2>Facility Usage</h2>
+                <p>Completed events and booked hours per facility.</p>
+            </div>
+            <span class="ra-count">{{ facility_usage_rows|length }} facilities</span>
+        </div>
+
+        {% if facility_usage_rows %}
+        <div class="ra-table-scroll">
+            <table class="ra-table ra-usage-table">
+                <thead>
+                    <tr>
+                        <th>Facility</th>
+                        <th>Completed Events</th>
+                        <th>Booked Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in facility_usage_rows %}
+                    <tr>
+                        <td>
+                            <div class="ra-facility-cell">
+                                <span class="ra-facility-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="1.8"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="4" y="3" width="16" height="18" rx="2"/>
+                                        <path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>
+                                    </svg>
+                                </span>
+                                <strong>{{ row.facility.name }}</strong>
+                            </div>
+                        </td>
+                        <td><span class="ra-usage-value">{{ row.completed_events }}</span></td>
+                        <td>
+                            <span class="ra-usage-value">{{ row.booked_hours }}</span>
+                            <span class="ra-hours-label">hrs</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="ra-empty-state">
+            <div class="ra-empty-icon" aria-hidden="true">▤</div>
+            <h3>No facility usage data available</h3>
+            <p>No completed facility activity for the selected period.</p>
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

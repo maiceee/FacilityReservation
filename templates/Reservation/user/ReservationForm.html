@@ -1,0 +1,101 @@
+
+{% extends 'Reservation/user/UserBase.html' %}
+
+{% block title %}Request Reservation | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="user-modern-page">
+
+    <div class="user-page-header">
+
+        <span class="user-section-eyebrow">NEW BOOKING</span>
+
+        <h1>Request Reservation</h1>
+
+        <p>
+            Complete the form below to submit a facility
+            reservation request for administrator review.
+        </p>
+
+    </div>
+
+    <section class="user-form-card">
+
+        <div class="user-card-heading">
+            <div>
+                <h2>Reservation Information</h2>
+                <p>Provide the event details and preferred schedule.</p>
+            </div>
+        </div>
+
+        <form method="post" class="user-reservation-form">
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+
+                <div class="user-form-alert" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+            {% endif %}
+
+            <div class="user-form-grid">
+
+                {% for field in form %}
+
+                    <div class="user-form-group">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+
+                            {% if field.field.required %}
+                                <span class="user-required">*</span>
+                            {% endif %}
+                        </label>
+
+                        <div class="user-field-control">
+                            {{ field }}
+                        </div>
+
+                        {% if field.help_text %}
+                            <span class="user-field-help">
+                                {{ field.help_text }}
+                            </span>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <span class="user-field-error" role="alert">
+                                {{ error }}
+                            </span>
+                        {% endfor %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="user-form-footer">
+
+                <a href="{% url 'user_dashboard' %}"
+                   class="user-outline-button">
+                    Cancel
+                </a>
+
+                <button type="submit" class="user-primary-button">
+                    Submit Reservation Request
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

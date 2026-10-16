@@ -1,0 +1,164 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>
+        Reservation Slip - {{ reservation.event_name }}
+    </title>
+
+    <link rel="stylesheet"
+          href="{% static 'Reservation/css/admin/reservation-print.css' %}">
+</head>
+
+<body>
+
+<main class="print-document">
+
+    <header class="print-header">
+        <div class="print-mark">CS</div>
+
+        <div>
+            <p class="print-eyebrow">CAMPUS FACILITY RESERVATION</p>
+            <h1>Reservation Slip</h1>
+            <p>Official facility booking record</p>
+        </div>
+    </header>
+
+    <div class="print-ref">
+        <span>RESERVATION NUMBER</span>
+        <strong>#{{ reservation.id }}</strong>
+    </div>
+
+    <section class="print-section">
+        <h2>Reservation Information</h2>
+
+        <dl>
+            <div>
+                <dt>Event</dt>
+                <dd>{{ reservation.event_name }}</dd>
+            </div>
+
+            <div>
+                <dt>Purpose</dt>
+                <dd>{{ reservation.purpose|linebreaksbr }}</dd>
+            </div>
+
+            <div>
+                <dt>Requester</dt>
+                <dd>
+                    {{ reservation.user.get_full_name|default:reservation.user.username }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>Expected Participants</dt>
+                <dd>{{ reservation.expected_attendees }}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="print-section">
+        <h2>Facility &amp; Schedule</h2>
+
+        <dl>
+            <div>
+                <dt>Facility Code</dt>
+                <dd>{{ reservation.facility.facility_code }}</dd>
+            </div>
+
+            <div>
+                <dt>Facility</dt>
+                <dd>{{ reservation.facility.name }}</dd>
+            </div>
+
+            <div>
+                <dt>Category</dt>
+                <dd>{{ reservation.facility.category.name }}</dd>
+            </div>
+
+            <div>
+                <dt>Location</dt>
+                <dd>{{ reservation.facility.location }}</dd>
+            </div>
+
+            <div>
+                <dt>Start</dt>
+                <dd>
+                    {{ reservation.start_datetime|date:"F d, Y h:i A" }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>End</dt>
+                <dd>
+                    {{ reservation.end_datetime|date:"F d, Y h:i A" }}
+                </dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="print-section">
+        <h2>Approval Information</h2>
+
+        <dl>
+            <div>
+                <dt>Status</dt>
+                <dd>
+                    <span class="print-status">
+                        {{ reservation.get_status_display }}
+                    </span>
+                </dd>
+            </div>
+
+            <div>
+                <dt>Reviewed By</dt>
+                <dd>
+                    {{ reservation.decision_by.get_full_name|default:reservation.decision_by.username|default:"—" }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>Decision Date</dt>
+                <dd>
+                    {{ reservation.decision_at|date:"F d, Y h:i A"|default:"—" }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>Note</dt>
+                <dd>
+                    {{ reservation.decision_reason|default:"—"|linebreaksbr }}
+                </dd>
+            </div>
+        </dl>
+    </section>
+
+    <div class="print-signatures">
+        <div>
+            <span>Requester Signature</span>
+        </div>
+
+        <div>
+            <span>Authorized Administrator</span>
+        </div>
+    </div>
+
+    <footer class="print-footer">
+        CampusSpace · Campus Facility Reservation System
+    </footer>
+
+</main>
+
+<div class="print-actions">
+    <button type="button" onclick="window.print()">
+        Print Reservation Slip
+    </button>
+</div>
+
+</body>
+</html>

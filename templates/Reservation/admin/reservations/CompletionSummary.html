@@ -1,0 +1,185 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Completion Summary - {{ reservation.event_name }}</title>
+
+    <link rel="stylesheet"
+          href="{% static 'Reservation/css/admin/completion-print.css' %}?v=2">
+</head>
+
+<body>
+
+<main class="completion-document">
+
+    <header class="completion-header">
+
+        <div class="completion-brand">
+            <span class="completion-logo">CS</span>
+
+            <div>
+                <span class="completion-eyebrow">
+                    CAMPUS FACILITY RESERVATION
+                </span>
+
+                <h1>Event Completion Summary</h1>
+                <p>Official event completion record</p>
+            </div>
+        </div>
+
+        <div class="completion-reference">
+            <span>RESERVATION NUMBER</span>
+            <strong>#{{ reservation.id }}</strong>
+        </div>
+
+    </header>
+
+    <section class="completion-section">
+
+        <h2>Event Information</h2>
+
+        <dl class="completion-details">
+
+            <div>
+                <dt>Event</dt>
+                <dd>{{ reservation.event_name }}</dd>
+            </div>
+
+            <div>
+                <dt>Requester</dt>
+                <dd>
+                    {{ reservation.user.get_full_name|default:reservation.user.username }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>Facility</dt>
+                <dd>{{ reservation.facility.name }}</dd>
+            </div>
+
+            <div>
+                <dt>Location</dt>
+                <dd>{{ reservation.facility.location }}</dd>
+            </div>
+
+            <div>
+                <dt>Expected Participants</dt>
+                <dd>{{ reservation.expected_attendees }}</dd>
+            </div>
+
+            <div>
+                <dt>Status</dt>
+                <dd>
+                    <span class="completion-status">
+                        {{ reservation.get_status_display }}
+                    </span>
+                </dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+    <section class="completion-section">
+
+        <h2>Scheduled Time</h2>
+
+        <dl class="completion-details">
+
+            <div>
+                <dt>Scheduled Start</dt>
+                <dd>
+                    {{ reservation.start_datetime|date:"F d, Y h:i A" }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>Scheduled End</dt>
+                <dd>
+                    {{ reservation.end_datetime|date:"F d, Y h:i A" }}
+                </dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+    <section class="completion-section">
+
+        <h2>Actual Event Record</h2>
+
+        <dl class="completion-details">
+
+            <div>
+                <dt>Checked In</dt>
+                <dd>
+                    {{ event_record.checked_in_at|date:"F d, Y h:i A"|default:"—" }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>Actual Start</dt>
+                <dd>
+                    {{ event_record.actual_start|date:"F d, Y h:i A"|default:"—" }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>Actual End</dt>
+                <dd>
+                    {{ event_record.actual_end|date:"F d, Y h:i A"|default:"—" }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>Completed At</dt>
+                <dd>
+                    {{ event_record.completed_at|date:"F d, Y h:i A"|default:"—" }}
+                </dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+    <section class="completion-section">
+
+        <h2>Incident Notes</h2>
+
+        <div class="completion-notes">
+            {{ event_record.incident_notes|default:"No incident notes recorded." }}
+        </div>
+
+    </section>
+
+    <div class="completion-signatures">
+
+        <div>
+            <span>Event Representative</span>
+        </div>
+
+        <div>
+            <span>Authorized Administrator</span>
+        </div>
+
+    </div>
+
+    <footer class="completion-footer">
+        CampusSpace · Campus Facility Reservation System
+    </footer>
+
+</main>
+
+<div class="completion-actions">
+    <button type="button" onclick="window.print();">
+        Print Completion Summary
+    </button>
+</div>
+
+</body>
+</html>

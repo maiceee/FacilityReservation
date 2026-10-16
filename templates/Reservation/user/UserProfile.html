@@ -1,0 +1,95 @@
+
+{% extends 'Reservation/user/UserBase.html' %}
+
+{% block title %}My Profile | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="user-modern-page">
+
+    <div class="user-page-header">
+
+        <span class="user-section-eyebrow">ACCOUNT SETTINGS</span>
+
+        <h1>My Profile</h1>
+
+        <p>Update your personal information and contact details.</p>
+
+    </div>
+
+    <section class="user-form-card">
+
+        <div class="user-card-heading user-profile-heading">
+
+            <span class="user-profile-avatar">
+                {{ request.user.username|first|upper }}
+            </span>
+
+            <div>
+                <h2>
+                    {{ request.user.get_full_name|default:request.user.username }}
+                </h2>
+                <p>@{{ request.user.username }}</p>
+            </div>
+
+        </div>
+
+        <form method="post" class="user-reservation-form">
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="user-form-alert" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="user-form-grid">
+
+                {% for field in form %}
+
+                    <div class="user-form-group">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+
+                            {% if field.field.required %}
+                                <span class="user-required">*</span>
+                            {% endif %}
+                        </label>
+
+                        <div class="user-field-control">
+                            {{ field }}
+                        </div>
+
+                        {% if field.help_text %}
+                            <span class="user-field-help">
+                                {{ field.help_text }}
+                            </span>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <span class="user-field-error" role="alert">
+                                {{ error }}
+                            </span>
+                        {% endfor %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="user-form-footer">
+                <button type="submit" class="user-primary-button">
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

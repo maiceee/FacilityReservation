@@ -1,0 +1,148 @@
+
+{% extends 'Reservation/user/UserBase.html' %}
+
+{% block title %}Reservation Details | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="user-modern-page">
+
+    <div class="user-detail-header">
+
+        <div>
+            <a href="{% url 'my_reservations' %}"
+               class="user-back-link">
+                ← Back to My Reservations
+            </a>
+
+            <span class="user-section-eyebrow">BOOKING INFORMATION</span>
+            <h1>Reservation Details</h1>
+
+            <p class="user-detail-subtitle">
+                Reservation #{{ reservation.id }}
+            </p>
+        </div>
+
+        <span class="user-status-badge user-status-{{ reservation.status|lower }}">
+            {{ reservation.get_status_display }}
+        </span>
+
+    </div>
+
+    <section class="user-detail-card">
+
+        <div class="user-card-heading">
+            <div>
+                <h2>Booking Information</h2>
+                <p>Your event and reservation schedule</p>
+            </div>
+        </div>
+
+        <div class="user-detail-card-body">
+
+            <div class="user-info-grid">
+
+                <div class="user-info-item">
+                    <span>Event</span>
+                    <strong>{{ reservation.event_name }}</strong>
+                </div>
+
+                <div class="user-info-item">
+                    <span>Facility</span>
+                    <strong>{{ reservation.facility.name }}</strong>
+                </div>
+
+                <div class="user-info-item">
+                    <span>Expected Participants</span>
+                    <strong>{{ reservation.expected_attendees }}</strong>
+                </div>
+
+                <div class="user-info-item">
+                    <span>Status</span>
+                    <strong>{{ reservation.get_status_display }}</strong>
+                </div>
+
+                <div class="user-info-item">
+                    <span>Scheduled Start</span>
+                    <strong>
+                        {{ reservation.start_datetime|date:"M d, Y h:i A" }}
+                    </strong>
+                </div>
+
+                <div class="user-info-item">
+                    <span>Scheduled End</span>
+                    <strong>
+                        {{ reservation.end_datetime|date:"M d, Y h:i A" }}
+                    </strong>
+                </div>
+
+            </div>
+
+            <div class="user-description-block">
+                <h3>Purpose</h3>
+                <p>{{ reservation.purpose }}</p>
+            </div>
+
+            {% if reservation.status == 'REJECTED' %}
+
+                <div class="user-rejection-notice">
+                    <strong>Rejection Reason</strong>
+                    <p>
+                        {{ reservation.decision_reason|default:"No reason provided." }}
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+    {% if reservation.status == 'PENDING' or reservation.status == 'APPROVED' %}
+
+        <section class="user-detail-card user-cancel-card">
+
+            <div class="user-card-heading">
+                <div>
+                    <h2>Cancel Reservation</h2>
+                    <p>Manage an existing booking request</p>
+                </div>
+            </div>
+
+            <div class="user-detail-card-body">
+
+                <p class="user-cancel-description">
+                    You may cancel this reservation before its scheduled
+                    start time. Cancellation cannot be undone.
+                </p>
+
+                <form
+                    method="post"
+                    action="{% url 'reservation_cancel_user' reservation.id %}"
+                    onsubmit="return confirm('Are you sure you want to cancel this reservation?');"
+                >
+                    {% csrf_token %}
+
+                    <button type="submit" class="user-danger-button">
+                        Cancel Reservation
+                    </button>
+                </form>
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+    <div class="user-detail-actions">
+
+        <a href="{% url 'my_reservations' %}"
+           class="user-outline-button">
+            Back to My Reservations
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

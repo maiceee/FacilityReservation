@@ -1,0 +1,255 @@
+
+{% extends 'Reservation/user/UserBase.html' %}
+{% load static %}
+
+{% block title %}Browse Facilities | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/user/user-pages.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+
+<div class="user-modern-page">
+
+    <div class="user-page-header">
+
+        <div>
+            <span class="user-section-eyebrow">
+                CAMPUS SPACES
+            </span>
+
+            <h1>Browse Facilities</h1>
+
+            <p>
+                Discover available campus spaces for
+                meetings, classes, and events.
+            </p>
+        </div>
+
+    </div>
+
+    <section class="user-filter-card">
+
+        <form method="get" class="user-facility-filter">
+
+            <div class="user-filter-field user-search-field">
+
+                <label for="facility-search">Search Facilities</label>
+
+                <div class="user-search-wrap">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-4-4"/>
+                    </svg>
+
+                    <input
+                        id="facility-search"
+                        type="search"
+                        name="search"
+                        value="{{ search_query|default:'' }}"
+                        placeholder="Name, code, or location"
+                    >
+
+                </div>
+
+            </div>
+
+            <div class="user-filter-field">
+
+                <label for="facility-category">Category</label>
+
+                <select id="facility-category" name="category">
+
+                    <option value="">All Categories</option>
+
+                    {% for category in categories %}
+
+                        <option
+                            value="{{ category.id }}"
+                            {% if category_filter == category.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ category.name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="user-filter-field">
+
+                <label for="facility-capacity">Minimum Capacity</label>
+
+                <input
+                    id="facility-capacity"
+                    type="number"
+                    name="capacity"
+                    min="1"
+                    value="{{ capacity_filter }}"
+                    placeholder="e.g. 50"
+                >
+
+            </div>
+
+            <div class="user-filter-actions">
+
+                <button type="submit" class="user-primary-button">
+                    Search
+                </button>
+
+                <a href="{% url 'browse_facilities' %}"
+                   class="user-outline-button">
+                    Clear
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+    <div class="user-results-heading">
+
+        <div>
+            <h2>Explore Campus Facilities</h2>
+            <p>Find a space that matches your event requirements.</p>
+        </div>
+
+        <span class="user-results-count">
+            {{ facilities|length }} shown
+        </span>
+
+    </div>
+
+    {% if facilities %}
+
+        <div class="user-facility-grid">
+
+            {% for facility in facilities %}
+
+                <article class="user-facility-card">
+
+                    <div class="user-facility-card-top">
+
+                        <span class="user-facility-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="1.7"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round">
+                                <rect x="4" y="3" width="16" height="18" rx="2"/>
+                                <path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>
+                            </svg>
+                        </span>
+
+                        <span class="user-facility-category">
+                            {{ facility.category.name }}
+                        </span>
+
+                    </div>
+
+                    <div class="user-facility-card-content">
+
+                        <span class="user-facility-code">
+                            {{ facility.facility_code }}
+                        </span>
+
+                        <h3>{{ facility.name }}</h3>
+
+                        <div class="user-facility-info">
+
+                            <div>
+                                <span class="user-facility-info-label">
+                                    Location
+                                </span>
+                                <strong>{{ facility.location }}</strong>
+                            </div>
+
+                            <div>
+                                <span class="user-facility-info-label">
+                                    Capacity
+                                </span>
+                                <strong>
+                                    {{ facility.capacity }} people
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span class="user-facility-info-label">
+                                    Operating Hours
+                                </span>
+                                <strong>
+                                    {{ facility.opening_time|time:"h:i A" }}
+                                    –
+                                    {{ facility.closing_time|time:"h:i A" }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="user-facility-card-footer">
+
+                        <a
+                            href="{% url 'facility_detail_user' facility.id %}"
+                            class="user-facility-view-btn"
+                        >
+                            View Facility
+                            <span aria-hidden="true">→</span>
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="user-empty-state user-facilities-empty">
+
+            <span class="user-empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.6"
+                     stroke-linecap="round"
+                     stroke-linejoin="round">
+                    <rect x="4" y="3" width="16" height="18" rx="2"/>
+                    <path d="M9 21v-5h6v5M8 8h2M14 8h2"/>
+                </svg>
+            </span>
+
+            <h3>No facilities found</h3>
+
+            <p>
+                No active facilities match your current search filters.
+            </p>
+
+            <a href="{% url 'browse_facilities' %}"
+               class="user-outline-button">
+                Clear Filters
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

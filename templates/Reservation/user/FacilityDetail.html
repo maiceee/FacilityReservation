@@ -1,0 +1,277 @@
+
+{% extends 'Reservation/user/UserBase.html' %}
+
+{% block title %}{{ facility.name }} | CampusSpace{% endblock %}
+
+{% block content %}
+
+<div class="user-modern-page">
+
+    <div class="user-detail-header">
+
+        <div>
+            <a href="{% url 'browse_facilities' %}"
+               class="user-back-link">
+                ← Back to Facilities
+            </a>
+
+            <span class="user-section-eyebrow">FACILITY DETAILS</span>
+
+            <h1>{{ facility.name }}</h1>
+
+            <span class="user-detail-code">
+                {{ facility.facility_code }}
+            </span>
+        </div>
+
+        <a href="{% url 'reservation_create' %}?facility={{ facility.id }}"
+           class="user-primary-button">
+            Request This Facility →
+        </a>
+
+    </div>
+
+    <section class="user-detail-card">
+
+        <div class="user-card-heading">
+            <div>
+                <h2>Facility Information</h2>
+                <p>Overview of this campus facility</p>
+            </div>
+        </div>
+
+        <div class="user-detail-card-body">
+
+            <div class="user-info-grid">
+
+                <div class="user-info-item">
+                    <span>Category</span>
+                    <strong>{{ facility.category.name }}</strong>
+                </div>
+
+                <div class="user-info-item">
+                    <span>Location</span>
+                    <strong>{{ facility.location }}</strong>
+                </div>
+
+                <div class="user-info-item">
+                    <span>Capacity</span>
+                    <strong>{{ facility.capacity }} people</strong>
+                </div>
+
+                <div class="user-info-item">
+                    <span>Operating Hours</span>
+                    <strong>
+                        {{ facility.opening_time|time:"h:i A" }}
+                        –
+                        {{ facility.closing_time|time:"h:i A" }}
+                    </strong>
+                </div>
+
+            </div>
+
+            <div class="user-description-block">
+                <h3>Description</h3>
+                <p>
+                    {{ facility.description|default:"No description available." }}
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="user-detail-card">
+
+        <div class="user-card-heading">
+            <div>
+                <h2>Amenities</h2>
+                <p>Facilities and equipment available in this space</p>
+            </div>
+        </div>
+
+        <div class="user-detail-card-body">
+
+            {% if amenities %}
+
+                <div class="user-amenities-grid">
+
+                    {% for amenity in amenities %}
+                        <div class="user-amenity-item">
+                            <span class="user-amenity-check" aria-hidden="true">✓</span>
+                            {{ amenity.name }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="user-inline-empty">
+                    No amenities listed for this facility.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+    <section class="user-detail-card">
+
+        <div class="user-card-heading">
+            <div>
+                <h2>Available Reservation Slots</h2>
+                <p>Available time periods for the next 7 days</p>
+            </div>
+
+            <span class="user-info-tag is-available">Available</span>
+        </div>
+
+        {% if available_slots %}
+
+            <div class="user-table-scroll">
+                <table class="user-modern-table user-slots-table">
+
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Available From</th>
+                            <th>Available Until</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for slot in available_slots %}
+                            <tr>
+                                <td>{{ slot.date|date:"M d, Y" }}</td>
+                                <td>{{ slot.start_datetime|date:"h:i A" }}</td>
+                                <td>{{ slot.end_datetime|date:"h:i A" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        {% else %}
+
+            <div class="user-inline-empty">
+                No available reservation slots within the next 7 days.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+    <section class="user-detail-card">
+
+        <div class="user-card-heading">
+            <div>
+                <h2>Unavailable Reservation Slots</h2>
+                <p>Already reserved time periods that cannot be selected</p>
+            </div>
+
+            <span class="user-info-tag is-unavailable">Reserved</span>
+        </div>
+
+        {% if unavailable_slots %}
+
+            <div class="user-table-scroll">
+                <table class="user-modern-table user-slots-table">
+
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for slot in unavailable_slots %}
+                            <tr>
+                                <td>{{ slot.start_datetime|date:"M d, Y" }}</td>
+                                <td>{{ slot.start_datetime|date:"h:i A" }}</td>
+                                <td>{{ slot.end_datetime|date:"h:i A" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        {% else %}
+
+            <div class="user-inline-empty">
+                No upcoming reserved slots.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+    <section class="user-detail-card">
+
+        <div class="user-card-heading">
+            <div>
+                <h2>Facility Closures</h2>
+                <p>This facility cannot be booked during closure periods</p>
+            </div>
+
+            <span class="user-info-tag is-closed">Closures</span>
+        </div>
+
+        {% if closure_slots %}
+
+            <div class="user-table-scroll">
+                <table class="user-modern-table user-slots-table">
+
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for slot in closure_slots %}
+                            <tr>
+                                <td>{{ slot.start_datetime|date:"M d, Y" }}</td>
+                                <td>{{ slot.start_datetime|date:"h:i A" }}</td>
+                                <td>{{ slot.end_datetime|date:"h:i A" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        {% else %}
+
+            <div class="user-inline-empty">
+                No upcoming facility closures.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+    <div class="user-detail-actions">
+
+        <a href="{% url 'browse_facilities' %}"
+           class="user-outline-button">
+            Back to Facilities
+        </a>
+
+        <a href="{% url 'reservation_create' %}?facility={{ facility.id }}"
+           class="user-primary-button">
+            Request This Facility
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

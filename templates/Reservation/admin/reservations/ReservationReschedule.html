@@ -1,0 +1,124 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
+
+{% block title %}Reschedule Reservation | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/admin/reservation-admin.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="rv-page rv-reschedule-page">
+
+    <div class="rv-page-head">
+        <div>
+            <span class="page-eyebrow">RESERVATION MANAGEMENT</span>
+            <h1>Reschedule Reservation</h1>
+            <p>{{ reservation.event_name }}</p>
+        </div>
+
+        <a href="{% url 'reservation_detail_admin' reservation.id %}"
+           class="rv-outline rv-back-button">
+            <span aria-hidden="true">←</span>
+            Back to Details
+        </a>
+    </div>
+
+    <section class="rv-panel rv-form-panel">
+
+        <div class="rv-panel-head">
+            <div class="rv-form-heading">
+                <div class="rv-form-heading-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <rect x="3" y="5" width="18" height="16" rx="2"/>
+                        <path d="M7 3v4M17 3v4M3 10h18"/>
+                        <path d="M8 15h4"/>
+                    </svg>
+                </div>
+
+                <div>
+                    <h2>New Schedule</h2>
+                    <p>Update the reservation schedule using the fields below.</p>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="rv-stacked-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="rv-form-alert" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+
+                <div class="rv-form-field">
+
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+
+                        {% if field.field.required %}
+                            <span class="rv-required">*</span>
+                        {% endif %}
+                    </label>
+
+                    <div class="rv-form-control">
+                        {{ field }}
+                    </div>
+
+                    {% if field.help_text %}
+                        <small class="rv-form-help">
+                            {{ field.help_text }}
+                        </small>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <span class="rv-field-error" role="alert">
+                            {{ error }}
+                        </span>
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+            <div class="rv-form-actions">
+
+                <a href="{% url 'reservation_detail_admin' reservation.id %}"
+                   class="rv-outline">
+                    Cancel
+                </a>
+
+                <button type="submit" class="rv-primary">
+                    <svg viewBox="0 0 24 24"
+                         width="17" height="17"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <path d="M5 3h12l4 4v14H3V3h2Z"/>
+                        <path d="M7 3v6h10V3M7 21v-8h10v8"/>
+                    </svg>
+                    Save New Schedule
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

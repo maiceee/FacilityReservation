@@ -1,0 +1,134 @@
+
+{% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
+
+{% block title %}Facility Closures | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'Reservation/css/admin/facility-closures.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+<div class="closures-page">
+
+    <div class="closures-header">
+        <div>
+            <span class="page-eyebrow">FACILITY MANAGEMENT</span>
+            <h1>Facility Closures</h1>
+            <p>Manage temporary facility closures, maintenance schedules, and unavailable dates.</p>
+        </div>
+    </div>
+
+    <section class="closures-card">
+        <div class="closures-card-heading">
+            <div class="closures-heading-icon">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <path d="M7 3v4M17 3v4M3 10h18"/>
+                </svg>
+            </div>
+            <div>
+                <h2>Schedule a Closure</h2>
+                <p>Set when a facility will be unavailable for reservations.</p>
+            </div>
+        </div>
+
+        <form method="post" class="closure-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="closure-alert" role="alert">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="closure-form-grid">
+                {% for field in form %}
+                <div class="closure-form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                        <span class="closure-required">*</span>
+                        {% endif %}
+                    </label>
+
+                    <div class="closure-field-control">
+                        {{ field }}
+                    </div>
+
+                    {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                    <span class="closure-field-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="closure-form-footer">
+                <button type="reset" class="closure-cancel">
+                    Clear Fields
+                </button>
+                <button type="submit" class="closure-submit">
+                    Save Closure
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="closures-card">
+        <div class="closures-list-header">
+            <div>
+                <h2>Closure Records</h2>
+                <p>Scheduled and recorded facility unavailability.</p>
+            </div>
+            <span class="closures-count">
+                {{ closures|length }} records
+            </span>
+        </div>
+
+        <div class="closures-table-scroll">
+            <table class="closures-table">
+                <thead>
+                    <tr>
+                        <th>Facility</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for closure in closures %}
+                    <tr>
+                        <td>
+                            <strong>{{ closure.facility.name }}</strong>
+                        </td>
+                        <td>{{ closure.start_date|date:"M d, Y" }}</td>
+                        <td>{{ closure.end_date|date:"M d, Y" }}</td>
+                        <td>{{ closure.reason|default:"—" }}</td>
+                        <td>
+                            <span class="closure-status">
+                                Scheduled
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="closures-empty">
+                            <div class="closures-empty-icon">📅</div>
+                            <h3>No facility closures yet</h3>
+                            <p>Scheduled closures will appear here once added.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
