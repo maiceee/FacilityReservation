@@ -1,7 +1,8 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.utils import timezone
 
 from .models import (
@@ -12,6 +13,17 @@ from .models import (
     SystemSetting,
 )
 from .services import approve_reservation
+
+
+class DjangoConfigurationTest(SimpleTestCase):
+
+    def test_project_uses_manila_timezone(self):
+        self.assertEqual(settings.TIME_ZONE, 'Asia/Manila')
+        self.assertTrue(settings.USE_TZ)
+        self.assertEqual(
+            timezone.get_default_timezone_name(),
+            'Asia/Manila'
+        )
 
 
 class CompetingApprovalTest(TestCase):
