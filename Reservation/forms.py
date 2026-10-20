@@ -363,11 +363,29 @@ class ReservationRequestForm(forms.ModelForm):
 class ReservationDecisionForm(forms.Form):
 
     decision_reason = forms.CharField(
-        required=False,
+        required=True,
         widget=forms.Textarea(
             attrs={'rows': 4}
         ),
-        label='Reason'
+        label='Reason',
+        error_messages={
+            'required': 'A decision reason is required.'
+        }
+    )
+
+
+# =========================================================
+# ADMIN RESERVATION CANCELLATION
+# =========================================================
+
+class ReservationCancellationForm(forms.Form):
+
+    reason = forms.CharField(
+        required=True,
+        widget=forms.Textarea(
+            attrs={'rows': 4}
+        ),
+        label='Cancellation reason'
     )
 
 
@@ -421,6 +439,20 @@ class ClosureBlockForm(forms.ModelForm):
             'reason',
         ]
 
+        labels = {
+            'facility': 'Facility',
+            'start_datetime': 'Closure starts',
+            'end_datetime': 'Closure ends',
+            'reason': 'Reason for closure',
+        }
+
+        help_texts = {
+            'facility': 'Only active facilities can be selected.',
+            'start_datetime': 'Use Philippine local date and time.',
+            'end_datetime': 'The facility becomes available after this time.',
+            'reason': 'Briefly explain why the facility will be unavailable.',
+        }
+
         widgets = {
             'start_datetime': forms.DateTimeInput(
                 attrs={'type': 'datetime-local'},
@@ -430,6 +462,15 @@ class ClosureBlockForm(forms.ModelForm):
             'end_datetime': forms.DateTimeInput(
                 attrs={'type': 'datetime-local'},
                 format='%Y-%m-%dT%H:%M'
+            ),
+
+            'reason': forms.Textarea(
+                attrs={
+                    'rows': 4,
+                    'placeholder': (
+                        'Example: Preventive maintenance or campus holiday'
+                    ),
+                }
             ),
         }
 

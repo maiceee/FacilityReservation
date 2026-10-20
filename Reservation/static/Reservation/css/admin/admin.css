@@ -3828,12 +3828,15 @@ body.modal-open {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
+    max-width: 240px;
 }
 
 .admin-page .facility-name-details strong {
     color: #292524;
     font-size: 13px;
     font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 .admin-page .facility-name-details span {
@@ -3859,6 +3862,12 @@ body.modal-open {
 .admin-page .facility-hours {
     white-space: nowrap;
     color: #57534e;
+}
+
+.admin-page .facility-location {
+    min-width: 150px;
+    max-width: 230px;
+    overflow-wrap: anywhere;
 }
 
 .admin-page .facility-row-actions {
@@ -3929,6 +3938,12 @@ body.modal-open {
     color: #78716c;
 }
 
+.admin-page .facility-empty-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
 .admin-page .facility-confirm-modal {
     max-width: 480px;
 }
@@ -3957,10 +3972,37 @@ body.modal-open {
     border: 1px solid #e7e5e4;
 }
 
+.admin-page .facility-confirm-modal .admin-modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid #e7e5e4;
+}
+
 .admin-page .facility-confirm-modal .admin-modal-primary {
     background: #b91c1c;
     color: #fff;
     border: none;
+}
+
+.admin-page .facility-confirm-modal .admin-modal-primary:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+
+.admin-page .facility-add-button:focus-visible,
+.admin-page .facility-clear-button:focus-visible,
+.admin-page .facility-search-button:focus-visible,
+.admin-page .facility-edit-button:focus-visible,
+.admin-page .facility-archive-button:focus-visible,
+.admin-page .facility-modal-cancel:focus-visible,
+.admin-page .facility-confirm-modal .admin-modal-close:focus-visible,
+.admin-page .facility-confirm-modal .admin-modal-primary:focus-visible {
+    outline: 3px solid rgba(185, 28, 28, .24);
+    outline-offset: 3px;
 }
 
 @media (max-width: 700px) {

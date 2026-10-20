@@ -1,134 +1,374 @@
-
 {% extends 'Reservation/admin/AdminBase.html' %}
-{% load static %}
 
-{% block title %}Facility Closures | CampusSpace{% endblock %}
-
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'Reservation/css/admin/facility-closures.css' %}?v=1">
-{% endblock %}
+{% block title %}Facilities | CampusSpace{% endblock %}
 
 {% block content %}
-<div class="closures-page">
+<div class="facilities-page">
 
-    <div class="closures-header">
+    <header class="facilities-header">
         <div>
-            <span class="page-eyebrow">FACILITY MANAGEMENT</span>
-            <h1>Facility Closures</h1>
-            <p>Manage temporary facility closures, maintenance schedules, and unavailable dates.</p>
-        </div>
-    </div>
-
-    <section class="closures-card">
-        <div class="closures-card-heading">
-            <div class="closures-heading-icon">
-                <svg viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="1.8">
-                    <rect x="3" y="5" width="18" height="16" rx="2"/>
-                    <path d="M7 3v4M17 3v4M3 10h18"/>
-                </svg>
-            </div>
-            <div>
-                <h2>Schedule a Closure</h2>
-                <p>Set when a facility will be unavailable for reservations.</p>
-            </div>
+            <h1>Facilities</h1>
+            <p>Manage campus spaces, operating hours, capacity, and availability.</p>
         </div>
 
-        <form method="post" class="closure-form">
-            {% csrf_token %}
+        <a href="{% url 'facility_create' %}"
+           class="facility-add-button">
+            <svg viewBox="0 0 24 24"
+                 width="18"
+                 height="18"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 stroke-linecap="round"
+                 aria-hidden="true">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Add Facility
+        </a>
+    </header>
 
-            {% if form.non_field_errors %}
-            <div class="closure-alert" role="alert">
-                {{ form.non_field_errors }}
-            </div>
-            {% endif %}
+    <section class="facility-filter-card"
+             aria-labelledby="facility-search-title">
+        <form method="get"
+              class="facility-search-form"
+              role="search">
+            <div class="facility-search-field">
+                <label for="facility-search"
+                       id="facility-search-title">
+                    Search facilities
+                </label>
 
-            <div class="closure-form-grid">
-                {% for field in form %}
-                <div class="closure-form-group">
-                    <label for="{{ field.id_for_label }}">
-                        {{ field.label }}
-                        {% if field.field.required %}
-                        <span class="closure-required">*</span>
-                        {% endif %}
-                    </label>
+                <div class="facility-search-input">
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-4-4"/>
+                    </svg>
 
-                    <div class="closure-field-control">
-                        {{ field }}
-                    </div>
-
-                    {% if field.help_text %}
-                    <small>{{ field.help_text }}</small>
-                    {% endif %}
-
-                    {% for error in field.errors %}
-                    <span class="closure-field-error">{{ error }}</span>
-                    {% endfor %}
+                    <input type="search"
+                           id="facility-search"
+                           name="search"
+                           value="{{ search_query }}"
+                           placeholder="Search by code, name, category, or location"
+                           autocomplete="off">
                 </div>
-                {% endfor %}
             </div>
 
-            <div class="closure-form-footer">
-                <button type="reset" class="closure-cancel">
-                    Clear Fields
+            <div class="facility-search-actions">
+                <button type="submit"
+                        class="facility-search-button">
+                    Search
                 </button>
-                <button type="submit" class="closure-submit">
-                    Save Closure
-                </button>
+
+                {% if search_query %}
+                    <a href="{% url 'facility_list' %}"
+                       class="facility-clear-button">
+                        Clear
+                    </a>
+                {% endif %}
             </div>
         </form>
     </section>
 
-    <section class="closures-card">
-        <div class="closures-list-header">
+    <section class="facility-table-card"
+             aria-labelledby="facility-directory-title">
+        <div class="facility-table-heading">
             <div>
-                <h2>Closure Records</h2>
-                <p>Scheduled and recorded facility unavailability.</p>
+                <h2 id="facility-directory-title">Facility Directory</h2>
+                {% if search_query %}
+                    <p>
+                        Results for “{{ search_query }}”
+                    </p>
+                {% else %}
+                    <p>All registered campus facilities and their current status.</p>
+                {% endif %}
             </div>
-            <span class="closures-count">
-                {{ closures|length }} records
+
+            <span class="management-count">
+                {{ facilities|length }} shown
             </span>
         </div>
 
-        <div class="closures-table-scroll">
-            <table class="closures-table">
-                <thead>
-                    <tr>
-                        <th>Facility</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for closure in closures %}
-                    <tr>
-                        <td>
-                            <strong>{{ closure.facility.name }}</strong>
-                        </td>
-                        <td>{{ closure.start_date|date:"M d, Y" }}</td>
-                        <td>{{ closure.end_date|date:"M d, Y" }}</td>
-                        <td>{{ closure.reason|default:"—" }}</td>
-                        <td>
-                            <span class="closure-status">
-                                Scheduled
-                            </span>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="closures-empty">
-                            <div class="closures-empty-icon">📅</div>
-                            <h3>No facility closures yet</h3>
-                            <p>Scheduled closures will appear here once added.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        {% if facilities %}
+            <div class="facility-table-scroll">
+                <table class="facility-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Facility</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Capacity</th>
+                            <th scope="col">Operating hours</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for facility in facilities %}
+                            <tr>
+                                <td>
+                                    <div class="facility-name-cell">
+                                        <div class="facility-icon-box"
+                                             aria-hidden="true">
+                                            <svg viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="1.8"
+                                                 stroke-linecap="round"
+                                                 stroke-linejoin="round">
+                                                <rect x="4" y="3" width="16" height="18" rx="2"/>
+                                                <path d="M9 21v-5h6v5M8 8h2m4 0h2M8 12h2m4 0h2"/>
+                                            </svg>
+                                        </div>
+
+                                        <div class="facility-name-details">
+                                            <strong>{{ facility.name }}</strong>
+                                            <span>{{ facility.facility_code }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="facility-category">
+                                        {{ facility.category.name }}
+                                    </span>
+                                </td>
+
+                                <td class="facility-location">
+                                    {{ facility.location }}
+                                </td>
+
+                                <td>
+                                    <span class="facility-capacity">
+                                        {{ facility.capacity }} people
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="facility-hours">
+                                        {{ facility.opening_time|time:"g:i A" }}
+                                        –
+                                        {{ facility.closing_time|time:"g:i A" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if facility.is_active %}
+                                        <span class="management-status is-active">
+                                            <span class="management-status-dot"
+                                                  aria-hidden="true"></span>
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="management-status is-inactive">
+                                            <span class="management-status-dot"
+                                                  aria-hidden="true"></span>
+                                            Archived
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="facility-row-actions">
+                                        <a href="{% url 'facility_update' facility.id %}"
+                                           class="facility-edit-button"
+                                           aria-label="Edit {{ facility.name }}">
+                                            Edit
+                                        </a>
+
+                                        {% if facility.is_active %}
+                                            <form method="post"
+                                                  action="{% url 'facility_archive' facility.id %}"
+                                                  class="facility-archive-form"
+                                                  data-facility-name="{{ facility.name }}">
+                                                {% csrf_token %}
+
+                                                <button type="submit"
+                                                        class="facility-archive-button"
+                                                        aria-label="Archive {{ facility.name }}">
+                                                    Archive
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="facility-empty-state">
+                <div class="facility-empty-icon"
+                     aria-hidden="true">
+                    <svg viewBox="0 0 24 24"
+                         width="29"
+                         height="29"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <rect x="4" y="3" width="16" height="18" rx="2"/>
+                        <path d="M9 21v-5h6v5M8 8h2m4 0h2M8 12h2m4 0h2"/>
+                    </svg>
+                </div>
+
+                {% if search_query %}
+                    <h3>No matching facilities</h3>
+                    <p>Try another code, name, category, or location.</p>
+                    <div class="facility-empty-actions">
+                        <a href="{% url 'facility_list' %}"
+                           class="facility-clear-button">
+                            Clear search
+                        </a>
+                    </div>
+                {% else %}
+                    <h3>No facilities yet</h3>
+                    <p>Add the first campus facility to begin accepting reservations.</p>
+                    <div class="facility-empty-actions">
+                        <a href="{% url 'facility_create' %}"
+                           class="facility-add-button">
+                            Add Facility
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
     </section>
 
 </div>
+
+<div class="admin-modal-backdrop"
+     id="facilityArchiveModal"
+     hidden>
+    <div class="admin-modal facility-confirm-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="facilityArchiveTitle"
+         aria-describedby="facilityArchiveMessage facilityArchiveNote">
+        <div class="admin-modal-header">
+            <h2 id="facilityArchiveTitle">Archive facility</h2>
+
+            <button type="button"
+                    class="admin-modal-close"
+                    aria-label="Close archive confirmation">
+                <svg viewBox="0 0 24 24"
+                     width="18"
+                     height="18"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     aria-hidden="true">
+                    <path d="m6 6 12 12M18 6 6 18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="admin-modal-body">
+            <p id="facilityArchiveMessage"></p>
+            <p class="facility-modal-note"
+               id="facilityArchiveNote">
+                Archived facilities remain in the directory but cannot accept new reservations.
+            </p>
+        </div>
+
+        <div class="admin-modal-footer">
+            <button type="button"
+                    class="facility-modal-cancel">
+                Keep active
+            </button>
+
+            <button type="button"
+                    id="confirmFacilityArchive"
+                    class="admin-modal-primary">
+                Archive facility
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+(() => {
+    const modal = document.getElementById("facilityArchiveModal");
+    const message = document.getElementById("facilityArchiveMessage");
+    const confirmButton = document.getElementById("confirmFacilityArchive");
+    const closeButton = modal.querySelector(".admin-modal-close");
+    const cancelButton = modal.querySelector(".facility-modal-cancel");
+    const archiveForms = document.querySelectorAll(".facility-archive-form");
+
+    let selectedForm = null;
+    let previousFocus = null;
+    let archiveConfirmed = false;
+
+    function openArchiveModal(form) {
+        selectedForm = form;
+        previousFocus = document.activeElement;
+        message.textContent =
+            `Archive “${form.dataset.facilityName}”?`;
+
+        modal.hidden = false;
+        document.body.classList.add("modal-open");
+        confirmButton.disabled = false;
+        confirmButton.focus();
+    }
+
+    function closeArchiveModal() {
+        modal.hidden = true;
+        document.body.classList.remove("modal-open");
+        selectedForm = null;
+        archiveConfirmed = false;
+
+        if (previousFocus) {
+            previousFocus.focus();
+        }
+    }
+
+    archiveForms.forEach((form) => {
+        form.addEventListener("submit", (event) => {
+            if (archiveConfirmed) {
+                return;
+            }
+
+            event.preventDefault();
+            openArchiveModal(form);
+        });
+    });
+
+    confirmButton.addEventListener("click", () => {
+        if (!selectedForm) {
+            return;
+        }
+
+        archiveConfirmed = true;
+        confirmButton.disabled = true;
+        confirmButton.textContent = "Archiving…";
+        selectedForm.requestSubmit();
+    });
+
+    closeButton.addEventListener("click", closeArchiveModal);
+    cancelButton.addEventListener("click", closeArchiveModal);
+
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            closeArchiveModal();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.hidden) {
+            closeArchiveModal();
+        }
+    });
+})();
+</script>
 {% endblock %}

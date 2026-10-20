@@ -61,6 +61,13 @@
     line-height: 1.6;
 }
 
+.ra-page .ra-export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
 .ra-page .ra-export-btn {
     display: inline-flex;
     flex-shrink: 0;
@@ -536,6 +543,11 @@
 
     .ra-page .ra-export-btn {
         width: 100%;
+    }
+
+    .ra-page .ra-export-actions {
+        width: 100%;
+        flex-direction: column;
     }
 
     .ra-page .ra-card {

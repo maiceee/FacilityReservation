@@ -122,7 +122,10 @@
         <div class="user-card-heading">
             <div>
                 <h2>Available Reservation Slots</h2>
-                <p>Available time periods for the next 7 days</p>
+                <p>
+                    Available time periods for the next
+                    {{ availability_days }} day{{ availability_days|pluralize }}
+                </p>
             </div>
 
             <span class="user-info-tag is-available">Available</span>
@@ -157,7 +160,8 @@
         {% else %}
 
             <div class="user-inline-empty">
-                No available reservation slots within the next 7 days.
+                No available reservation slots within the next
+                {{ availability_days }} day{{ availability_days|pluralize }}.
             </div>
 
         {% endif %}

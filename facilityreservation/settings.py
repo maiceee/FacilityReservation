@@ -10,10 +10,87 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def load_environment_file(path):
+    """Load simple KEY=VALUE entries without overriding shell variables."""
+    if not path.exists():
+        return
+
+    for raw_line in path.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+
+        key, value = line.split('=', 1)
+        key = key.strip()
+        value = value.strip()
+
+        if value[:1] == value[-1:] and value.startswith(('"', "'")):
+            value = value[1:-1]
+
+        os.environ.setdefault(key, value)
+
+
+def environment_boolean(name, default=False):
+    value = os.environ.get(name)
+
+    if value is None:
+        return default
+
+    normalized_value = value.strip().lower()
+
+    if normalized_value in {'1', 'true', 'yes', 'on'}:
+        return True
+
+    if normalized_value in {'0', 'false', 'no', 'off'}:
+        return False
+
+    raise ImproperlyConfigured(
+        f'{name} must be a boolean value.'
+    )
+
+
+def environment_integer(name, default, minimum=None):
+    raw_value = os.environ.get(name)
+
+    if raw_value is None:
+        return default
+
+    try:
+        value = int(raw_value)
+    except ValueError as error:
+        raise ImproperlyConfigured(
+            f'{name} must be an integer.'
+        ) from error
+
+    if minimum is not None and value < minimum:
+        raise ImproperlyConfigured(
+            f'{name} must be at least {minimum}.'
+        )
+
+    return value
+
+
+def environment_list(name, default=''):
+    raw_value = os.environ.get(name, default)
+    return [
+        item.strip()
+        for item in raw_value.split(',')
+        if item.strip()
+    ]
+
+
+load_environment_file(BASE_DIR / '.env')
+
 AUTH_USER_MODEL = 'Reservation.User'
 
 LOGIN_URL = 'login'
@@ -24,19 +101,77 @@ LOGOUT_REDIRECT_URL = 'login'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-2_jij981czaw(7#a6bn59g67b6f6ic=2c^r5azk^r9!31_pc9)'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '').strip()
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        'DJANGO_SECRET_KEY must be set in the environment or local .env file.'
+    )
 
-ALLOWED_HOSTS = []
+DEBUG = environment_boolean('DJANGO_DEBUG', False)
+
+default_allowed_hosts = (
+    'localhost,127.0.0.1,[::1]'
+    if DEBUG
+    else ''
+)
+ALLOWED_HOSTS = environment_list(
+    'DJANGO_ALLOWED_HOSTS',
+    default_allowed_hosts
+)
+
+if not DEBUG and not ALLOWED_HOSTS:
+    raise ImproperlyConfigured(
+        'DJANGO_ALLOWED_HOSTS must be set when DJANGO_DEBUG is False.'
+    )
+
+CSRF_TRUSTED_ORIGINS = environment_list(
+    'DJANGO_CSRF_TRUSTED_ORIGINS'
+)
+
+
+# Production security defaults. Each value can be overridden explicitly for
+# a deployment environment, while local HTTP development remains usable.
+SECURE_SSL_REDIRECT = environment_boolean(
+    'DJANGO_SECURE_SSL_REDIRECT',
+    not DEBUG
+)
+SESSION_COOKIE_SECURE = environment_boolean(
+    'DJANGO_SESSION_COOKIE_SECURE',
+    not DEBUG
+)
+CSRF_COOKIE_SECURE = environment_boolean(
+    'DJANGO_CSRF_COOKIE_SECURE',
+    not DEBUG
+)
+SECURE_HSTS_SECONDS = environment_integer(
+    'DJANGO_SECURE_HSTS_SECONDS',
+    0 if DEBUG else 31536000,
+    minimum=0
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = environment_boolean(
+    'DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS',
+    not DEBUG and SECURE_HSTS_SECONDS > 0
+)
+SECURE_HSTS_PRELOAD = environment_boolean(
+    'DJANGO_SECURE_HSTS_PRELOAD',
+    False
+)
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
+
+if environment_boolean('DJANGO_TRUST_PROXY_HEADERS', False):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -83,6 +218,18 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            # SQLite ignores select_for_update(). Starting atomic blocks
+            # with an immediate write lock serializes competing approval
+            # and rescheduling decisions before availability is checked.
+            'transaction_mode': 'IMMEDIATE',
+            'timeout': 20,
+        },
+        # A file-backed test database exercises the same SQLite locking
+        # behavior as the application database during concurrency tests.
+        'TEST': {
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        },
     }
 }
 
@@ -127,8 +274,24 @@ STATIC_URL = 'static/'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+if DEBUG:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        },
+    }
+else:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+            'OPTIONS': {
+                'host': os.environ.get('DJANGO_EMAIL_HOST', 'localhost'),
+                'port': environment_integer('DJANGO_EMAIL_PORT', 587),
+                'username': os.environ.get('DJANGO_EMAIL_HOST_USER') or None,
+                'password': os.environ.get('DJANGO_EMAIL_HOST_PASSWORD') or None,
+                'use_tls': environment_boolean('DJANGO_EMAIL_USE_TLS', True),
+                'use_ssl': environment_boolean('DJANGO_EMAIL_USE_SSL', False),
+                'timeout': environment_integer('DJANGO_EMAIL_TIMEOUT', 10),
+            },
+        },
+    }

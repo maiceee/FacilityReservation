@@ -1,3 +1,4 @@
-from django.contrib import admin
+"""Django Admin is intentionally disabled for this project.
 
-# Register your models here.
+Administration is provided by the role-protected custom management views.
+"""

@@ -367,6 +367,14 @@
     resize: vertical;
 }
 
+.admin-page .closures-field-control input:not([type="checkbox"]):focus,
+.admin-page .closures-field-control select:focus,
+.admin-page .closures-field-control textarea:focus {
+    border-color: #b91c1c;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(185, 28, 28, .1);
+}
+
 .closures-field-help {
     font-size: 11px;
     line-height: 1.6;
@@ -390,6 +398,16 @@
 
 .closures-form-alert p {
     margin: 5px 0;
+}
+
+.closures-alert-title {
+    margin-bottom: 7px;
+    font-weight: 750;
+}
+
+.closures-form-alert ul {
+    margin: 0;
+    padding-left: 18px;
 }
 
 .closures-form-footer {
@@ -458,6 +476,11 @@
 
 .closures-conflict-item:last-child {
     border-bottom: 0;
+}
+
+.closures-conflict-item h3,
+.closures-info-item strong {
+    overflow-wrap: anywhere;
 }
 
 .closures-conflict-top {
@@ -533,6 +556,21 @@
     text-decoration: none;
 }
 
+.closures-primary-btn:focus-visible,
+.closures-outline-btn:focus-visible,
+.closures-view-btn:focus-visible,
+.admin-page .closures-field-control input:focus-visible,
+.admin-page .closures-field-control select:focus-visible,
+.admin-page .closures-field-control textarea:focus-visible {
+    outline: 3px solid rgba(185, 28, 28, .22);
+    outline-offset: 3px;
+}
+
+.admin-page button.closures-primary-btn:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+
 @media (max-width: 750px) {
     .closures-page-header {
         align-items: flex-start;
@@ -550,6 +588,12 @@
 
     .closures-form-group:has(textarea) {
         grid-column: auto;
+    }
+
+    .admin-page .closures-field-control input:not([type="checkbox"]),
+    .admin-page .closures-field-control select,
+    .admin-page .closures-field-control textarea {
+        font-size: 16px;
     }
 
     .closures-card-heading,

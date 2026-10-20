@@ -1,6 +1,9 @@
+import os
 from datetime import datetime, time, timedelta
 
-from django.core.management.base import BaseCommand
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
@@ -20,7 +23,40 @@ from Reservation.models import (
 class Command(BaseCommand):
     help = 'Creates repeatable fictional demo data for the facility reservation system.'
 
-    DEMO_PASSWORD = 'DemoUser123!'
+    PASSWORD_ENVIRONMENT_VARIABLE = 'DEMO_ACCOUNT_PASSWORD'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--password',
+            help=(
+                'Password for all fictional demo accounts. '
+                'If omitted, DEMO_ACCOUNT_PASSWORD is required.'
+            ),
+        )
+
+    def get_demo_password(self, options):
+        password = options.get('password')
+
+        if password is None:
+            password = os.environ.get(
+                self.PASSWORD_ENVIRONMENT_VARIABLE
+            )
+
+        if not password or not password.strip():
+            raise CommandError(
+                'Provide the demo account password with --password or '
+                'the DEMO_ACCOUNT_PASSWORD environment variable.'
+            )
+
+        try:
+            validate_password(password)
+        except ValidationError as error:
+            raise CommandError(
+                'The demo account password does not meet the configured '
+                f'password requirements: {" ".join(error.messages)}'
+            ) from error
+
+        return password
 
     def local_datetime(self, date_value, hour, minute=0):
         """
@@ -39,6 +75,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        demo_password = self.get_demo_password(options)
 
         self.stdout.write(
             self.style.WARNING(
@@ -66,7 +103,7 @@ class Command(BaseCommand):
         # Separate from any existing administrator.
         # =====================================================
 
-        demo_admin, created = User.objects.get_or_create(
+        demo_admin, _ = User.objects.get_or_create(
             username='demo_admin',
             defaults={
                 'first_name': 'Adrian',
@@ -89,8 +126,7 @@ class Command(BaseCommand):
         demo_admin.contact_number = '09000000001'
         demo_admin.is_active = True
 
-        if created or not demo_admin.has_usable_password():
-            demo_admin.set_password(self.DEMO_PASSWORD)
+        demo_admin.set_password(demo_password)
 
         demo_admin.save()
 
@@ -167,7 +203,7 @@ class Command(BaseCommand):
             contact_number
         ) in demo_users_data:
 
-            user, created = User.objects.get_or_create(
+            user, _ = User.objects.get_or_create(
                 username=username,
                 defaults={
                     'first_name': first_name,
@@ -188,8 +224,7 @@ class Command(BaseCommand):
             user.contact_number = contact_number
             user.is_active = True
 
-            if created or not user.has_usable_password():
-                user.set_password(self.DEMO_PASSWORD)
+            user.set_password(demo_password)
 
             user.save()
 

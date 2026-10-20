@@ -1,23 +1,27 @@
-
 {% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
 
-{% block title %}{{ page_title }} | CampusSpace{% endblock %}
+{% block title %}Schedule Facility Closure | CampusSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'Reservation/css/admin/closure-admin.css' %}?v=2">
+{% endblock %}
 
 {% block content %}
+<div class="closures-page">
 
-<div class="master-form-page">
-
-    <div class="master-form-header">
+    <header class="closures-page-header">
         <div>
-            <span class="page-eyebrow">FACILITY MANAGEMENT</span>
-            <h1>{{ page_title }}</h1>
-            <p>Enter the category information below.</p>
+            <h1>Schedule a facility closure</h1>
+            <p>Block a campus facility during maintenance, holidays, or other unavailable periods.</p>
         </div>
 
-        <a href="{% url 'category_list' %}"
-           class="master-back-button">
+        <a href="{% url 'closure_list' %}"
+           class="closures-outline-btn">
             <svg viewBox="0 0 24 24"
-                 width="17" height="17"
+                 width="17"
+                 height="17"
                  fill="none"
                  stroke="currentColor"
                  stroke-width="1.8"
@@ -26,106 +30,208 @@
                  aria-hidden="true">
                 <path d="m15 18-6-6 6-6M9 12h12"/>
             </svg>
-            Back to Categories
+            Back to closures
         </a>
-    </div>
+    </header>
 
-    <section class="master-form-card">
-
-        <div class="master-form-card-heading">
-
-            <div class="master-form-icon" aria-hidden="true">
+    <section class="closures-form-card"
+             aria-labelledby="closure-form-title">
+        <div class="closures-card-heading">
+            <div class="closures-heading-icon"
+                 aria-hidden="true">
                 <svg viewBox="0 0 24 24"
-                     width="23" height="23"
                      fill="none"
                      stroke="currentColor"
                      stroke-width="1.8"
                      stroke-linecap="round"
                      stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-                    <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-                    <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    <rect x="3" y="5" width="18" height="16" rx="2"/>
+                    <path d="M7 3v4M17 3v4M3 10h18M8 15h8"/>
                 </svg>
             </div>
 
             <div>
-                <h2>Category Information</h2>
-                <p>Manage the details of this facility category.</p>
+                <h2 id="closure-form-title">Closure details</h2>
+                <p>Select the facility and the exact period when reservations must be blocked.</p>
             </div>
-
         </div>
 
-        <form method="post" class="master-detail-form">
-
+        <form method="post"
+              class="closures-detail-form"
+              id="closure-create-form">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="master-form-alert" role="alert">
+                <div class="closures-form-alert"
+                     role="alert">
+                    <div class="closures-alert-title">
+                        The closure could not be created
+                    </div>
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
-            {% for field in form %}
+            <div class="closures-form-grid">
+                {% for field in form %}
+                    <div class="closures-form-group">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                                <span class="closures-required"
+                                      aria-hidden="true">*</span>
+                            {% endif %}
+                        </label>
 
-                <div class="master-form-group">
+                        <div class="closures-field-control">
+                            {{ field }}
+                        </div>
 
-                    <label for="{{ field.id_for_label }}">
-                        {{ field.label }}
-
-                        {% if field.field.required %}
-                            <span class="master-required">*</span>
+                        {% if field.help_text %}
+                            <div class="closures-field-help"
+                                 id="{{ field.auto_id }}_helptext">
+                                {{ field.help_text }}
+                            </div>
                         {% endif %}
-                    </label>
 
-                    <div class="master-field-control">
-                        {{ field }}
+                        {% for error in field.errors %}
+                            <div class="closures-field-error"
+                                 role="alert">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
                     </div>
+                {% endfor %}
+            </div>
 
-                    {% if field.help_text %}
-                        <div class="master-field-help">
-                            {{ field.help_text }}
-                        </div>
-                    {% endif %}
-
-                    {% for error in field.errors %}
-                        <div class="master-field-error" role="alert">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-
-                </div>
-
-            {% endfor %}
-
-            <div class="master-form-footer">
-
-                <a href="{% url 'category_list' %}"
-                   class="master-cancel-button">
+            <div class="closures-form-footer">
+                <a href="{% url 'closure_list' %}"
+                   class="closures-outline-btn">
                     Cancel
                 </a>
 
-                <button type="submit" class="master-save-button">
-                    <svg viewBox="0 0 24 24"
-                         width="17" height="17"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
-                         aria-hidden="true">
-                        <path d="M5 3h12l4 4v14H3V3h2Z"/>
-                        <path d="M7 3v6h10V3M7 21v-8h10v8"/>
-                    </svg>
-                    Save Category
+                <button type="submit"
+                        class="closures-primary-btn"
+                        id="closure-submit-button">
+                    Create closure
                 </button>
-
             </div>
-
         </form>
-
     </section>
 
-</div>
+    {% if conflicting_reservations %}
+        <section class="closures-conflict-card"
+                 role="alert"
+                 aria-labelledby="closure-conflict-title">
+            <div class="closures-conflict-heading">
+                <div class="closures-warning-icon"
+                     aria-hidden="true">
+                    <svg viewBox="0 0 24 24"
+                         width="21"
+                         height="21"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path d="M12 3 2.8 19h18.4L12 3Z"/>
+                        <path d="M12 9v4M12 17h.01"/>
+                    </svg>
+                </div>
 
+                <div>
+                    <h2 id="closure-conflict-title">
+                        Resolve {{ conflicting_reservations|length }} conflicting
+                        reservation{{ conflicting_reservations|length|pluralize }}
+                    </h2>
+                    <p>
+                        These reservations overlap the requested closure period.
+                        Reschedule or resolve them before trying again.
+                    </p>
+                </div>
+            </div>
+
+            <div class="closures-conflict-list">
+                {% for reservation in conflicting_reservations %}
+                    <article class="closures-conflict-item">
+                        <div class="closures-conflict-top">
+                            <div>
+                                <span class="closures-conflict-label">
+                                    Reservation #{{ reservation.id }}
+                                </span>
+                                <h3>{{ reservation.event_name }}</h3>
+                            </div>
+
+                            <span class="closures-conflict-status">
+                                {{ reservation.get_status_display }}
+                            </span>
+                        </div>
+
+                        <div class="closures-conflict-grid">
+                            <div class="closures-info-item">
+                                <span>Requested by</span>
+                                <strong>
+                                    {{ reservation.user.get_full_name|default:reservation.user.username }}
+                                </strong>
+                            </div>
+
+                            <div class="closures-info-item">
+                                <span>Schedule</span>
+                                <strong>
+                                    {{ reservation.start_datetime|date:"M d, Y · g:i A" }}
+                                    –
+                                    {{ reservation.end_datetime|date:"M d, Y · g:i A" }}
+                                </strong>
+                            </div>
+
+                            <div class="closures-info-item">
+                                <span>Facility</span>
+                                <strong>{{ reservation.facility.name }}</strong>
+                            </div>
+
+                            <div class="closures-info-item">
+                                <span>Expected attendees</span>
+                                <strong>{{ reservation.expected_attendees }}</strong>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'reservation_detail_admin' reservation.id %}"
+                           class="closures-view-btn">
+                            View reservation
+                            <svg viewBox="0 0 24 24"
+                                 width="15"
+                                 height="15"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="1.8"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+(() => {
+    const form = document.getElementById("closure-create-form");
+    const submitButton = document.getElementById("closure-submit-button");
+
+    form.addEventListener("submit", () => {
+        if (!form.checkValidity()) {
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Creating…";
+    });
+})();
+</script>
 {% endblock %}

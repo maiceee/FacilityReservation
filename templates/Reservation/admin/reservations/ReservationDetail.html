@@ -118,14 +118,15 @@
 
                     <h3>Approve Request</h3>
 
-                    <label for="approval-note">
-                        Decision Note (optional)
+                    <label for="approval-reason">
+                        Approval Reason
                     </label>
 
-                    <textarea id="approval-note"
+                    <textarea id="approval-reason"
                               name="decision_reason"
                               rows="4"
-                              placeholder="Add an optional note"></textarea>
+                              required
+                              placeholder="Explain why this request is approved"></textarea>
 
                     <button type="submit"
                             class="reservation-btn reservation-btn-success">
@@ -196,6 +197,35 @@
                 </form>
 
             </div>
+        </section>
+
+        <section class="reservation-panel">
+            <div class="reservation-section-header">
+                <h2>Cancel Reservation</h2>
+                <p>Cancel this approved booking before creating a conflicting closure.</p>
+            </div>
+
+            <form method="post"
+                  action="{% url 'reservation_cancel_admin' reservation.id %}"
+                  class="reservation-cancellation-form"
+                  onsubmit="return confirm('Cancel this approved reservation?');">
+                {% csrf_token %}
+
+                <label for="cancellation-reason">
+                    Cancellation Reason
+                </label>
+
+                <textarea id="cancellation-reason"
+                          name="reason"
+                          rows="4"
+                          required
+                          placeholder="Explain why this approved reservation is being cancelled"></textarea>
+
+                <button type="submit"
+                        class="reservation-btn reservation-btn-danger">
+                    Cancel Reservation
+                </button>
+            </form>
         </section>
     {% endif %}
 

@@ -188,6 +188,12 @@ urlpatterns = [
         name='reservation_reject'
     ),
 
+    path(
+        'manage/reservations/<int:reservation_id>/cancel/',
+        views.reservation_cancel_admin,
+        name='reservation_cancel_admin'
+    ),
+
 
     # =====================================================
     # ADMIN A4 - CALENDAR / RESCHEDULING
@@ -278,6 +284,12 @@ urlpatterns = [
         'manage/reports/reservations/csv/',
         views.export_reservations_csv,
         name='export_reservations_csv'
+    ),
+
+    path(
+        'manage/reports/facility-utilization/csv/',
+        views.export_facility_usage_csv,
+        name='export_facility_usage_csv'
     ),
 
 

@@ -1,7 +1,7 @@
 from functools import wraps
 
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import SESSION_KEY, logout
 from django.shortcuts import redirect
 
 
@@ -10,6 +10,8 @@ def admin_required(view_function):
     def wrapper(request, *args, **kwargs):
 
         if not request.user.is_authenticated:
+            if SESSION_KEY in request.session:
+                logout(request)
             return redirect('login')
 
         if not request.user.is_active:
@@ -37,6 +39,8 @@ def basic_user_required(view_function):
     def wrapper(request, *args, **kwargs):
 
         if not request.user.is_authenticated:
+            if SESSION_KEY in request.session:
+                logout(request)
             return redirect('login')
 
         if not request.user.is_active:

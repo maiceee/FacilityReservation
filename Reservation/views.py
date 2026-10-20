@@ -3,6 +3,7 @@ import csv
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Count, Q, Sum, F, ExpressionWrapper, DurationField
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -19,6 +20,7 @@ from .forms import (
     FacilityForm,
     ReservationRequestForm,
     ReservationDecisionForm,
+    ReservationCancellationForm,
     ReservationRescheduleForm,
     ClosureBlockForm,
     IncidentNotesForm,
@@ -42,12 +44,52 @@ from .services import (
     approve_reservation,
     reject_reservation,
     cancel_reservation,
+    cancel_reservation_by_admin,
     reschedule_reservation,
     check_in_reservation,
     complete_reservation,
     mark_no_show,
+    archive_closure_block,
     get_system_settings,
 )
+
+
+# =========================================================
+# QUERY FILTER VALIDATION
+# =========================================================
+
+def parse_iso_date_filter(value):
+    normalized_value = (value or '').strip()
+
+    if not normalized_value:
+        return '', None
+
+    try:
+        parsed_value = datetime.strptime(
+            normalized_value,
+            '%Y-%m-%d'
+        ).date()
+    except (TypeError, ValueError):
+        return '', None
+
+    return normalized_value, parsed_value
+
+
+def parse_positive_id_filter(value):
+    normalized_value = (value or '').strip()
+
+    if not normalized_value:
+        return '', None
+
+    try:
+        parsed_value = int(normalized_value)
+    except (TypeError, ValueError):
+        return '', None
+
+    if parsed_value < 1 or parsed_value > 2147483647:
+        return '', None
+
+    return str(parsed_value), parsed_value
 
 
 # =========================================================
@@ -62,7 +104,18 @@ def register(request):
         form = UserRegistrationForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            with transaction.atomic():
+                account = form.save()
+
+                create_audit_log(
+                    actor=account,
+                    action='ACCOUNT_REGISTERED',
+                    reference=f'User #{account.pk}',
+                    description=(
+                        f'Basic User account registered for '
+                        f'{account.username}.'
+                    )
+                )
 
             messages.success(
                 request,
@@ -794,15 +847,13 @@ def reservation_queue(request):
         ''
     ).strip()
 
-    facility_filter = request.GET.get(
-        'facility',
-        ''
-    ).strip()
+    facility_filter, facility_id = parse_positive_id_filter(
+        request.GET.get('facility', '')
+    )
 
-    date_filter = request.GET.get(
-        'date',
-        ''
-    ).strip()
+    date_filter, reservation_date = parse_iso_date_filter(
+        request.GET.get('date', '')
+    )
 
     reservations = (
         Reservation.objects
@@ -825,17 +876,14 @@ def reservation_queue(request):
             status=status_filter
         )
 
-    if facility_filter:
-        try:
-            reservations = reservations.filter(
-                facility_id=int(facility_filter)
-            )
-        except (TypeError, ValueError):
-            facility_filter = ''
-
-    if date_filter:
+    if facility_id is not None:
         reservations = reservations.filter(
-            start_datetime__date=date_filter
+            facility_id=facility_id
+        )
+
+    if reservation_date is not None:
+        reservations = reservations.filter(
+            start_datetime__date=reservation_date
         )
 
     reservations = reservations.order_by(
@@ -940,6 +988,11 @@ def reservation_approve(request, reservation_id):
                 request,
                 ' '.join(error.messages)
             )
+    else:
+        messages.error(
+            request,
+            'An approval reason is required.'
+        )
 
     return redirect(
         'reservation_detail_admin',
@@ -979,6 +1032,58 @@ def reservation_reject(request, reservation_id):
                 request,
                 ' '.join(error.messages)
             )
+    else:
+        messages.error(
+            request,
+            'A rejection reason is required.'
+        )
+
+    return redirect(
+        'reservation_detail_admin',
+        reservation_id=reservation_id
+    )
+
+
+@admin_required
+def reservation_cancel_admin(request, reservation_id):
+    get_object_or_404(
+        Reservation,
+        pk=reservation_id
+    )
+
+    if request.method != 'POST':
+        return redirect(
+            'reservation_detail_admin',
+            reservation_id=reservation_id
+        )
+
+    form = ReservationCancellationForm(
+        request.POST
+    )
+
+    if not form.is_valid():
+        messages.error(
+            request,
+            'A cancellation reason is required.'
+        )
+    else:
+        try:
+            cancel_reservation_by_admin(
+                reservation_id=reservation_id,
+                admin_user=request.user,
+                reason=form.cleaned_data['reason']
+            )
+
+            messages.success(
+                request,
+                'Reservation cancelled successfully.'
+            )
+
+        except ValidationError as error:
+            messages.error(
+                request,
+                ' '.join(error.messages)
+            )
 
     return redirect(
         'reservation_detail_admin',
@@ -994,7 +1099,9 @@ def reservation_reject(request, reservation_id):
 def admin_calendar(request):
     view_mode = request.GET.get('view', 'week').strip().lower()
     date_value = request.GET.get('date', '').strip()
-    facility_value = request.GET.get('facility', '').strip()
+    facility_value, facility_id = parse_positive_id_filter(
+        request.GET.get('facility')
+    )
 
     if view_mode not in ['day', 'week']:
         view_mode = 'week'
@@ -1052,13 +1159,10 @@ def admin_calendar(request):
         )
     )
 
-    if facility_value:
-        try:
-            reservations = reservations.filter(
-                facility_id=int(facility_value)
-            )
-        except (TypeError, ValueError):
-            facility_value = ''
+    if facility_id is not None:
+        reservations = reservations.filter(
+            facility_id=facility_id
+        )
 
     closures = (
         ClosureBlock.objects
@@ -1075,9 +1179,9 @@ def admin_calendar(request):
         )
     )
 
-    if facility_value:
+    if facility_id is not None:
         closures = closures.filter(
-            facility_id=facility_value
+            facility_id=facility_id
         )
 
     calendar_days = []
@@ -1508,32 +1612,27 @@ def closure_archive(request, closure_id):
     if request.method != 'POST':
         return redirect('closure_list')
 
-    closure = get_object_or_404(
+    get_object_or_404(
         ClosureBlock,
         pk=closure_id
     )
 
-    closure.is_active = False
-    closure.archived_at = timezone.now()
+    try:
+        archive_closure_block(
+            closure_id=closure_id,
+            admin_user=request.user
+        )
 
-    closure.save(
-        update_fields=[
-            'is_active',
-            'archived_at',
-        ]
-    )
+        messages.success(
+            request,
+            'Closure archived successfully.'
+        )
 
-    create_audit_log(
-        actor=request.user,
-        action='CLOSURE_ARCHIVED',
-        reference=f'Closure #{closure.pk}',
-        description=closure.reason
-    )
-
-    messages.success(
-        request,
-        'Closure archived successfully.'
-    )
+    except ValidationError as error:
+        messages.error(
+            request,
+            ' '.join(error.messages)
+        )
 
     return redirect('closure_list')
 
@@ -1542,43 +1641,10 @@ def closure_archive(request, closure_id):
 # ADMIN A7 - REPORTS
 # =========================================================
 
-@admin_required
-def reports(request):
-    start_date = request.GET.get(
-        'start_date',
-        ''
-    ).strip()
-
-    end_date = request.GET.get(
-        'end_date',
-        ''
-    ).strip()
-
-    reservations = (
-        Reservation.objects
-        .select_related(
-            'facility',
-            'user'
-        )
-        .order_by('-start_datetime')
-    )
-
-    if start_date:
-        reservations = reservations.filter(
-            start_datetime__date__gte=start_date
-        )
-
-    if end_date:
-        reservations = reservations.filter(
-            start_datetime__date__lte=end_date
-        )
-
-    total_reservations = reservations.count()
-
-    completed_reservations = reservations.filter(
-        status='COMPLETED'
-    ).count()
-
+def build_facility_usage_report(
+    start_date=None,
+    end_date=None
+):
     facilities = Facility.objects.order_by(
         'name'
     )
@@ -1587,7 +1653,6 @@ def reports(request):
     total_booked_hours = 0
 
     for facility in facilities:
-
         facility_reservations = (
             Reservation.objects
             .filter(
@@ -1601,14 +1666,14 @@ def reports(request):
             )
         )
 
-        if start_date:
+        if start_date is not None:
             facility_reservations = (
                 facility_reservations.filter(
                     start_datetime__date__gte=start_date
                 )
             )
 
-        if end_date:
+        if end_date is not None:
             facility_reservations = (
                 facility_reservations.filter(
                     start_datetime__date__lte=end_date
@@ -1617,9 +1682,7 @@ def reports(request):
 
         completed_events = (
             facility_reservations
-            .filter(
-                status='COMPLETED'
-            )
+            .filter(status='COMPLETED')
             .count()
         )
 
@@ -1632,34 +1695,67 @@ def reports(request):
                 )
             )
             .aggregate(
-                total_duration=Sum(
-                    'reservation_duration'
-                )
+                total_duration=Sum('reservation_duration')
             )['total_duration']
         )
 
-        if booked_duration:
-            booked_hours = (
-                booked_duration.total_seconds()
-                / 3600
-            )
-        else:
-            booked_hours = 0
-
+        booked_hours = (
+            booked_duration.total_seconds() / 3600
+            if booked_duration
+            else 0
+        )
+        booked_hours = round(booked_hours, 2)
         total_booked_hours += booked_hours
 
         facility_usage_rows.append({
             'facility': facility,
             'completed_events': completed_events,
-            'booked_hours': round(
-                booked_hours,
-                2
-            ),
+            'booked_hours': booked_hours,
         })
 
-    total_booked_hours = round(
-        total_booked_hours,
-        2
+    return facility_usage_rows, round(total_booked_hours, 2)
+
+
+@admin_required
+def reports(request):
+    start_date, parsed_start_date = parse_iso_date_filter(
+        request.GET.get('start_date', '')
+    )
+
+    end_date, parsed_end_date = parse_iso_date_filter(
+        request.GET.get('end_date', '')
+    )
+
+    reservations = (
+        Reservation.objects
+        .select_related(
+            'facility',
+            'user'
+        )
+        .order_by('-start_datetime')
+    )
+
+    if parsed_start_date is not None:
+        reservations = reservations.filter(
+            start_datetime__date__gte=parsed_start_date
+        )
+
+    if parsed_end_date is not None:
+        reservations = reservations.filter(
+            start_datetime__date__lte=parsed_end_date
+        )
+
+    total_reservations = reservations.count()
+
+    completed_reservations = reservations.filter(
+        status='COMPLETED'
+    ).count()
+
+    facility_usage_rows, total_booked_hours = (
+        build_facility_usage_report(
+            start_date=parsed_start_date,
+            end_date=parsed_end_date
+        )
     )
 
     return render(
@@ -1681,14 +1777,12 @@ def reports(request):
 
 @admin_required
 def export_reservations_csv(request):
-    start_date = request.GET.get(
-        'start_date',
-        ''
+    _, parsed_start_date = parse_iso_date_filter(
+        request.GET.get('start_date', '')
     )
 
-    end_date = request.GET.get(
-        'end_date',
-        ''
+    _, parsed_end_date = parse_iso_date_filter(
+        request.GET.get('end_date', '')
     )
 
     reservations = (
@@ -1700,14 +1794,14 @@ def export_reservations_csv(request):
         .order_by('start_datetime')
     )
 
-    if start_date:
+    if parsed_start_date is not None:
         reservations = reservations.filter(
-            start_datetime__date__gte=start_date
+            start_datetime__date__gte=parsed_start_date
         )
 
-    if end_date:
+    if parsed_end_date is not None:
         reservations = reservations.filter(
-            start_datetime__date__lte=end_date
+            start_datetime__date__lte=parsed_end_date
         )
 
     response = HttpResponse(
@@ -1748,6 +1842,48 @@ def export_reservations_csv(request):
                 reservation.end_datetime
             ).strftime('%Y-%m-%d %H:%M'),
             reservation.get_status_display(),
+        ])
+
+    return response
+
+
+@admin_required
+def export_facility_usage_csv(request):
+    _, parsed_start_date = parse_iso_date_filter(
+        request.GET.get('start_date', '')
+    )
+
+    _, parsed_end_date = parse_iso_date_filter(
+        request.GET.get('end_date', '')
+    )
+
+    facility_usage_rows, _ = build_facility_usage_report(
+        start_date=parsed_start_date,
+        end_date=parsed_end_date
+    )
+
+    response = HttpResponse(
+        content_type='text/csv'
+    )
+    response['Content-Disposition'] = (
+        'attachment; '
+        'filename="facility_utilization_report.csv"'
+    )
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Facility Code',
+        'Facility',
+        'Completed Events',
+        'Booked Hours',
+    ])
+
+    for row in facility_usage_rows:
+        writer.writerow([
+            row['facility'].facility_code,
+            row['facility'].name,
+            row['completed_events'],
+            f"{row['booked_hours']:.2f}",
         ])
 
     return response
@@ -1890,7 +2026,29 @@ def user_profile(request):
         )
 
         if form.is_valid():
-            form.save()
+            changed_fields = list(form.changed_data)
+
+            with transaction.atomic():
+                account = form.save()
+
+                if changed_fields:
+                    changed_field_labels = [
+                        str(
+                            form.fields[field_name].label
+                            or field_name.replace('_', ' ').title()
+                        )
+                        for field_name in changed_fields
+                    ]
+
+                    create_audit_log(
+                        actor=account,
+                        action='PROFILE_UPDATED',
+                        reference=f'User #{account.pk}',
+                        description=(
+                            'Updated profile fields: '
+                            f'{", ".join(changed_field_labels)}.'
+                        )
+                    )
 
             messages.success(
                 request,
@@ -1924,10 +2082,9 @@ def browse_facilities(request):
         ''
     ).strip()
 
-    category_filter = request.GET.get(
-        'category',
-        ''
-    ).strip()
+    category_filter, category_id = parse_positive_id_filter(
+        request.GET.get('category', '')
+    )
 
     capacity_filter = request.GET.get(
         'capacity',
@@ -1950,9 +2107,9 @@ def browse_facilities(request):
             | Q(facility_code__icontains=search_query)
         )
 
-    if category_filter:
+    if category_id is not None:
         facilities = facilities.filter(
-            category_id=category_filter
+            category_id=category_id
         )
 
     if capacity_filter:
@@ -2001,8 +2158,10 @@ def facility_detail_user(request, facility_id):
 
     now = timezone.now()
     today = timezone.localdate()
+    booking_settings = get_system_settings()
+    availability_days = booking_settings.advance_booking_days
 
-    unavailable_slots = (
+    unavailable_slots = list(
         Reservation.objects
         .filter(
             facility=facility,
@@ -2019,7 +2178,7 @@ def facility_detail_user(request, facility_id):
         .order_by('start_datetime')
     )
 
-    closure_slots = (
+    closure_slots = list(
         ClosureBlock.objects
         .filter(
             facility=facility,
@@ -2035,7 +2194,7 @@ def facility_detail_user(request, facility_id):
 
     available_slots = []
 
-    for day_offset in range(7):
+    for day_offset in range(availability_days):
 
         current_date = today + timedelta(days=day_offset)
 
@@ -2061,36 +2220,23 @@ def facility_detail_user(request, facility_id):
         if slot_start >= closing_datetime:
             continue
 
-        reservation_blocks = (
-            Reservation.objects
-            .filter(
-                facility=facility,
-                status__in=[
-                    'APPROVED',
-                    'CHECKED_IN',
-                ],
-                start_datetime__lt=closing_datetime,
-                end_datetime__gt=opening_datetime
+        reservation_blocks = [
+            block
+            for block in unavailable_slots
+            if (
+                block['start_datetime'] < closing_datetime
+                and block['end_datetime'] > opening_datetime
             )
-            .values(
-                'start_datetime',
-                'end_datetime'
-            )
-        )
+        ]
 
-        closure_blocks = (
-            ClosureBlock.objects
-            .filter(
-                facility=facility,
-                is_active=True,
-                start_datetime__lt=closing_datetime,
-                end_datetime__gt=opening_datetime
+        closure_blocks = [
+            block
+            for block in closure_slots
+            if (
+                block['start_datetime'] < closing_datetime
+                and block['end_datetime'] > opening_datetime
             )
-            .values(
-                'start_datetime',
-                'end_datetime'
-            )
-        )
+        ]
 
         blocked_periods = []
 
@@ -2185,6 +2331,7 @@ def facility_detail_user(request, facility_id):
             'available_slots': available_slots,
             'unavailable_slots': unavailable_slots,
             'closure_slots': closure_slots,
+            'availability_days': availability_days,
         }
     )
 
@@ -2316,10 +2463,16 @@ def reservation_cancel_user(
     request,
     reservation_id
 ):
+    reservation = get_object_or_404(
+        Reservation,
+        pk=reservation_id,
+        user=request.user
+    )
+
     if request.method != 'POST':
         return redirect(
             'reservation_detail_user',
-            reservation_id=reservation_id
+            reservation_id=reservation.pk
         )
 
     try:
@@ -2341,5 +2494,5 @@ def reservation_cancel_user(
 
     return redirect(
         'reservation_detail_user',
-        reservation_id=reservation_id
+        reservation_id=reservation.pk
     )

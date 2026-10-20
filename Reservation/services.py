@@ -281,7 +281,7 @@ def create_reservation_request(
 def approve_reservation(
     reservation_id,
     admin_user,
-    reason=''
+    reason
 ):
     """
     Approves a Pending reservation.
@@ -294,6 +294,13 @@ def approve_reservation(
     Availability is always revalidated inside the same
     transaction immediately before approval.
     """
+
+    approval_reason = (reason or '').strip()
+
+    if not approval_reason:
+        raise ValidationError(
+            'An approval reason is required.'
+        )
 
     reservation = (
         Reservation.objects
@@ -343,7 +350,7 @@ def approve_reservation(
     reservation.status = 'APPROVED'
     reservation.decision_by = admin_user
     reservation.decision_at = timezone.now()
-    reservation.decision_reason = reason.strip()
+    reservation.decision_reason = approval_reason
 
     reservation.save(
         update_fields=[
@@ -359,10 +366,7 @@ def approve_reservation(
         actor=admin_user,
         action='RESERVATION_APPROVED',
         reference=f'Reservation #{reservation.pk}',
-        description=(
-            f'Approved reservation for '
-            f'{facility.name}.'
-        )
+        description=approval_reason
     )
 
     return reservation
@@ -475,6 +479,57 @@ def cancel_reservation(
 
 
 # =========================================================
+# ADMIN CANCEL APPROVED RESERVATION
+# =========================================================
+
+@transaction.atomic
+def cancel_reservation_by_admin(
+    reservation_id,
+    admin_user,
+    reason
+):
+    """
+    Cancels an Approved reservation and records the
+    administrator's required reason in the audit log.
+    """
+
+    reservation = (
+        Reservation.objects
+        .select_for_update()
+        .get(pk=reservation_id)
+    )
+
+    if reservation.status != 'APPROVED':
+        raise ValidationError(
+            'Only an approved reservation can be cancelled.'
+        )
+
+    cancellation_reason = (reason or '').strip()
+
+    if not cancellation_reason:
+        raise ValidationError(
+            'A cancellation reason is required.'
+        )
+
+    reservation.status = 'CANCELLED'
+    reservation.save(
+        update_fields=[
+            'status',
+            'updated_at',
+        ]
+    )
+
+    create_audit_log(
+        actor=admin_user,
+        action='RESERVATION_CANCELLED',
+        reference=f'Reservation #{reservation.pk}',
+        description=cancellation_reason
+    )
+
+    return reservation
+
+
+# =========================================================
 # RESCHEDULE APPROVED RESERVATION
 # =========================================================
 
@@ -577,6 +632,71 @@ def reschedule_reservation(
     )
 
     return reservation
+
+
+# =========================================================
+# ARCHIVE FACILITY CLOSURE
+# =========================================================
+
+@transaction.atomic
+def archive_closure_block(
+    closure_id,
+    admin_user
+):
+    """
+    Archives only an unused closure block.
+
+    A closure is no longer considered unused once its scheduled period has
+    started or when any reservation record overlaps the closure period.
+    """
+
+    closure = (
+        ClosureBlock.objects
+        .select_for_update()
+        .select_related('facility')
+        .get(pk=closure_id)
+    )
+
+    if not closure.is_active:
+        raise ValidationError(
+            'This closure has already been archived.'
+        )
+
+    if closure.start_datetime <= timezone.now():
+        raise ValidationError(
+            'Only unused future closures can be archived. '
+            'This closure has already started.'
+        )
+
+    has_overlapping_reservation = Reservation.objects.filter(
+        facility_id=closure.facility_id,
+        start_datetime__lt=closure.end_datetime,
+        end_datetime__gt=closure.start_datetime
+    ).exists()
+
+    if has_overlapping_reservation:
+        raise ValidationError(
+            'Only unused closures can be archived. A reservation '
+            'overlaps this closure period.'
+        )
+
+    closure.is_active = False
+    closure.archived_at = timezone.now()
+    closure.save(
+        update_fields=[
+            'is_active',
+            'archived_at',
+        ]
+    )
+
+    create_audit_log(
+        actor=admin_user,
+        action='CLOSURE_ARCHIVED',
+        reference=f'Closure #{closure.pk}',
+        description=closure.reason
+    )
+
+    return closure
 
 
 # =========================================================

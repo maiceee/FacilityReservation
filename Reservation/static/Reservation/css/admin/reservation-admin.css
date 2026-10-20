@@ -575,14 +575,16 @@
 }
 
 .reservation-action-form label,
-.reservation-completion-form label {
+.reservation-completion-form label,
+.reservation-cancellation-form label {
     color: #57534e;
     font-size: 13px;
     font-weight: 700;
 }
 
 .admin-page .reservation-action-form textarea,
-.admin-page .reservation-completion-form textarea {
+.admin-page .reservation-completion-form textarea,
+.admin-page .reservation-cancellation-form textarea {
     width: 100%;
     min-height: 110px;
     margin: 0;
@@ -597,7 +599,8 @@
 }
 
 .admin-page .reservation-action-form textarea:focus,
-.admin-page .reservation-completion-form textarea:focus {
+.admin-page .reservation-completion-form textarea:focus,
+.admin-page .reservation-cancellation-form textarea:focus {
     outline: none;
     border-color: var(--rv-red);
     box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.1);
@@ -607,7 +610,8 @@
     align-self: flex-start;
 }
 
-.reservation-completion-form {
+.reservation-completion-form,
+.reservation-cancellation-form {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -615,7 +619,8 @@
     padding: 24px;
 }
 
-.reservation-completion-form textarea {
+.reservation-completion-form textarea,
+.reservation-cancellation-form textarea {
     align-self: stretch;
 }
 
@@ -772,7 +777,8 @@
     }
 
     .reservation-button-row,
-    .reservation-completion-form {
+    .reservation-completion-form,
+    .reservation-cancellation-form {
         padding: 18px;
     }
 
