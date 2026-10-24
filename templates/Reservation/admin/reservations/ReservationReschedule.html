@@ -2,15 +2,15 @@
 {% extends 'Reservation/admin/AdminBase.html' %}
 {% load static %}
 
-{% block title %}Reschedule Reservation | CampusSpace{% endblock %}
+{% block title %}Reschedule Reservation | Spasyo{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'Reservation/css/admin/reservation-admin.css' %}">
+
 {% endblock %}
 
 {% block content %}
 
-<div class="rv-page rv-reschedule-page">
+<div class="rv-page rv-reschedule-page workspace-page" data-workspace-page="form">
 
     <div class="rv-page-head">
         <div>
@@ -21,31 +21,22 @@
 
         <a href="{% url 'reservation_detail_admin' reservation.id %}"
            class="rv-outline rv-back-button">
-            <span aria-hidden="true">←</span>
+            <span aria-hidden="true">{% include 'Reservation/components/icon.html' with name='arrow-left' %}</span>
             Back to Details
         </a>
     </div>
+<div class="workspace-detail-body" role="region" aria-label="Form content" tabindex="0">
 
     <section class="rv-panel rv-form-panel">
 
         <div class="rv-panel-head">
             <div class="rv-form-heading">
                 <div class="rv-form-heading-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <rect x="3" y="5" width="18" height="16" rx="2"/>
-                        <path d="M7 3v4M17 3v4M3 10h18"/>
-                        <path d="M8 15h4"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='calendar-days' %}
                 </div>
 
                 <div>
                     <h2>New Schedule</h2>
-                    <p>Update the reservation schedule using the fields below.</p>
                 </div>
             </div>
         </div>
@@ -76,16 +67,15 @@
                     </div>
 
                     {% if field.help_text %}
-                        <small class="rv-form-help">
-                            {{ field.help_text }}
+                        <small class="rv-form-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}
                         </small>
                     {% endif %}
 
-                    {% for error in field.errors %}
-                        <span class="rv-field-error" role="alert">
-                            {{ error }}
-                        </span>
-                    {% endfor %}
+                    {% if field.errors %}
+<div class="rv-field-error" id="{{ field.auto_id }}_error" role="alert">
+    {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
 
                 </div>
 
@@ -99,17 +89,7 @@
                 </a>
 
                 <button type="submit" class="rv-primary">
-                    <svg viewBox="0 0 24 24"
-                         width="17" height="17"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
-                         aria-hidden="true">
-                        <path d="M5 3h12l4 4v14H3V3h2Z"/>
-                        <path d="M7 3v6h10V3M7 21v-8h10v8"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='list-checks' %}
                     Save New Schedule
                 </button>
 
@@ -119,6 +99,7 @@
 
     </section>
 
+</div>
 </div>
 
 {% endblock %}

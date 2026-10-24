@@ -11,28 +11,20 @@
         Reservation Slip - {{ reservation.event_name }}
     </title>
 
+    {% include 'Reservation/components/styles.html' %}
     <link rel="stylesheet"
-          href="{% static 'Reservation/css/admin/reservation-print.css' %}">
+          href="{% static 'Reservation/css/admin/documents.css' %}?v=2">
 </head>
 
 <body>
+<nav class="print-actions" aria-label="Document actions">
+    <a href="{% url 'reservation_detail_admin' reservation.id %}" class="button">{% include 'Reservation/components/icon.html' with name='arrow-left' %}Back to reservation</a>
+    <button type="button" class="button button-primary" onclick="window.print()">Print</button>
+</nav>
 
 <main class="print-document">
 
-    <header class="print-header">
-        <div class="print-mark">CS</div>
-
-        <div>
-            <p class="print-eyebrow">CAMPUS FACILITY RESERVATION</p>
-            <h1>Reservation Slip</h1>
-            <p>Official facility booking record</p>
-        </div>
-    </header>
-
-    <div class="print-ref">
-        <span>RESERVATION NUMBER</span>
-        <strong>#{{ reservation.id }}</strong>
-    </div>
+    {% include 'Reservation/components/document_header.html' with title='Reservation slip' subtitle='Official facility booking record' %}
 
     <section class="print-section">
         <h2>Reservation Information</h2>
@@ -149,16 +141,12 @@
     </div>
 
     <footer class="print-footer">
-        CampusSpace · Campus Facility Reservation System
+        Spasyo · Campus Facility Reservation System
     </footer>
 
 </main>
 
-<div class="print-actions">
-    <button type="button" onclick="window.print()">
-        Print Reservation Slip
-    </button>
-</div>
+
 
 </body>
 </html>

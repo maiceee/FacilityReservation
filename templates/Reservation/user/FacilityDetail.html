@@ -1,18 +1,19 @@
-
 {% extends 'Reservation/user/UserBase.html' %}
 
-{% block title %}{{ facility.name }} | CampusSpace{% endblock %}
+{% block title %}{{ facility.name }} | Spasyo{% endblock %}
+
+{% block breadcrumb %}Find a space / {{ facility.name }}{% endblock %}
 
 {% block content %}
 
-<div class="user-modern-page">
+<div class="user-modern-page workspace-page" data-workspace-page="detail">
 
     <div class="user-detail-header">
 
         <div>
             <a href="{% url 'browse_facilities' %}"
                class="user-back-link">
-                ← Back to Facilities
+                {% include 'Reservation/components/icon.html' with name='arrow-left' %} Back to facilities
             </a>
 
             <span class="user-section-eyebrow">FACILITY DETAILS</span>
@@ -24,13 +25,15 @@
             </span>
         </div>
 
-        <a href="{% url 'reservation_create' %}?facility={{ facility.id }}"
-           class="user-primary-button">
-            Request This Facility →
+        <a href="{% url 'reservation_create' %}?facility={{ facility.id }}" data-edit-dialog data-editor-kind="reservation"
+           class="button button-primary">
+            {% include 'Reservation/components/icon.html' with name='plus' %}New reservation
         </a>
 
     </div>
+<div class="workspace-detail-body" role="region" aria-label="Details" tabindex="0">
 
+    <div class="content-with-aside">
     <section class="user-detail-card">
 
         <div class="user-card-heading">
@@ -98,7 +101,7 @@
 
                     {% for amenity in amenities %}
                         <div class="user-amenity-item">
-                            <span class="user-amenity-check" aria-hidden="true">✓</span>
+                            {% include 'Reservation/components/icon.html' with name='check' %}
                             {{ amenity.name }}
                         </div>
                     {% endfor %}
@@ -116,6 +119,7 @@
         </div>
 
     </section>
+    </div>
 
     <section class="user-detail-card">
 
@@ -168,12 +172,13 @@
 
     </section>
 
+    <div class="availability-columns">
     <section class="user-detail-card">
 
         <div class="user-card-heading">
             <div>
                 <h2>Unavailable Reservation Slots</h2>
-                <p>Already reserved time periods that cannot be selected</p>
+                {% include 'Reservation/components/hint.html' with label='Availability help' text='Approved bookings block these time periods.' %}
             </div>
 
             <span class="user-info-tag is-unavailable">Reserved</span>
@@ -220,7 +225,7 @@
         <div class="user-card-heading">
             <div>
                 <h2>Facility Closures</h2>
-                <p>This facility cannot be booked during closure periods</p>
+                {% include 'Reservation/components/hint.html' with label='Closure help' text='Reservations cannot overlap a facility closure.' %}
             </div>
 
             <span class="user-info-tag is-closed">Closures</span>
@@ -261,6 +266,7 @@
         {% endif %}
 
     </section>
+    </div>
 
     <div class="user-detail-actions">
 
@@ -269,13 +275,14 @@
             Back to Facilities
         </a>
 
-        <a href="{% url 'reservation_create' %}?facility={{ facility.id }}"
-           class="user-primary-button">
-            Request This Facility
+        <a href="{% url 'reservation_create' %}?facility={{ facility.id }}" data-edit-dialog data-editor-kind="reservation"
+           class="button button-primary">
+            {% include 'Reservation/components/icon.html' with name='plus' %}New reservation
         </a>
 
     </div>
 
+</div>
 </div>
 
 {% endblock %}

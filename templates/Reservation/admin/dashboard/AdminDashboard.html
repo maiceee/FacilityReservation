@@ -1,139 +1,103 @@
 
 {% extends 'Reservation/admin/AdminBase.html' %}
+{% load static %}
 
-{% block title %}Dashboard | CampusSpace{% endblock %}
+{% block title %}Dashboard | Spasyo{% endblock %}
 
 {% block content %}
 
-<div class="dashboard-page">
+<div class="dashboard-page workspace-page" data-workspace-page="dashboard">
 
     <div class="dashboard-heading">
         <div>
             <span class="page-eyebrow">ADMIN OVERVIEW</span>
-            <h1>Dashboard</h1>
-            <p>
-                Welcome back,
-                {{ request.user.first_name|default:request.user.username }}!
-                Here's what's happening across your campus.
-            </p>
+            <h1>Campus at a glance</h1>
+
         </div>
 
         <div class="dashboard-date">
-            <svg viewBox="0 0 24 24" width="17" height="17"
-                 fill="none" stroke="currentColor" stroke-width="1.8"
-                 stroke-linecap="round" stroke-linejoin="round"
-                 aria-hidden="true">
-                <rect x="3" y="5" width="18" height="16" rx="2"/>
-                <path d="M7 3v4M17 3v4M3 10h18"/>
-            </svg>
+            {% include 'Reservation/components/icon.html' with name='calendar-days' %}
             <span>{% now "F j, Y" %}</span>
         </div>
     </div>
 
     <div class="dashboard-cards">
 
-        <div class="dashboard-card">
+        <a class="dashboard-card" href="{% url 'reservation_queue' %}?status=PENDING">
             <div class="metric-top">
                 <span class="metric-label">Pending Requests</span>
                 <span class="metric-icon metric-purple">
-                    <svg viewBox="0 0 24 24" width="22" height="22"
-                         fill="none" stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="M12 7v5l3 2"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='clock-3' %}
                 </span>
             </div>
             <div class="number">{{ pending_requests }}</div>
-            <p class="metric-description">Awaiting admin review</p>
-        </div>
 
-        <div class="dashboard-card">
+        </a>
+
+        <a class="dashboard-card" href="{% url 'reservation_queue' %}?status=APPROVED">
             <div class="metric-top">
                 <span class="metric-label">Approved Upcoming</span>
                 <span class="metric-icon metric-blue">
-                    <svg viewBox="0 0 24 24" width="22" height="22"
-                         fill="none" stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                        <rect x="3" y="5" width="18" height="16" rx="2"/>
-                        <path d="M7 3v4M17 3v4M3 10h18m-12 5 2 2 4-4"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='calendar-days' %}
                 </span>
             </div>
             <div class="number">{{ approved_upcoming }}</div>
-            <p class="metric-description">Scheduled reservations</p>
-        </div>
 
-        <div class="dashboard-card">
+        </a>
+
+        <a class="dashboard-card" href="{% url 'reports' %}">
             <div class="metric-top">
                 <span class="metric-label">Completed Events</span>
                 <span class="metric-icon metric-green">
-                    <svg viewBox="0 0 24 24" width="22" height="22"
-                         fill="none" stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="m8 12 3 3 5-6"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='circle-check' %}
                 </span>
             </div>
             <div class="number">{{ completed_events }}</div>
-            <p class="metric-description">Successfully completed</p>
-        </div>
 
-        <div class="dashboard-card">
+        </a>
+
+        <a class="dashboard-card" href="{% url 'facility_list' %}">
             <div class="metric-top">
                 <span class="metric-label">Active Facilities</span>
                 <span class="metric-icon metric-cyan">
-                    <svg viewBox="0 0 24 24" width="22" height="22"
-                         fill="none" stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                        <rect x="4" y="3" width="16" height="18" rx="2"/>
-                        <path d="M9 21v-5h6v5M8 7h2m4 0h2M8 11h2m4 0h2"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='building-2' %}
                 </span>
             </div>
             <div class="number">{{ active_facilities }}</div>
-            <p class="metric-description">Available for reservation</p>
-        </div>
+
+        </a>
 
     </div>
 
-    <div class="chart-grid">
+    <div class="chart-grid" data-tabs>
+<nav class="workspace-tabs" data-tablist aria-label="Dashboard chart" hidden><button type="button" data-tab="chart-bookings">{% include 'Reservation/components/icon.html' with name='calendar-days' %}Bookings</button><button type="button" data-tab="chart-facilities">{% include 'Reservation/components/icon.html' with name='building-2' %}Facilities</button></nav>
 
-        <section class="chart-card">
+        <section class="chart-card" id="chart-bookings" data-tab-panel>
             <div class="chart-header">
                 <div>
                     <h2>Monthly Bookings</h2>
-                    <p class="chart-description">
-                        Reservation trends over the last six months
-                    </p>
+
                 </div>
                 <span class="chart-tag">Last 6 months</span>
             </div>
 
             <div class="chart-container">
-                <canvas id="monthlyBookingChart"></canvas>
+                <canvas id="monthlyBookingChart" role="img" aria-label="Monthly booking counts"></canvas>
             </div>
         </section>
 
-        <section class="chart-card">
+        <section class="chart-card" id="chart-facilities" data-tab-panel>
             <div class="chart-header">
                 <div>
                     <h2>Facility Usage</h2>
-                    <p class="chart-description">
-                        Processed reservations by facility
-                    </p>
+
                 </div>
                 <span class="chart-tag">Overview</span>
             </div>
 
             {% if facility_labels %}
                 <div class="chart-container">
-                    <canvas id="facilityUsageChart"></canvas>
+                    <canvas id="facilityUsageChart" role="img" aria-label="Reservation counts by facility"></canvas>
                 </div>
             {% else %}
                 <div class="chart-empty">
@@ -149,26 +113,26 @@
         <div class="table-section-header">
             <div>
                 <h2>Recent Reservations</h2>
-                <p>Latest reservation activity across campus facilities</p>
+
             </div>
 
             <a href="{% url 'reservation_queue' %}"
                class="table-action">
-                View All →
+                View All {% include 'Reservation/components/icon.html' with name='arrow-right' %}
             </a>
         </div>
 
         {% if recent_reservations %}
-            <div class="table-responsive">
+            <div class="table-responsive" role="region" aria-label="Data table" tabindex="0">
                 <table class="dashboard-table">
                     <thead>
                         <tr>
-                            <th>Event</th>
-                            <th>User</th>
-                            <th>Facility</th>
-                            <th>Schedule</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th scope="col">Event</th>
+
+                            <th scope="col">Facility</th>
+                            <th scope="col">Schedule</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Action</th>
                         </tr>
                     </thead>
 
@@ -176,11 +140,7 @@
                         {% for reservation in recent_reservations %}
                             <tr>
                                 <td class="event-name">
-                                    {{ reservation.event_name }}
-                                </td>
-
-                                <td>
-                                    {{ reservation.user.get_full_name|default:reservation.user.username }}
+                                    <span class="table-primary" title="{{ reservation.event_name }}">{{ reservation.event_name }}</span><small>{{ reservation.user.get_full_name|default:reservation.user.username }}</small>
                                 </td>
 
                                 <td>
@@ -191,6 +151,7 @@
                                     {{ reservation.start_datetime|date:"M d, Y" }}
                                     <span class="table-time">
                                         {{ reservation.start_datetime|date:"h:i A" }}
+                                        – {{ reservation.end_datetime|date:"h:i A" }}
                                     </span>
                                 </td>
 
@@ -201,9 +162,9 @@
                                 </td>
 
                                 <td>
-                                    <a class="table-action"
+                                    <a class="table-action icon-button" aria-label="View {{ reservation.event_name }}" title="View reservation"
                                        href="{% url 'reservation_detail_admin' reservation.id %}">
-                                        View Details →
+                                        {% include 'Reservation/components/icon.html' with name='arrow-right' %}
                                     </a>
                                 </td>
                             </tr>
@@ -229,7 +190,7 @@
 {% endblock %}
 
 {% block extra_script %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'Reservation/vendor/chartjs/chart.umd.js' %}"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -253,12 +214,29 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
-    Chart.defaults.color = "#78716c";
+    const theme = getComputedStyle(document.documentElement);
+    const themeColor = (name) => theme.getPropertyValue(name).trim();
+    Chart.defaults.font.family = themeColor('--font-family');
+    Chart.defaults.color = themeColor('--color-text-muted');
+    const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+    const chartDuration = parseFloat(themeColor('--duration-chart')) || 320;
+    Chart.defaults.animation.duration = motionPreference.matches ? 0 : chartDuration;
+    Chart.defaults.animation.easing = 'easeOutQuart';
+    Chart.defaults.transitions.active.animation.duration = motionPreference.matches ? 0 : parseFloat(themeColor('--duration-fast'));
+    motionPreference.addEventListener('change', () => {
+        Chart.defaults.animation.duration = motionPreference.matches ? 0 : chartDuration;
+        Chart.defaults.transitions.active.animation.duration = motionPreference.matches ? 0 : parseFloat(themeColor('--duration-fast'));
+        Object.values(Chart.instances).forEach((chart) => {
+            chart.options.animation = motionPreference.matches ? false : { duration: chartDuration, easing: 'easeOutQuart' };
+            chart.options.transitions.active.animation.duration = Chart.defaults.transitions.active.animation.duration;
+            chart.update('none');
+        });
+    });
 
     const monthlyCanvas = document.getElementById("monthlyBookingChart");
 
     if (monthlyCanvas) {
+        monthlyCanvas.setAttribute('aria-label', monthlyLabels.map((label, index) => `${label}: ${monthlyBookings[index]} bookings`).join('; '));
         new Chart(monthlyCanvas, {
             type: "bar",
             data: {
@@ -266,19 +244,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     label: "Bookings",
                     data: monthlyBookings,
-                    backgroundColor: "#b91c1c",
-                    hoverBackgroundColor: "#991b1b",
+                    backgroundColor: themeColor('--color-primary'),
+                    hoverBackgroundColor: themeColor('--color-primary-hover'),
                     borderRadius: 7,
                     maxBarThickness: 38
                 }]
             },
             options: {
+                animation: motionPreference.matches ? false : { duration: chartDuration, easing: 'easeOutQuart' },
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: "#292524",
+                        backgroundColor: themeColor('--color-text'),
                         padding: 12,
                         cornerRadius: 8
                     }
@@ -292,7 +271,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         beginAtZero: true,
                         border: { display: false },
                         ticks: { precision: 0 },
-                        grid: { color: "#f1edeb" }
+                        grid: { color: themeColor('--color-border') }
                     }
                 }
             }
@@ -302,6 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const facilityCanvas = document.getElementById("facilityUsageChart");
 
     if (facilityCanvas && facilityLabels.length > 0) {
+        facilityCanvas.setAttribute('aria-label', facilityLabels.map((label, index) => `${label}: ${facilityUsage[index]} reservations`).join('; '));
         new Chart(facilityCanvas, {
             type: "bar",
             data: {
@@ -309,20 +289,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     label: "Reservations",
                     data: facilityUsage,
-                    backgroundColor: "#dc2626",
-                    hoverBackgroundColor: "#b91c1c",
+                    backgroundColor: themeColor('--color-text-muted'),
+                    hoverBackgroundColor: themeColor('--color-primary'),
                     borderRadius: 6,
                     maxBarThickness: 25
                 }]
             },
             options: {
+                animation: motionPreference.matches ? false : { duration: chartDuration, easing: 'easeOutQuart' },
                 indexAxis: "y",
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: "#292524",
+                        backgroundColor: themeColor('--color-text'),
                         padding: 12,
                         cornerRadius: 8
                     }
@@ -332,7 +313,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         beginAtZero: true,
                         border: { display: false },
                         ticks: { precision: 0 },
-                        grid: { color: "#f1edeb" }
+                        grid: { color: themeColor('--color-border') }
                     },
                     y: {
                         grid: { display: false },

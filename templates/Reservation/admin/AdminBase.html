@@ -1,299 +1,117 @@
-
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="admin-root">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>{% block title %}CampusSpace | Admin{% endblock %}</title>
-
-    <link rel="stylesheet" href="{% static 'Reservation/css/admin/admin.css' %}">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Administration | Spasyo{% endblock %}</title>
+    {% include 'Reservation/components/styles.html' %}
+    <link rel="stylesheet" href="{% static 'Reservation/css/admin/admin.css' %}?v=spasyo-10">
+    {% include 'Reservation/components/frame_styles.html' %}
     {% block extra_head %}{% endblock %}
 </head>
-
-<body class="admin-page">
-
+<body class="admin-page" data-form-actor="{{ request.user.pk }}">
+<a href="#admin-content" class="skip-link">Skip to content</a>
 <div class="layout">
-
-    <input type="checkbox"
-           id="sidebar-toggle"
-           class="sidebar-toggle"
-           aria-label="Toggle sidebar">
-
-    <aside class="sidebar" id="admin-sidebar">
-
-        <div class="sidebar-brand">
-            <div class="sidebar-brand-icon">
-                <svg viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.8"
-                     stroke-linecap="round"
-                     stroke-linejoin="round"
-                     aria-hidden="true">
-                    <rect x="3" y="3" width="18" height="18" rx="4"/>
-                    <path d="M8 8h8M8 12h8M8 16h5"/>
-                </svg>
-            </div>
-
-            <div class="sidebar-brand-text">
-                <strong>CampusSpace</strong>
-                <span>ADMINISTRATION</span>
-            </div>
-        </div>
-
-        <div class="sidebar-section-label">WORKSPACE</div>
-
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle administration navigation">
+    <aside class="sidebar" id="admin-sidebar" aria-label="Administration">
+        <a href="{% url 'admin_dashboard' %}" class="sidebar-brand">{% include 'Reservation/components/brand.html' %}<small>ADMINISTRATION</small></a>
         <nav class="sidebar-nav" aria-label="Admin navigation">
-
+            <div class="sidebar-section-label">OPERATIONS</div>
             <a href="{% url 'admin_dashboard' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-                        <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-                        <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-                        <rect x="14" y="14" width="7" height="7" rx="1.5"/>
-                    </svg>
-                </span>
-                <span>Dashboard</span>
+               class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'admin_dashboard' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='house' %}<span>Overview</span>
             </a>
-
-            <a href="{% url 'user_management' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'user_management' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9" cy="8" r="3"/>
-                        <path d="M3 20v-2a6 6 0 0 1 12 0v2"/>
-                        <path d="M17 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5v1"/>
-                    </svg>
-                </span>
-                <span>User Management</span>
-            </a>
-
-            <a href="{% url 'facility_list' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'facility_list' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="4" y="3" width="16" height="18" rx="2"/>
-                        <path d="M9 21v-5h6v5M8 7h2m4 0h2M8 11h2m4 0h2"/>
-                    </svg>
-                </span>
-                <span>Facilities</span>
-            </a>
-
-            <a href="{% url 'category_list' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="8" height="8" rx="2"/>
-                        <rect x="13" y="3" width="8" height="8" rx="2"/>
-                        <rect x="3" y="13" width="8" height="8" rx="2"/>
-                        <rect x="13" y="13" width="8" height="8" rx="2"/>
-                    </svg>
-                </span>
-                <span>Categories</span>
-            </a>
-
-            <a href="{% url 'amenity_list' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'amenity_list' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m12 3 2.8 5.7L21 9.6l-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>
-                    </svg>
-                </span>
-                <span>Amenities</span>
-            </a>
-
-            <div class="sidebar-section-label sidebar-section-inner">
-                OPERATIONS
-            </div>
-
             <a href="{% url 'reservation_queue' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'reservation_queue' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="4" y="4" width="16" height="16" rx="2"/>
-                        <path d="M8 9h8M8 13h8M8 17h5"/>
-                    </svg>
-                </span>
-                <span>Reservations</span>
+               class="nav-link {% if request.resolver_match.url_name == 'reservation_queue' or request.resolver_match.url_name == 'reservation_detail_admin' or request.resolver_match.url_name == 'reservation_reschedule' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'reservation_queue' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='list-checks' %}<span>Reservations</span>
             </a>
-
             <a href="{% url 'admin_calendar' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'admin_calendar' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="5" width="18" height="16" rx="2"/>
-                        <path d="M7 3v4M17 3v4M3 10h18"/>
-                    </svg>
-                </span>
-                <span>Calendar</span>
+               class="nav-link {% if request.resolver_match.url_name == 'admin_calendar' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'admin_calendar' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='calendar-days' %}<span>Calendar</span>
             </a>
-
             <a href="{% url 'closure_list' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'closure_list' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="M6 18 18 6"/>
-                    </svg>
-                </span>
-                <span>Facility Closures</span>
+               class="nav-link {% if request.resolver_match.url_name == 'closure_list' or request.resolver_match.url_name == 'closure_create' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'closure_list' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='circle-alert' %}<span>Closures</span>
             </a>
-
+            <div class="sidebar-section-label">MANAGEMENT</div>
+            <a href="{% url 'facility_list' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'facility_list' or request.resolver_match.url_name == 'facility_create' or request.resolver_match.url_name == 'facility_update' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'facility_list' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='building-2' %}<span>Facilities</span>
+            </a>
+            <a href="{% url 'category_list' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_create' or request.resolver_match.url_name == 'category_update' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'category_list' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='list-checks' %}<span>Categories</span>
+            </a>
+            <a href="{% url 'amenity_list' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'amenity_list' or request.resolver_match.url_name == 'amenity_create' or request.resolver_match.url_name == 'amenity_update' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'amenity_list' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='check' %}<span>Amenities</span>
+            </a>
+            <a href="{% url 'user_management' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'user_management' or request.resolver_match.url_name == 'admin_user_detail' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'user_management' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='users' %}<span>Users</span>
+            </a>
+            <div class="sidebar-section-label">SYSTEM</div>
             <a href="{% url 'reports' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 20V10M10 20V4M16 20v-8M22 20V7"/>
-                    </svg>
-                </span>
-                <span>Reports</span>
+               class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'reports' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='calendar-check-2' %}<span>Reports</span>
             </a>
-
-            <div class="sidebar-section-label sidebar-section-inner">
-                SYSTEM
-            </div>
-
             <a href="{% url 'audit_logs' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'audit_logs' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8 6h12M8 12h12M8 18h12"/>
-                        <path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"/>
-                    </svg>
-                </span>
-                <span>Audit Logs</span>
+               class="nav-link {% if request.resolver_match.url_name == 'audit_logs' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'audit_logs' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='shield-check' %}<span>Audit history</span>
             </a>
-
-            <a href="{% url 'system_settings' %}"
-               class="nav-link {% if request.resolver_match.url_name == 'system_settings' %}active{% endif %}">
-                <span class="nav-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="1.8"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 2-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-3v-.8a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2-2 .1-.1A1.7 1.7 0 0 0 7.2 15a1.7 1.7 0 0 0-1.6-1H5v-3h.6a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L6.8 8l2-2 .1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V4h3v.8a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2 2-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.6v3H21a1.7 1.7 0 0 0-1.6 1Z"/>
-                    </svg>
-                </span>
-                <span>System Settings</span>
+            <a href="{% url 'system_settings' %}" data-edit-dialog data-editor-kind="settings" data-editor-title="Booking settings"
+               class="nav-link {% if request.resolver_match.url_name == 'system_settings' %}active{% endif %}"
+               {% if request.resolver_match.url_name == 'system_settings' %}aria-current="page"{% endif %}>
+                {% include 'Reservation/components/icon.html' with name='user-round' %}<span>Settings</span>
             </a>
-
         </nav>
-
         <div class="sidebar-bottom">
-
-            <div class="sidebar-profile">
-                <div class="profile-avatar">
-                    {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
-                </div>
-
-                <div class="profile-info">
-                    <strong>
-                        {{ request.user.get_full_name|default:request.user.username }}
-                    </strong>
-                    <span>Administrator</span>
-                </div>
-            </div>
-
-            <form method="post" action="{% url 'logout' %}" class="logout-form">
-                {% csrf_token %}
-
-                <button type="submit" class="logout-button">
-                    <span class="nav-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="1.8"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10 17l5-5-5-5M15 12H3"/>
-                            <path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6"/>
-                        </svg>
-                    </span>
-                    <span>Sign Out</span>
-                </button>
-            </form>
-
+            <div class="sidebar-profile"><span class="avatar" aria-hidden="true">{{ request.user.username|first|upper }}</span><div class="profile-info"><strong>{{ request.user.get_full_name|default:request.user.username }}</strong><span>Administrator</span></div></div>
+            <form method="post" action="{% url 'logout' %}" class="logout-form" data-signout>{% csrf_token %}<button type="submit" class="logout-button">{% include 'Reservation/components/icon.html' with name='log-out' %}Sign out</button></form>
         </div>
-
     </aside>
-
-    <label for="sidebar-toggle"
-           class="sidebar-overlay"
-           aria-label="Close navigation"></label>
-
+    <label for="sidebar-toggle" class="sidebar-overlay" aria-label="Close navigation"></label>
     <div class="main-shell">
-
         <header class="topbar">
-
             <div class="topbar-left">
-
-                <label for="sidebar-toggle"
-                       class="mobile-menu-button"
-                       aria-label="Toggle navigation">
-                    ☰
-                </label>
-
-                <div class="topbar-heading">
-                    <span class="topbar-eyebrow">CAMPUSSPACE ADMIN</span>
-                    <strong>Campus Facility Management</strong>
-                </div>
-
+                <label for="sidebar-toggle" class="mobile-menu-button" aria-label="Open navigation">{% include 'Reservation/components/icon.html' with name='menu' %}</label>
+                <div class="topbar-heading"><span class="topbar-eyebrow">SPASYO / ADMINISTRATION</span><strong>Campus workspace</strong></div>
             </div>
-
-            <div class="topbar-right">
-                <span class="topbar-role">Administrator</span>
-
-                <div class="topbar-avatar">
-                    {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
-                </div>
-            </div>
-
+            <div class="topbar-right">{% include 'Reservation/components/keyboard_tools.html' %}<span class="topbar-role">{{ request.user.first_name|default:request.user.username }}</span><span class="avatar" aria-hidden="true">{{ request.user.username|first|upper }}</span></div>
         </header>
-
-        <main class="content">
-
-            {% if messages %}
-                <div class="messages-container">
-                    {% for message in messages %}
-                        <div class="message {{ message.tags }}"
-                             role="status">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% block content %}{% endblock %}
-
+        <main class="content" id="admin-content" tabindex="-1">
+            <div class="admin-content-inner">
+                {% if messages %}<div class="messages-container">{% for message in messages %}<div class="message {{ message.tags }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}
+                {% block content %}{% endblock %}
+                <footer class="admin-footer">Spasyo · Administration. All times are Philippine local time.</footer>
+            </div>
         </main>
-
     </div>
-
 </div>
-
+<dialog class="admin-confirm-dialog" id="admin-action-confirmation" aria-labelledby="admin-action-title" aria-describedby="admin-action-description admin-action-context">
+    <h2 id="admin-action-title">Confirm this action?</h2>
+    <p id="admin-action-description">Confirm to submit this action, or go back to review your changes.</p>
+    <div class="admin-confirm-context" id="admin-action-context"><strong data-confirm-record></strong><p data-confirm-details hidden></p></div>
+    <div class="admin-confirm-actions">
+        <button type="button" class="button" data-admin-confirm-close autofocus>Go back</button>
+        <button type="button" class="button button-primary" data-admin-confirm-submit>Confirm</button>
+    </div>
+</dialog>
+<script src="{% static 'Reservation/js/admin-presentation.js' %}?v=5" defer></script>
+{% include 'Reservation/components/edit_dialog.html' %}
+<script src="{% static 'Reservation/js/table-editor.js' %}?v=7" defer></script>
 {% block extra_script %}{% endblock %}
-
+{% include 'Reservation/components/workspace.html' %}
 </body>
 </html>

@@ -1,0 +1,15 @@
+<span class="keyboard-tools" hidden>
+    <button type="button" class="icon-button keyboard-help-trigger" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+        {% include 'Reservation/components/icon.html' with name='keyboard' %}<kbd aria-hidden="true">?</kbd>
+    </button>
+    <span class="context-popover keyboard-help" id="keyboard-help" popover role="region" aria-label="Keyboard shortcuts">
+        <strong>Keyboard shortcuts</strong>
+        <span data-shortcut-search><span>Focus search</span><kbd>/</kbd></span>
+        <span data-shortcut-new><span>New record</span><kbd>Alt N</kbd></span>
+        <span><span>Show shortcuts</span><kbd>?</kbd></span>
+        <span><span>Close popup or dialog</span><kbd>Esc</kbd></span>
+        <span><span>Move between controls</span><kbd>Tab</kbd></span>
+        <label class="quick-key-setting"><input type="checkbox" data-quick-keys checked> Enable quick shortcuts</label>
+        <small>Quick shortcuts pause while you type. Escape and Tab always work.</small>
+    </span>
+</span>

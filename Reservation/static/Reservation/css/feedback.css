@@ -1,0 +1,253 @@
+/* SEMANTIC FEEDBACK
+   Pastel surfaces identify a state. Dark text and visible labels carry its meaning. */
+:is(.status-pending, .user-status-pending,
+    .message.warning, .user-flash-message.warning, .closures-conflict-card) {
+    --state-surface: var(--color-warning-surface);
+    --state-border: var(--color-warning-border);
+    --state-text: var(--color-warning-text);
+}
+:is(.status-approved, .user-status-approved,
+    .management-status.is-active, .closures-status.is-active,
+    .message.success, .user-flash-message.success) {
+    --state-surface: var(--color-success-surface);
+    --state-border: var(--color-success-border);
+    --state-text: var(--color-success-text);
+}
+:is(.status-checked_in, .user-status-checked_in,
+    .message.info, .user-flash-message.info, .notice) {
+    --state-surface: var(--color-info-surface);
+    --state-border: var(--color-info-border);
+    --state-text: var(--color-info-text);
+}
+:is(.status-completed, .user-status-completed) {
+    --state-surface: var(--color-complete-surface);
+    --state-border: var(--color-complete-border);
+    --state-text: var(--color-complete-text);
+}
+:is(.status-rejected, .user-status-rejected,
+    .status-no_show, .user-status-no_show,
+    .message.error, .user-flash-message.error, .user-rejection-notice,
+    .user-form-alert, .auth-alert, .rv-form-alert, .facility-form-alert,
+    .master-form-alert, .closures-form-alert, .system-form-alert) {
+    --state-surface: var(--color-danger-surface);
+    --state-border: var(--color-danger-border);
+    --state-text: var(--color-danger-text);
+}
+:is(.status-cancelled, .user-status-cancelled,
+    .management-status.is-inactive, .management-status.is-archived,
+    .closures-status.is-archived) {
+    --state-surface: var(--color-canvas);
+    --state-border: var(--color-border);
+    --state-text: var(--color-text-muted);
+}
+
+:is(.status-badge, .user-status-badge, .management-status,
+    .closures-status, .closures-conflict-status,
+    .schedule-entry .status-badge) {
+    background: var(--state-surface, var(--color-canvas));
+    border: 0;
+    padding: var(--space-1) var(--space-3);
+    gap: var(--space-1);
+    color: var(--state-text, var(--color-text-muted));
+}
+:is(.message, .user-flash-message, .notice, .user-form-alert, .auth-alert,
+    .rv-form-alert, .facility-form-alert, .master-form-alert, .closures-form-alert,
+    .system-form-alert, .user-rejection-notice, .workspace-page .closures-conflict-card) {
+    background: var(--state-surface, var(--color-info-surface));
+    border: 1px solid var(--state-border, var(--color-info-border));
+    border-left: 3px solid var(--state-text, var(--color-info-text));
+    color: var(--state-text, var(--color-info-text));
+}
+:is(.field-error, .rv-field-error, .facility-field-error,
+    .master-field-error, .closures-field-error, .system-field-error, .errorlist) {
+    color: var(--color-danger-text);
+}
+:is(input, select, textarea, .control-trigger)[aria-invalid='true'],
+:is(input, select, textarea):user-invalid {
+    border: 1px solid var(--color-danger-text);
+    background: var(--color-danger-surface);
+}
+:is(input, select, textarea, .control-trigger)[aria-invalid='true']:focus-visible {
+    outline-color: var(--color-danger-text);
+}
+/* Django field errors also mark controls before any presentation script runs. */
+:is(.field, .rv-form-field, .facility-form-group, .master-form-group,
+    .closures-form-group, .system-settings-field):has([role='alert'])
+    :is(input, select, textarea, .control-trigger) {
+    border-color: var(--color-danger-text);
+    background: var(--color-danger-surface);
+}
+.workspace-page .schedule-entry-closure {
+    background: var(--color-warning-surface);
+    border-color: var(--color-warning-border);
+    color: var(--color-warning-text);
+}
+:is(.user-danger-button, .reservation-btn-danger, .closures-archive-btn,
+    .facility-archive-button, .master-archive-button) {
+    border-color: var(--color-danger-border);
+    background: var(--color-danger-surface);
+    color: var(--color-danger-text);
+}
+:is(.user-danger-button, .reservation-btn-danger, .closures-archive-btn,
+    .facility-archive-button, .master-archive-button):hover {
+    border-color: var(--color-danger-text);
+    background: var(--color-danger-surface);
+    color: var(--color-danger-text);
+}
+.reservation-btn-success {
+    background: var(--color-success-surface);
+    border-color: var(--color-success-border);
+    color: var(--color-success-text);
+}
+.reservation-btn-success:hover {
+    background: var(--color-success-surface);
+    border-color: var(--color-success-text);
+    color: var(--color-success-text);
+}
+.management-deactivate-button {
+    background: var(--color-danger-surface);
+    border-color: var(--color-danger-border);
+    color: var(--color-danger-text);
+}
+.management-activate-button {
+    background: var(--color-success-surface);
+    border-color: var(--color-success-border);
+    color: var(--color-success-text);
+}
+.management-deactivate-button:hover {
+    background: var(--color-danger-surface);
+    border-color: var(--color-danger-text);
+    color: var(--color-danger-text);
+}
+.management-activate-button:hover {
+    background: var(--color-success-surface);
+    border-color: var(--color-success-text);
+    color: var(--color-success-text);
+}
+
+/* Compact, focusable recovery information; original field errors remain beside controls. */
+.ui-validation-summary {
+    grid-column: 1 / -1;
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+    border: 1px solid var(--color-danger-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-danger-surface);
+    color: var(--color-danger-text);
+    font-size: var(--font-size-xs);
+}
+.ui-validation-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin-top: var(--space-1);
+}
+.ui-validation-links a { color: inherit; text-decoration: underline; }
+form:is(.master-detail-form, .rv-stacked-form, .system-settings-form, .auth-form) > .ui-validation-summary {
+    margin-bottom: 0;
+}
+.ui-client-error { color: var(--color-danger-text); font-size: var(--font-size-xs); }
+.editor-load-error p { margin-bottom: var(--space-3); }
+.editor-load-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.is-submitting button[type='submit'] { cursor: progress; }
+.ui-recovery-notice {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--color-info-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-info-surface);
+    color: var(--color-info-text);
+    font-size: var(--font-size-xs);
+}
+.ui-recovery-notice p { flex: 1 1 12rem; }
+
+/* Filled status pills: icon + readable label, without an outline or dot. */
+.status-icon.icon { width: .875rem; height: .875rem; flex-shrink: 0; }
+.management-status-dot, .closures-status-dot { display: none; }
+.workspace-page .notice {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-3);
+    border: 0;
+    border-radius: var(--radius-card);
+    padding: var(--space-4);
+    background: var(--color-surface-subtle);
+    color: var(--color-text);
+}
+.workspace-page .notice > .icon {
+    box-sizing: content-box;
+    padding: var(--space-2);
+    border-radius: var(--radius-pill);
+    background: var(--color-info-surface);
+    color: var(--color-info-text);
+}
+.workspace-page .notice p { color: var(--color-text-muted); margin-top: var(--space-1); }
+
+/* Top-layer toast stack stays usable when another dialog is open. */
+.toast-stack {
+    position: fixed;
+    inset: var(--space-3) 0 auto;
+    width: fit-content;
+    max-width: min(38rem, calc(100vw - 2rem));
+    max-height: min(70dvh, 32rem);
+    margin: 0 auto;
+    padding: var(--space-3);
+    border: 0;
+    background: transparent;
+    overflow: auto;
+    color: var(--color-text);
+    z-index: 1000;
+}
+.toast-stack:popover-open, .toast-stack:not([hidden]):not([popover]) { display: grid; gap: var(--space-2); }
+.toast-stack::backdrop { background: transparent; pointer-events: none; }
+ .ui-toast {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: .5rem .75rem .5rem .5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    box-shadow: 0 4px 18px rgb(0 0 0 / 12%);
+    font-size: var(--font-size-xs);
+    animation: toast-enter 260ms cubic-bezier(.16, 1, .3, 1) both;
+}
+@keyframes toast-enter {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.toast-mark {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-info-surface);
+    color: var(--color-info-text);
+}
+.toast-success .toast-mark { background: var(--color-success-surface); color: var(--color-success-text); }
+.toast-warning .toast-mark { background: var(--color-warning-surface); color: var(--color-warning-text); }
+.toast-error .toast-mark { background: var(--color-danger-surface); color: var(--color-danger-text); }
+.toast-copy { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.toast-copy p { margin: 0; font-weight: var(--font-weight-medium); }
+.toast-copy small { display: block; margin-top: var(--space-1); font-size: .6875rem; color: var(--color-text-muted); }
+.toast-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-1); }
+.toast-actions button {
+    padding: var(--space-1) var(--space-2);
+    min-height: 1.75rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+}
+.toast-actions button:hover { background: var(--color-canvas); }
+.toast-actions .toast-dismiss { padding: var(--space-1); color: var(--color-text-muted); }
+.toast-countdown { font-size: .6875rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }

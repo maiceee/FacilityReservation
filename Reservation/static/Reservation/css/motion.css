@@ -1,0 +1,104 @@
+/* Motion supports changes of state without moving dense content around. */
+:is(button, a, .button, .user-nav-link,
+    .sidebar a, .user-sidebar a, input, textarea, select, summary, .control-option,
+    .workspace-tabs [role='tab'], tbody tr, .user-facility-card) {
+    transition: background-color var(--duration-fast) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        box-shadow var(--duration-fast) var(--ease-standard);
+}
+/* Translate individual controls only; preserve date-trigger positioning transforms. */
+:is(.button, .icon-button, .control-trigger):active:not(:disabled) {
+    translate: 0 1px;
+}
+:is(.button, .icon-button, .control-trigger) {
+    transition: background-color var(--duration-fast) var(--ease-standard),
+        border-color var(--duration-fast) var(--ease-standard),
+        color var(--duration-fast) var(--ease-standard),
+        box-shadow var(--duration-fast) var(--ease-standard),
+        translate var(--duration-fast) var(--ease-standard);
+}
+input[role='switch']::before {
+    transition: transform var(--duration-fast) var(--ease-standard);
+}
+/* Opacity-only panel entry avoids shifting tables and scroll containers. */
+:is(.auth-form-wrapper, [role='tabpanel']:not([hidden]),
+    .date-picker-grid, .control-options, .user-flash-message, .message) {
+    animation: spasyo-reveal var(--duration-normal) var(--ease-standard) both;
+}
+@keyframes spasyo-reveal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+/* Progressive native top-layer transitions. Older browsers keep instant dismissal. */
+@supports (transition-behavior: allow-discrete) {
+    dialog {
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity var(--duration-dialog) var(--ease-standard),
+            transform var(--duration-dialog) var(--ease-standard),
+            display var(--duration-dialog) allow-discrete,
+            overlay var(--duration-dialog) allow-discrete;
+    }
+    dialog[open] { opacity: 1; transform: none; }
+    dialog:not([open]) { pointer-events: none; }
+    dialog:not([open])::backdrop { pointer-events: none; }
+    dialog::backdrop {
+        background: transparent;
+        transition: background var(--duration-dialog) var(--ease-standard),
+            display var(--duration-dialog) allow-discrete,
+            overlay var(--duration-dialog) allow-discrete;
+    }
+    dialog[open]::backdrop { background: var(--color-overlay); }
+    [popover]:not(.toast-stack) {
+        opacity: 0;
+        transition: opacity var(--duration-fast) var(--ease-standard),
+            display var(--duration-fast) allow-discrete,
+            overlay var(--duration-fast) allow-discrete;
+    }
+    [popover]:not(.toast-stack):popover-open { opacity: 1; }
+    [popover]:not(:popover-open) { pointer-events: none; }
+    @starting-style {
+        dialog[open] { opacity: 0; transform: translateY(8px); }
+        dialog[open]::backdrop { background: transparent; }
+        [popover]:not(.toast-stack):popover-open { opacity: 0; }
+    }
+}
+/* Existing account/archive overlays use hidden rather than the native dialog API. */
+.admin-modal-backdrop:not([hidden]) {
+    animation: spasyo-reveal var(--duration-normal) var(--ease-standard) both;
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+    :is(.button, .icon-button, .control-trigger):active { translate: none; }
+}
+
+/* Native same-origin navigation preserves the shell while the content crossfades. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: no-preference) {
+    .sidebar, .user-sidebar { view-transition-name: workspace-sidebar; }
+    .sidebar .nav-link.active, .user-sidebar .user-nav-link.active { view-transition-name: navigation-selection; }
+    .directory-tabs [aria-current='page'] { view-transition-name: directory-selection; }
+    .workspace-page { view-transition-name: workspace-content; }
+    ::view-transition-group(*) { animation-duration: 240ms; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
+    ::view-transition-old(workspace-sidebar), ::view-transition-new(workspace-sidebar) { animation: none; mix-blend-mode: normal; }
+    ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* One sliding surface keeps tab movement coherent without moving table content. */
+.workspace-tabs.has-tab-indicator { position: relative; isolation: isolate; }
+.workspace-tabs.has-tab-indicator::before {
+    content: ''; position: absolute; left: 0; top: 0; z-index: -1;
+    width: var(--tab-width); height: var(--tab-height);
+    transform: translate(var(--tab-left), var(--tab-top));
+    border-radius: var(--radius-pill); background: var(--color-primary);
+    transition: transform var(--duration-normal) var(--ease-standard), width var(--duration-normal) var(--ease-standard);
+}
+.workspace-tabs.has-tab-indicator [aria-selected='true'] { background: transparent; box-shadow: none; }

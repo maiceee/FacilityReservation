@@ -1,0 +1,6 @@
+<nav class="directory-pagination" aria-label="Directory pages">
+    <span>{{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+    {% if page_obj.has_previous %}<a class="icon-button" href="?{{ directory_query }}&amp;page={{ page_obj.previous_page_number }}" aria-label="Previous page">{% include 'Reservation/components/icon.html' with name='arrow-left' %}</a>{% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="icon-button" href="?{{ directory_query }}&amp;page={{ page_obj.next_page_number }}" aria-label="Next page">{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>{% endif %}
+</nav>

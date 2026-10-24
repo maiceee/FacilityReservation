@@ -2,50 +2,43 @@
 {% extends 'Reservation/admin/AdminBase.html' %}
 {% load static %}
 
-{% block title %}System Settings | CampusSpace{% endblock %}
+{% block title %}System Settings | Spasyo{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'Reservation/css/admin/system-admin.css' %}?v=2">
+
 {% endblock %}
 
 {% block content %}
 
-<div class="system-page">
+<div class="system-page workspace-page" data-workspace-page="form">
 
     <div class="system-page-header">
         <div>
             <span class="page-eyebrow">SYSTEM ADMINISTRATION</span>
             <h1>System Settings</h1>
-            <p>Configure reservation limits and booking restrictions.</p>
+
         </div>
     </div>
+<div class="workspace-detail-body" role="region" aria-label="Form content" tabindex="0">
 
     <section class="system-settings-card">
 
         <div class="system-settings-heading">
 
             <span class="system-settings-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.8"
-                     stroke-linecap="round"
-                     stroke-linejoin="round">
-                    <path d="M4 7h16M4 17h16"/>
-                    <circle cx="9" cy="7" r="3" fill="white"/>
-                    <circle cx="15" cy="17" r="3" fill="white"/>
-                </svg>
+                {% include 'Reservation/components/icon.html' with name='list-checks' %}
             </span>
 
             <div>
                 <h2>Reservation Configuration</h2>
-                <p>Adjust the rules applied to new facility reservations.</p>
+
             </div>
 
         </div>
 
         <form method="post"
               class="system-settings-form"
+              data-confirm-record="Booking settings"
               onsubmit="return confirm('Save these booking settings?');">
 
             {% csrf_token %}
@@ -72,11 +65,11 @@
                     <span>Hours</span>
                 </div>
 
-                {% for error in form.max_event_duration_hours.errors %}
-                    <span class="system-field-error" role="alert">
-                        {{ error }}
-                    </span>
-                {% endfor %}
+                {% if form.max_event_duration_hours.errors %}
+<div class="system-field-error" id="{{ form.max_event_duration_hours.auto_id }}_error" role="alert">
+    {% for error in form.max_event_duration_hours.errors %}<p>{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
 
             </div>
 
@@ -96,11 +89,11 @@
                     <span>Days</span>
                 </div>
 
-                {% for error in form.advance_booking_days.errors %}
-                    <span class="system-field-error" role="alert">
-                        {{ error }}
-                    </span>
-                {% endfor %}
+                {% if form.advance_booking_days.errors %}
+<div class="system-field-error" id="{{ form.advance_booking_days.auto_id }}_error" role="alert">
+    {% for error in form.advance_booking_days.errors %}<p>{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
 
             </div>
 
@@ -114,6 +107,7 @@
 
     </section>
 
+</div>
 </div>
 
 {% endblock %}

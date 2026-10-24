@@ -2,26 +2,26 @@
 {% extends 'Reservation/admin/AdminBase.html' %}
 {% load static %}
 
-{% block title %}Facility Closures | CampusSpace{% endblock %}
+{% block title %}Facility Closures | Spasyo{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'Reservation/css/admin/closure-admin.css' %}">
+
 {% endblock %}
 
 {% block content %}
 
-<div class="closures-page">
+<div class="closures-page workspace-page" data-workspace-page="directory">
 
     <div class="closures-page-header">
         <div>
             <span class="page-eyebrow">FACILITY MANAGEMENT</span>
             <h1>Facility Closures</h1>
-            <p>Manage facility closure periods and scheduling restrictions.</p>
+
         </div>
 
-        <a href="{% url 'closure_create' %}"
+        <a href="{% url 'closure_create' %}" data-edit-dialog data-editor-kind="closure"
            class="closures-primary-btn">
-            <span class="closures-plus" aria-hidden="true">+</span>
+            {% include 'Reservation/components/icon.html' with name='plus' %}
             Add Closure
         </a>
     </div>
@@ -31,7 +31,7 @@
         <div class="closures-table-heading">
             <div>
                 <h2>Closure Directory</h2>
-                <p>Registered closure periods and their current status</p>
+
             </div>
 
             <span class="closures-count">
@@ -41,19 +41,19 @@
 
         {% if closures %}
 
-            <div class="closures-table-scroll">
+            <div class="closures-table-scroll" role="region" aria-label="Data table" tabindex="0">
 
                 <table class="closures-table">
 
                     <thead>
                         <tr>
-                            <th>Facility</th>
-                            <th>Start</th>
-                            <th>End</th>
-                            <th>Reason</th>
-                            <th>Status</th>
-                            <th>Created By</th>
-                            <th>Action</th>
+                            <th scope="col">Facility</th>
+                            <th scope="col">Schedule</th>
+
+                            <th scope="col">Reason</th>
+                            <th scope="col">Status</th>
+
+                            <th scope="col">Action</th>
                         </tr>
                     </thead>
 
@@ -67,43 +67,17 @@
                                     <div class="closures-facility-cell">
                                         <div class="closures-facility-icon"
                                              aria-hidden="true">
-                                            <svg viewBox="0 0 24 24"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 stroke-width="1.8"
-                                                 stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <rect x="4" y="3" width="16" height="18" rx="2"/>
-                                                <path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>
-                                            </svg>
+                                            {% include 'Reservation/components/icon.html' with name='building-2' %}
                                         </div>
 
                                         <strong>{{ closure.facility.name }}</strong>
                                     </div>
                                 </td>
 
-                                <td>
-                                    <span class="closures-date">
-                                        {{ closure.start_datetime|date:"M d, Y" }}
-                                    </span>
-
-                                    <span class="closures-time">
-                                        {{ closure.start_datetime|date:"h:i A" }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="closures-date">
-                                        {{ closure.end_datetime|date:"M d, Y" }}
-                                    </span>
-
-                                    <span class="closures-time">
-                                        {{ closure.end_datetime|date:"h:i A" }}
-                                    </span>
-                                </td>
+                                <td><span class="closures-date">{{ closure.start_datetime|date:"M d, Y" }}</span><span class="closures-time">{{ closure.start_datetime|date:"g:i A" }} – {% if closure.start_datetime.date != closure.end_datetime.date %}{{ closure.end_datetime|date:"M d, Y" }} · {% endif %}{{ closure.end_datetime|date:"g:i A" }}</span></td>
 
                                 <td class="closures-reason">
-                                    {{ closure.reason }}
+                                    <details class="table-details"><summary>{{ closure.reason|truncatechars:44 }}</summary><p>{{ closure.reason }}</p><small>Created by {{ closure.created_by.get_full_name|default:closure.created_by.username }}</small></details>
                                 </td>
 
                                 <td>
@@ -121,10 +95,6 @@
                                 </td>
 
                                 <td>
-                                    {{ closure.created_by.get_full_name|default:closure.created_by.username }}
-                                </td>
-
-                                <td>
                                     {% if closure.is_active %}
 
                                         <form
@@ -132,12 +102,14 @@
                                             action="{% url 'closure_archive' closure.id %}"
                                             class="closures-action-form"
                                             onsubmit="return confirm('Archive this closure?');"
+                                            data-confirm-record="{{ closure.facility.name }}"
+                                            data-confirm-details="{{ closure.start_datetime|date:'M j, Y · g:i A' }} – {{ closure.end_datetime|date:'M j, Y · g:i A' }}&#10;{{ closure.reason }}"
+                                            data-confirm-action="Archive"
                                         >
                                             {% csrf_token %}
 
                                             <button type="submit"
-                                                    class="closures-archive-btn">
-                                                Archive
+                                                    class="closures-archive-btn icon-button" aria-label="Archive closure for {{ closure.facility.name }}" title="Archive closure">{% include 'Reservation/components/icon.html' with name='archive' %}
                                             </button>
                                         </form>
 
@@ -160,7 +132,7 @@
 
             <div class="closures-empty-state">
                 <div class="closures-empty-icon" aria-hidden="true">
-                    ▦
+                    {% include 'Reservation/components/icon.html' with name='calendar-days' %}
                 </div>
 
                 <h3>No facility closures available</h3>

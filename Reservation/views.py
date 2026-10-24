@@ -1,4 +1,7 @@
 import csv
+from urllib.parse import urlencode
+
+from .directory import directory_context
 
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -422,17 +425,9 @@ def admin_user_detail(request, user_id):
 
 @admin_required
 def category_list(request):
-    categories = FacilityCategory.objects.order_by(
-        'name'
-    )
-
-    return render(
-        request,
-        'Reservation/admin/facilities/CategoryList.html',
-        {
-            'categories': categories
-        }
-    )
+    context = directory_context(request, 'category')
+    context['categories'] = context['page_obj']
+    return render(request, 'Reservation/admin/facilities/CategoryList.html', context)
 
 
 @admin_required
@@ -554,17 +549,9 @@ def category_archive(request, category_id):
 
 @admin_required
 def amenity_list(request):
-    amenities = Amenity.objects.order_by(
-        'name'
-    )
-
-    return render(
-        request,
-        'Reservation/admin/facilities/AmenityList.html',
-        {
-            'amenities': amenities
-        }
-    )
+    context = directory_context(request, 'amenity')
+    context['amenities'] = context['page_obj']
+    return render(request, 'Reservation/admin/facilities/AmenityList.html', context)
 
 
 @admin_required
@@ -686,36 +673,9 @@ def amenity_archive(request, amenity_id):
 
 @admin_required
 def facility_list(request):
-    search_query = request.GET.get(
-        'search',
-        ''
-    ).strip()
-
-    facilities = (
-        Facility.objects
-        .select_related('category')
-    )
-
-    if search_query:
-        facilities = facilities.filter(
-            Q(facility_code__icontains=search_query)
-            | Q(name__icontains=search_query)
-            | Q(location__icontains=search_query)
-            | Q(category__name__icontains=search_query)
-        )
-
-    facilities = facilities.order_by(
-        'name'
-    )
-
-    return render(
-        request,
-        'Reservation/admin/facilities/FacilityList.html',
-        {
-            'facilities': facilities,
-            'search_query': search_query,
-        }
-    )
+    context = directory_context(request, 'facility')
+    context['facilities'] = context['page_obj']
+    return render(request, 'Reservation/admin/facilities/FacilityList.html', context)
 
 
 @admin_required
@@ -1641,83 +1601,48 @@ def closure_archive(request, closure_id):
 # ADMIN A7 - REPORTS
 # =========================================================
 
+def report_facility_ids(request):
+    # An invalid supplied selection yields no records, never an unfiltered export.
+    supplied = request.GET.getlist('facility')
+    if not supplied:
+        return None
+    return sorted({int(value) for value in supplied if value.isdecimal() and len(value) <= 18 and int(value) > 0})
+
+
 def build_facility_usage_report(
     start_date=None,
-    end_date=None
+    end_date=None,
+    facility_ids=None
 ):
     facilities = Facility.objects.order_by(
         'name'
     )
 
-    facility_usage_rows = []
-    total_booked_hours = 0
+    if facility_ids is not None:
+        facilities = facilities.filter(pk__in=facility_ids)
 
+    booking_filter = Q(reservations__status__in=['APPROVED', 'CHECKED_IN', 'COMPLETED', 'NO_SHOW'])
+    if start_date is not None:
+        booking_filter &= Q(reservations__start_datetime__date__gte=start_date)
+    if end_date is not None:
+        booking_filter &= Q(reservations__start_datetime__date__lte=end_date)
+    duration = ExpressionWrapper(F('reservations__end_datetime') - F('reservations__start_datetime'), output_field=DurationField())
+    facilities = facilities.annotate(
+        report_completed=Count('reservations', filter=booking_filter & Q(reservations__status='COMPLETED')),
+        report_duration=Sum(duration, filter=booking_filter),
+    )
+    rows = []
+    total = 0
     for facility in facilities:
-        facility_reservations = (
-            Reservation.objects
-            .filter(
-                facility=facility,
-                status__in=[
-                    'APPROVED',
-                    'CHECKED_IN',
-                    'COMPLETED',
-                    'NO_SHOW',
-                ]
-            )
-        )
-
-        if start_date is not None:
-            facility_reservations = (
-                facility_reservations.filter(
-                    start_datetime__date__gte=start_date
-                )
-            )
-
-        if end_date is not None:
-            facility_reservations = (
-                facility_reservations.filter(
-                    start_datetime__date__lte=end_date
-                )
-            )
-
-        completed_events = (
-            facility_reservations
-            .filter(status='COMPLETED')
-            .count()
-        )
-
-        booked_duration = (
-            facility_reservations
-            .annotate(
-                reservation_duration=ExpressionWrapper(
-                    F('end_datetime') - F('start_datetime'),
-                    output_field=DurationField()
-                )
-            )
-            .aggregate(
-                total_duration=Sum('reservation_duration')
-            )['total_duration']
-        )
-
-        booked_hours = (
-            booked_duration.total_seconds() / 3600
-            if booked_duration
-            else 0
-        )
-        booked_hours = round(booked_hours, 2)
-        total_booked_hours += booked_hours
-
-        facility_usage_rows.append({
-            'facility': facility,
-            'completed_events': completed_events,
-            'booked_hours': booked_hours,
-        })
-
-    return facility_usage_rows, round(total_booked_hours, 2)
+        hours = round(facility.report_duration.total_seconds() / 3600, 2) if facility.report_duration else 0
+        rows.append({'facility': facility, 'completed_events': facility.report_completed, 'booked_hours': hours})
+        total += hours
+    return rows, round(total, 2)
 
 
 @admin_required
 def reports(request):
+    selected_facilities = report_facility_ids(request)
     start_date, parsed_start_date = parse_iso_date_filter(
         request.GET.get('start_date', '')
     )
@@ -1734,6 +1659,9 @@ def reports(request):
         )
         .order_by('-start_datetime')
     )
+
+    if selected_facilities is not None:
+        reservations = reservations.filter(facility_id__in=selected_facilities)
 
     if parsed_start_date is not None:
         reservations = reservations.filter(
@@ -1754,7 +1682,8 @@ def reports(request):
     facility_usage_rows, total_booked_hours = (
         build_facility_usage_report(
             start_date=parsed_start_date,
-            end_date=parsed_end_date
+            end_date=parsed_end_date,
+            facility_ids=selected_facilities
         )
     )
 
@@ -1763,6 +1692,9 @@ def reports(request):
         'Reservation/admin/reports/Reports.html',
         {
             'reservations': reservations,
+            'report_facilities': Facility.objects.order_by('name', 'pk'),
+            'selected_facilities': selected_facilities or [],
+            'facility_query': urlencode({'facility': selected_facilities or []}, doseq=True),
             'facility_usage_rows': facility_usage_rows,
 
             'start_date': start_date,
@@ -1777,6 +1709,7 @@ def reports(request):
 
 @admin_required
 def export_reservations_csv(request):
+    selected_facilities = report_facility_ids(request)
     _, parsed_start_date = parse_iso_date_filter(
         request.GET.get('start_date', '')
     )
@@ -1793,6 +1726,9 @@ def export_reservations_csv(request):
         )
         .order_by('start_datetime')
     )
+
+    if selected_facilities is not None:
+        reservations = reservations.filter(facility_id__in=selected_facilities)
 
     if parsed_start_date is not None:
         reservations = reservations.filter(
@@ -1849,6 +1785,7 @@ def export_reservations_csv(request):
 
 @admin_required
 def export_facility_usage_csv(request):
+    selected_facilities = report_facility_ids(request)
     _, parsed_start_date = parse_iso_date_filter(
         request.GET.get('start_date', '')
     )
@@ -1859,7 +1796,8 @@ def export_facility_usage_csv(request):
 
     facility_usage_rows, _ = build_facility_usage_report(
         start_date=parsed_start_date,
-        end_date=parsed_end_date
+        end_date=parsed_end_date,
+            facility_ids=selected_facilities
     )
 
     response = HttpResponse(

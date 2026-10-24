@@ -1,0 +1,18 @@
+{% extends 'Reservation/registration/AuthBase.html' %}
+{% load static %}
+{% block page_class %}error-page{% endblock %}
+{% block content %}
+    <p class="auth-error-code" aria-hidden="true">{% block error_code %}{% endblock %}</p>
+    <div class="auth-heading">
+        <h1>{% block error_heading %}Something went wrong{% endblock %}</h1>
+        <p>{% block error_message %}Please try again in a moment.{% endblock %}</p>
+    </div>
+    <div class="auth-error-actions">
+        <a class="button button-primary" data-error-review hidden>Review entered details</a>
+        <button type="button" class="button" data-error-back hidden>{% include 'Reservation/components/icon.html' with name='arrow-left' %}Go back</button>
+        <a href="{% url 'dashboard_redirect' %}" class="button button-primary">Go to my workspace{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>
+        <a href="{% url 'login' %}" class="button">Sign in</a>
+    </div>
+    <p class="auth-note">If you need help, contact your campus administrator.</p>
+    <script src="{% static 'Reservation/js/error-recovery.js' %}?v=1" defer></script>
+{% endblock %}

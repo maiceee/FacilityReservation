@@ -1,0 +1,8 @@
+{% load static %}
+<span class="brand">
+    {% if full %}
+    <img class="brand-image brand-image-full" src="{% static 'Reservation/branding/full-logo.png' %}" alt="Spasyo — Campus Facility Reservation" width="1344" height="343">
+    {% else %}
+    <img class="brand-image" src="{% static 'Reservation/branding/wordmark.png' %}" alt="Spasyo" width="1345" height="329">
+    {% endif %}
+</span>

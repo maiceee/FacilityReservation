@@ -1,0 +1,6 @@
+<article class="schedule-record">
+    <div><strong>{{ reservation.event_name }}</strong><span class="status-badge status-{{ reservation.status|lower }}">{{ reservation.get_status_display }}</span></div>
+    <p>{{ reservation.facility.name }} · {{ reservation.start_datetime|date:"M d, g:i A" }} – {{ reservation.end_datetime|date:"M d, g:i A" }}</p>
+    <p>{{ reservation.user.get_full_name|default:reservation.user.username }} · {{ reservation.expected_attendees }} attendees</p>
+    <a class="text-link" href="{% url 'reservation_detail_admin' reservation.id %}">Open reservation {% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>
+</article>

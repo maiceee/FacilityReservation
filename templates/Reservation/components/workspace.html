@@ -1,0 +1,19 @@
+{% load static %}
+<dialog class="workspace-dialog" id="workspace-preview" aria-labelledby="workspace-preview-title">
+    <header class="workspace-dialog-header"><div><h2 id="workspace-preview-title">Details</h2><p class="modal-description">Review the selected booking or schedule.</p></div><button type="button" class="icon-button" data-preview-close aria-label="Close details" title="Close">{% include 'Reservation/components/icon.html' with name='x' %}</button></header>
+    <div class="workspace-dialog-body" data-preview-body></div>
+</dialog>
+{% include 'Reservation/components/signout_dialog.html' %}
+<div class="toast-stack" data-toast-stack data-icon-sprite="{% static 'Reservation/icons/lucide.svg' %}" aria-label="Notifications" popover="manual" hidden></div>
+<script src="{% static 'Reservation/js/notifications.js' %}?v=3" defer></script>
+<script src="{% static 'Reservation/js/status-badges.js' %}?v=1" defer></script>
+<script src="{% static 'Reservation/js/motion.js' %}?v=1" defer></script>
+<script src="{% static 'Reservation/js/form-recovery.js' %}?v=1" defer></script>
+<script src="{% static 'Reservation/js/field-examples.js' %}?v=2" defer></script>
+<script src="{% static 'Reservation/js/workspace.js' %}?v=8" defer></script>
+<script src="{% static 'Reservation/js/validation.js' %}?v=1" defer></script>
+<script src="{% static 'Reservation/js/signout.js' %}?v=1" defer></script>
+<script src="{% static 'Reservation/js/interactions.js' %}?v=4" defer></script>
+<script src="{% static 'Reservation/js/tooltips.js' %}?v=3" defer></script>
+
+<script src="{% static 'Reservation/js/directory.js' %}?v=2" defer></script>

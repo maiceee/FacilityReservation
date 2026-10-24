@@ -9,37 +9,22 @@
 
     <title>Completion Summary - {{ reservation.event_name }}</title>
 
+    {% include 'Reservation/components/styles.html' %}
     <link rel="stylesheet"
-          href="{% static 'Reservation/css/admin/completion-print.css' %}?v=2">
+          href="{% static 'Reservation/css/admin/documents.css' %}?v=2">
 </head>
 
 <body>
+<nav class="print-actions" aria-label="Document actions">
+    <a href="{% url 'reservation_detail_admin' reservation.id %}" class="button">{% include 'Reservation/components/icon.html' with name='arrow-left' %}Back to reservation</a>
+    <button type="button" class="button button-primary" onclick="window.print()">Print</button>
+</nav>
 
-<main class="completion-document">
+<main class="print-document">
 
-    <header class="completion-header">
+    {% include 'Reservation/components/document_header.html' with title='Event completion summary' subtitle='Official event completion record' %}
 
-        <div class="completion-brand">
-            <span class="completion-logo">CS</span>
-
-            <div>
-                <span class="completion-eyebrow">
-                    CAMPUS FACILITY RESERVATION
-                </span>
-
-                <h1>Event Completion Summary</h1>
-                <p>Official event completion record</p>
-            </div>
-        </div>
-
-        <div class="completion-reference">
-            <span>RESERVATION NUMBER</span>
-            <strong>#{{ reservation.id }}</strong>
-        </div>
-
-    </header>
-
-    <section class="completion-section">
+    <section class="print-section">
 
         <h2>Event Information</h2>
 
@@ -75,7 +60,7 @@
             <div>
                 <dt>Status</dt>
                 <dd>
-                    <span class="completion-status">
+                    <span class="print-status">
                         {{ reservation.get_status_display }}
                     </span>
                 </dd>
@@ -85,7 +70,7 @@
 
     </section>
 
-    <section class="completion-section">
+    <section class="print-section">
 
         <h2>Scheduled Time</h2>
 
@@ -109,7 +94,7 @@
 
     </section>
 
-    <section class="completion-section">
+    <section class="print-section">
 
         <h2>Actual Event Record</h2>
 
@@ -147,17 +132,17 @@
 
     </section>
 
-    <section class="completion-section">
+    <section class="print-section">
 
         <h2>Incident Notes</h2>
 
-        <div class="completion-notes">
+        <div class="print-notes">
             {{ event_record.incident_notes|default:"No incident notes recorded." }}
         </div>
 
     </section>
 
-    <div class="completion-signatures">
+    <div class="print-signatures">
 
         <div>
             <span>Event Representative</span>
@@ -169,17 +154,13 @@
 
     </div>
 
-    <footer class="completion-footer">
-        CampusSpace · Campus Facility Reservation System
+    <footer class="print-footer">
+        Spasyo · Campus Facility Reservation System
     </footer>
 
 </main>
 
-<div class="completion-actions">
-    <button type="button" onclick="window.print();">
-        Print Completion Summary
-    </button>
-</div>
+
 
 </body>
 </html>

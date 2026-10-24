@@ -1,0 +1,757 @@
+/* FIXED WORKSPACE
+   Shells never scroll. Each list, form, detail pane or calendar owns its overflow.
+   Loaded after page styles so these layout responsibilities stay in one place. */
+.content {
+    overflow: hidden;
+    scrollbar-gutter: auto;
+}
+.admin-content-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    padding: var(--space-3);
+}
+.user-main-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    scrollbar-gutter: auto;
+    padding: var(--space-3);
+}
+.workspace-page {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: var(--space-2);
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+.workspace-page > * {
+    min-width: 0;
+}
+.workspace-page > :is(header, [class$='-header'], .rv-page-head, .dashboard-heading) {
+    flex-shrink: 0;
+    margin: 0;
+    gap: var(--space-2);
+}
+.workspace-page > :is(header, [class$='-header'], .rv-page-head, .dashboard-heading) > div {
+    min-width: 0;
+}
+.workspace-page h1 {
+    display: block;
+    overflow: visible;
+    line-height: 1.5;
+    padding-block: 2px;
+    overflow-wrap: anywhere;
+}
+.nav-link.active, .user-nav-link.active {
+    box-shadow: none;
+    background: var(--color-sidebar-active);
+    color: var(--color-on-primary);
+}
+.nav-link.active > .icon, .user-nav-link.active > .icon {
+    color: var(--color-accent);
+}
+.workspace-page :is(.page-eyebrow, .ra-eyebrow, .user-section-eyebrow) {
+    display: none;
+}
+.admin-footer, .portal-footer {
+    flex-shrink: 0;
+    margin-top: var(--space-2);
+    padding: 0;
+    font-size: .6875rem;
+}
+.messages-container, .user-flash-messages {
+    flex-shrink: 0;
+    max-height: 20%;
+    margin-bottom: var(--space-2);
+    overflow: auto;
+}
+
+/* A little more breathing room in administration navigation and the topbar. */
+.sidebar-nav {
+    gap: 2px;
+}
+.nav-link, .logout-button {
+    min-height: 2.5rem;
+}
+.sidebar-section-label {
+    padding-block: var(--space-2) var(--space-1);
+}
+.topbar {
+    min-height: 3.75rem;
+}
+
+/* Outline independent content groups; keep supporting toolbars visually lighter. */
+.workspace-page :is(.dashboard-card, .chart-card, .dashboard-table-section, .rv-panel,
+    .reservation-panel, .calendar-filter-card, .calendar-navigation-card, .calendar-day-card,
+    .closures-table-card, .closures-form-card, .closures-conflict-card, .facility-filter-card,
+    .facility-table-card, .facility-form-card, .master-table-card, .master-form-card,
+    .management-filter-card, .management-table-card, .user-detail-profile-card,
+    .user-detail-info-card, .user-detail-history-card, .ra-card, .ra-summary-card,
+    .system-filter-card, .system-table-card, .system-settings-card, .user-data-card,
+    .user-detail-card, .user-form-card, .panel, .user-facility-card) {
+    border: 1px solid var(--color-border);
+}
+.workspace-page :is(.calendar-filter-card, .calendar-navigation-card,
+    .facility-filter-card, .management-filter-card, .system-filter-card) {
+    border: 0;
+}
+.workspace-page :is(.ra-summary-card, .calendar-day-card) {
+    background: var(--color-surface-subtle);
+}
+.workspace-page :is(.chart-header, .table-section-header, .rv-panel-head,
+    .closures-table-heading, .facility-table-heading, .master-table-heading,
+    .management-table-heading, .user-detail-section-heading, .ra-section-heading,
+    .system-card-heading, .user-data-heading, .panel-heading, .user-card-heading) {
+    flex-shrink: 0;
+    padding: var(--space-3);
+    gap: var(--space-2);
+}
+.workspace-page .icon-button {
+    padding: var(--space-1);
+    border-color: transparent;
+}
+.workspace-page .icon-button:hover {
+    background: var(--color-canvas);
+    color: var(--color-text);
+}
+.workspace-page :is(.button, .rv-primary, .rv-outline, .calendar-primary-btn,
+    .calendar-outline-btn, .calendar-today-btn, .facility-add-button, .master-add-button,
+    .management-search-button, .system-primary-btn, .ra-primary-btn, .ra-clear-btn) {
+    padding-block: .375rem;
+}
+
+/* Compact labelled toolbars; the table, rather than its filter card, gets the space. */
+.workspace-page > :is(.rv-filters, .facility-filter-card, .management-filter-card,
+    .system-filter-card, .calendar-filter-card, .user-filter-card) {
+    flex-shrink: 0;
+    max-height: 35%;
+    overflow: auto;
+    background: var(--color-surface-subtle);
+    border-radius: var(--radius-sm);
+}
+.workspace-page :is(.rv-filter-grid, .calendar-filter-form, .ra-filter-form,
+    .management-search-form, .facility-search-form, .system-search-form) {
+    padding: var(--space-2);
+    gap: var(--space-2);
+}
+.rv-filter-grid {
+    grid-template-columns: minmax(8rem, 1.3fr) repeat(3, minmax(7.25rem, 1fr)) auto;
+}
+.rv-filter-actions {
+    grid-column: auto;
+}
+.workspace-page :is(.rv-field, .calendar-field, .ra-field, .management-search-field,
+    .facility-search-field, .system-search-field, .user-filter-field) {
+    gap: var(--space-1);
+}
+.workspace-page :is(.rv-field, .calendar-field, .ra-field, .management-search-field,
+    .facility-search-field, .system-search-field, .user-filter-field) > label {
+    font-size: .6875rem;
+}
+.user-filter-card {
+    padding: var(--space-2);
+}
+.user-facility-filter {
+    gap: var(--space-2);
+}
+/* Filters share a label row, control row, and optional guidance row.
+   Extra examples no longer push Search or the action buttons downward. */
+.workspace-page :is(.rv-filter-grid, .calendar-filter-form, .ra-filter-form,
+    .management-search-form, .facility-search-form, .system-search-form, .user-facility-filter) {
+    align-items: start;
+}
+.workspace-page :is(.management-search-form, .facility-search-form, .system-search-form) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+.workspace-page .ra-filter-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+}
+.workspace-page :is(.rv-field, .calendar-field, .ra-field, .management-search-field,
+    .facility-search-field, .system-search-field, .user-filter-field) > label {
+    margin: 0;
+    line-height: var(--line-height);
+}
+.workspace-page :is(.rv-filter-actions, .calendar-filter-actions, .ra-filter-actions,
+    .management-search-actions, .facility-search-actions, .system-search-actions, .user-filter-actions) {
+    align-self: start;
+    padding-top: calc(.6875rem * var(--line-height) + var(--space-1));
+    margin: 0;
+}
+@supports (grid-template-rows: subgrid) {
+    .workspace-page :is(.rv-filter-grid, .calendar-filter-form, .ra-filter-form,
+        .management-search-form, .facility-search-form, .system-search-form, .user-facility-filter) {
+        grid-template-rows: auto var(--control-height) auto;
+        column-gap: var(--space-2);
+        row-gap: var(--space-1);
+    }
+    .workspace-page :is(.rv-field, .calendar-field, .ra-field, .management-search-field,
+        .facility-search-field, .system-search-field, .user-filter-field,
+        .rv-filter-actions, .calendar-filter-actions, .ra-filter-actions,
+        .management-search-actions, .facility-search-actions, .system-search-actions, .user-filter-actions) {
+        display: grid;
+        grid-row: span 3;
+        grid-template-rows: subgrid;
+        align-self: stretch;
+        align-content: start;
+        row-gap: var(--space-1);
+        min-width: 0;
+        padding-top: 0;
+    }
+    .workspace-page :is(.rv-field, .calendar-field, .ra-field, .management-search-field,
+        .facility-search-field, .system-search-field, .user-filter-field) > label {
+        grid-row: 1;
+    }
+    .workspace-page :is(.rv-field, .calendar-field, .ra-field, .management-search-field,
+        .facility-search-field, .system-search-field, .user-filter-field) > :not(label):not(.field-example) {
+        grid-row: 2;
+    }
+    .workspace-page :is(.rv-field, .calendar-field, .ra-field, .management-search-field,
+        .facility-search-field, .system-search-field, .user-filter-field) > .field-example {
+        grid-row: 3;
+        margin: 0;
+    }
+    .workspace-page :is(.rv-filter-actions, .calendar-filter-actions, .ra-filter-actions,
+        .management-search-actions, .facility-search-actions, .system-search-actions, .user-filter-actions) {
+        grid-auto-flow: column;
+        grid-auto-columns: max-content;
+        column-gap: var(--space-2);
+    }
+    .workspace-page :is(.rv-filter-actions, .calendar-filter-actions, .ra-filter-actions,
+        .management-search-actions, .facility-search-actions, .system-search-actions, .user-filter-actions) > * {
+        grid-row: 2;
+    }
+}
+.calendar-navigation-card {
+    flex-shrink: 0;
+    padding: var(--space-1) 0;
+}
+
+/* Directories and report tabs: header + flexible scroll region + compact footer. */
+.workspace-page[data-workspace-page='directory'] > :is(.rv-table-panel,
+    .facility-table-card, .master-table-card, .management-table-card, .closures-table-card,
+    .system-table-card, .user-data-card),
+.ra-report-card, .dashboard-table-section, .user-data-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+:is(.table-responsive, .rv-table-scroll, .closures-table-scroll, .facility-table-scroll,
+    .master-table-scroll, .management-table-scroll, .user-detail-table-scroll,
+    .ra-table-scroll, .system-table-scroll, .user-table-scroll) {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+}
+.workspace-page th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.rv-pagination {
+    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border-top: 1px solid var(--color-border);
+    font-size: var(--font-size-xs);
+}
+.rv-pagination .icon-button {
+    min-width: var(--control-height);
+    padding: var(--space-1);
+}
+.rv-pagination :is(a, span) {
+    border: 0;
+}
+.rv-pagination > span {
+    padding: var(--space-1) var(--space-2);
+}
+.rv-pagination .pagination-count {
+    padding-left: 0;
+}
+.pagination-count {
+    margin-right: auto;
+    color: var(--color-text-muted);
+}
+.report-tabs {
+    position: static;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+}
+.ra-page > :is(.ra-card:not(.ra-report-card), .ra-summary-grid) {
+    flex-shrink: 0;
+}
+.ra-summary-card {
+    padding: var(--space-2) var(--space-3);
+}
+
+/* Forms and rich details have one bounded, named component body. */
+.workspace-detail-body {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding-right: var(--space-1);
+}
+.workspace-detail-body > * + * {
+    margin-top: var(--space-3);
+}
+.workspace-detail-body :is(.rv-table-scroll, .table-responsive, .user-table-scroll,
+    .user-detail-table-scroll) {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior: auto;
+    scrollbar-gutter: auto;
+}
+.workspace-detail-body .content-with-aside {
+    align-items: start;
+}
+.workspace-page .user-back-link {
+    margin-bottom: var(--space-2);
+}
+.workspace-detail-body :is(.user-reservation-form, .rv-stacked-form, .facility-detail-form,
+    .master-detail-form, .closures-detail-form, .system-settings-form) {
+    padding: var(--space-3);
+}
+.workspace-detail-body :is(.user-form-grid, .facility-form-grid, .closures-form-grid,
+    .reservation-info-grid, .reservation-history-grid) {
+    gap: var(--space-3);
+}
+.workspace-detail-body :is(.user-form-footer, .rv-form-actions, .facility-form-footer,
+    .master-form-footer, .closures-form-footer, .system-settings-footer) {
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border: 0;
+}
+
+/* Facility cards use an auto-filling grid, with scrolling inside the collection. */
+.table-edit-dialog {
+    width: min(24rem, calc(100% - 2rem));
+}
+.table-edit-dialog[data-editor='facility'], .table-edit-dialog[data-editor='closure'] {
+    width: min(36rem, calc(100% - 2rem));
+}
+.table-edit-dialog[data-editor='reservation'] {
+    width: min(40rem, calc(100% - 2rem));
+}
+.table-edit-dialog[data-editor='profile'] { width: min(35rem, calc(100% - 2rem)); }
+.table-edit-dialog[data-editor='settings'] { width: min(32rem, calc(100% - 2rem)); }
+.table-edit-dialog [data-editor-content] { display: grid; gap: var(--space-4); }
+.table-edit-dialog[data-editor='profile'] .content-with-aside { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+.table-edit-dialog[data-editor='profile'] :is(.panel, .user-form-card) { border: 0; box-shadow: none; background: transparent; }
+.table-edit-dialog[data-editor='profile'] :is(.panel-body, .panel-heading, .user-card-heading) { padding: 0; }
+.table-edit-dialog[data-editor='profile'] .user-profile-heading { margin-bottom: 0; }
+.table-edit-dialog[data-editor='profile'] .user-profile-heading .avatar { width: 2.5rem; height: 2.5rem; }
+.table-edit-dialog[data-editor='profile'] .user-form-grid > .field:last-child { grid-column: 1 / -1; }
+.table-edit-dialog[data-editor='profile'] .account-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.table-edit-dialog[data-editor='profile'] .account-details div { padding: 0; border: 0; min-width: 0; }
+.table-edit-dialog[data-editor='profile'] .account-details dd { overflow-wrap: anywhere; font-size: var(--font-size-xs); }
+.table-edit-dialog[data-editor='profile'] .account-details dt { font-size: .6875rem; }
+.table-edit-dialog[data-editor='profile'] aside .panel-heading { margin-bottom: var(--space-2); }
+.table-edit-dialog[data-editor='profile'] .user-form-footer { padding: var(--space-3) 0 0; }
+.table-edit-dialog[data-editor='settings'] .system-settings-form { padding: 0; gap: var(--space-4); }
+.table-edit-dialog[data-editor='settings'] .system-settings-footer { grid-column: 1 / -1; padding: var(--space-3) 0 0; }
+.modal-description {
+    margin-top: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-regular);
+    line-height: 1.45;
+}
+.table-edit-dialog .workspace-dialog-header > div {
+    min-width: 0;
+}
+.table-edit-dialog .workspace-dialog-header h2 {
+    overflow-wrap: anywhere;
+}
+.table-edit-dialog .shortcut-close {
+    flex-shrink: 0;
+}
+.ui-field-help, .table-edit-dialog :is(.field-help, .master-field-help, .facility-field-help, .closures-field-help) {
+    color: var(--color-text-muted);
+    font-size: .6875rem;
+    font-weight: var(--font-weight-regular);
+    line-height: 1.45;
+}
+.table-edit-dialog .workspace-dialog-header {
+    padding: var(--space-3) var(--space-4);
+}
+.table-edit-dialog .workspace-dialog-body {
+    padding: var(--space-3) var(--space-4);
+}
+.table-edit-dialog :is(.master-form-group, .facility-form-group, .closures-form-group) {
+    gap: var(--space-1);
+    margin: 0;
+}
+.table-edit-dialog :is(.facility-form-grid, .closures-form-grid, .user-form-grid) {
+    gap: var(--space-3);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.table-edit-dialog textarea {
+    min-height: 4rem;
+    height: 4rem;
+}
+.table-edit-dialog label {
+    font-size: var(--font-size-xs);
+}
+.table-edit-dialog .facility-form-group:has(input[name='is_active']) {
+    grid-column: auto;
+}
+.table-edit-dialog :is(.master-form-group, .facility-form-group):has(input[name='is_active']) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block: var(--space-2);
+    flex-wrap: wrap;
+}
+.table-edit-dialog :is(.master-form-group, .facility-form-group):has(input[name='is_active']) .ui-field-help {
+    flex-basis: 100%;
+}
+.table-edit-dialog :is(.master-form-group, .facility-form-group):has(input[name='is_active']) {
+    row-gap: var(--space-1);
+}
+.table-edit-dialog .field {
+    gap: var(--space-1);
+}
+.table-edit-dialog .master-detail-form {
+    gap: var(--space-3);
+}
+.table-edit-dialog .facility-form-group:has(input[name='amenities']) {
+    grid-column: 1 / -1;
+}
+.table-edit-dialog .closures-form-group:has(select) {
+    grid-column: 1 / -1;
+}
+.table-edit-dialog .facility-field-control > div:has(input[name='amenities']) {
+    gap: var(--space-2);
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+}
+.table-edit-dialog :is(.master-detail-form, .facility-detail-form, .closures-detail-form, .user-reservation-form) {
+    padding: 0;
+}
+.table-edit-dialog .workspace-dialog-body > p {
+    margin-bottom: var(--space-3);
+}
+.table-edit-dialog .modal-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    margin-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+}
+.table-edit-dialog .master-detail-form > .modal-form-actions {
+    margin-top: 0;
+}
+
+.user-facility-grid {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: var(--space-3);
+    padding-right: var(--space-1);
+    scrollbar-gutter: stable;
+}
+.user-facility-card {
+    background: var(--color-surface);
+    padding: var(--space-3);
+}
+.user-facility-card .facility-placeholder {
+    display: none;
+}
+
+/* Calendar scrolls only inside its collection; a daily list owns its own overflow. */
+.calendar-days-grid {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    grid-auto-rows: minmax(min-content, 1fr);
+    align-items: stretch;
+    scrollbar-gutter: stable;
+}
+.calendar-day-card {
+    display: flex;
+    flex-direction: column;
+}
+.calendar-day-heading {
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--color-border);
+}
+.calendar-day-content {
+    flex: 1;
+    align-content: start;
+}
+.schedule-entry {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+.schedule-day-open {
+    flex-shrink: 0;
+    border: 0;
+}
+.calendar-single-day {
+    overflow: hidden;
+    grid-template-rows: minmax(0, 1fr);
+}
+.calendar-single-day .calendar-day-card {
+    min-height: 0;
+    overflow: hidden;
+}
+.calendar-single-day .calendar-day-content {
+    min-height: 0;
+    overflow: auto;
+}
+
+/* Dashboard grid consumes the available space, with a scrollable recent-data pane. */
+.dashboard-page.workspace-page {
+    display: grid;
+    align-items: stretch;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.35fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: var(--space-3);
+}
+.dashboard-heading {
+    grid-column: 1 / -1;
+}
+.dashboard-cards {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+.dashboard-page .chart-grid {
+    display: flex;
+    flex-direction: column;
+    grid-column: 1;
+    grid-row: 3;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+}
+.chart-grid > .workspace-tabs {
+    flex-shrink: 0;
+    padding: var(--space-1);
+    margin: var(--space-2);
+    background: var(--color-surface-subtle);
+    border: 0;
+}
+.workspace-page .chart-grid .chart-card {
+    border: 0;
+    border-radius: 0;
+}
+.chart-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+.chart-header {
+    flex-shrink: 0;
+    padding: var(--space-2);
+}
+.chart-container {
+    flex: 1;
+    min-height: 3rem;
+    height: auto;
+    padding: var(--space-2);
+}
+.dashboard-table-section {
+    grid-column: 2;
+    grid-row: 3;
+    height: 100%;
+}
+.dashboard-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: var(--color-surface);
+    transition: border-color var(--duration-fast) var(--ease-standard);
+}
+.dashboard-card:hover {
+    border-color: var(--color-border-strong);
+}
+.dashboard-card .metric-top {
+    min-width: 0;
+}
+.dashboard-card .metric-icon {
+    display: none;
+}
+.dashboard-card .number {
+    margin: 0;
+}
+.metric-label {
+    font-size: var(--font-size-xs);
+}
+
+/* The user home keeps overview and history visible as separate bounded components. */
+.workspace-page[data-workspace-page='home'] {
+    display: grid;
+    grid-template-rows: auto minmax(0, .85fr) minmax(0, 1fr);
+}
+.workspace-page[data-workspace-page='home'] .dashboard-grid {
+    min-height: 0;
+    align-items: stretch;
+    gap: var(--space-3);
+}
+.workspace-page[data-workspace-page='home'] .dashboard-grid > .panel {
+    overflow: auto;
+}
+.workspace-page[data-workspace-page='home'] .panel-body {
+    padding: var(--space-3);
+}
+.workspace-page[data-workspace-page='home'] .booking-meta {
+    margin-top: var(--space-2);
+}
+.workspace-page[data-workspace-page='home'] .next-booking .button {
+    margin-top: var(--space-2);
+}
+.workspace-page[data-workspace-page='home'] .next-booking-title {
+    font-size: 1rem;
+    margin-bottom: var(--space-2);
+}
+@media (max-width: 900px) {
+    .dashboard-page.workspace-page {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(7rem, .8fr) minmax(8rem, 1.2fr);
+    }
+    .dashboard-cards {
+        grid-column: 1;
+        grid-row: 2;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .dashboard-page .chart-grid {
+        grid-column: 1;
+        grid-row: 3;
+    }
+    .dashboard-table-section {
+        grid-column: 1;
+        grid-row: 4;
+    }
+}
+@media (max-width: 780px) {
+    .rv-filter-grid, .calendar-filter-form, .user-facility-filter {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .rv-filter-actions {
+        grid-column: auto;
+    }
+    .dashboard-card {
+        padding: var(--space-2);
+    }
+    .dashboard-card .number {
+        font-size: 1.125rem;
+    }
+    .workspace-page[data-workspace-page='home'] .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+        grid-auto-rows: max-content;
+        overflow: auto;
+    }
+    .workspace-page[data-workspace-page='home'] .dashboard-grid > .panel {
+        overflow: visible;
+    }
+}
+@media (max-width: 600px) {
+    .table-edit-dialog :is(.facility-form-grid, .closures-form-grid, .user-form-grid) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Dense directories: fixed controls and footer, with only rows scrolling. */
+.directory-controls, .directory-bulk, .directory-pagination {
+    display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0;
+}
+.directory-controls { justify-content: space-between; flex-wrap: wrap; }
+.directory-tabs { display: inline-flex; padding: .25rem; gap: .25rem; border-radius: var(--radius-pill); background: var(--color-surface-subtle); }
+.directory-tabs a { display: inline-flex; align-items: center; gap: .5rem; padding: .4rem .75rem; color: var(--color-text-muted); border-radius: var(--radius-pill); font-size: var(--font-size-xs); text-decoration: none; }
+.directory-tabs a[aria-current='page'] { background: var(--color-primary); color: white; }
+.directory-tabs span { font-size: .6875rem; font-variant-numeric: tabular-nums; opacity: .8; }
+.directory-search { display: flex; align-items: center; gap: .25rem; flex: 0 1 22rem; }
+.directory-search input[type='search'] { width: 100%; min-width: 8rem; }
+.directory-bulk { font-size: var(--font-size-xs); }
+.directory-bulk > span { margin-right: auto; color: var(--color-text-muted); }
+.directory-bulk .button { min-height: 1.875rem; padding: .25rem .65rem; font-size: var(--font-size-xs); }
+.directory-pagination { justify-content: flex-end; padding: .5rem .75rem; font-size: var(--font-size-xs); }
+.directory-pagination > span:first-child { margin-right: auto; color: var(--color-text-muted); }
+.workspace-page :is(th, td).selection-cell { width: 2.5rem; min-width: 2.5rem; padding-inline: .75rem; }
+.selection-cell input { width: 1rem; height: 1rem; vertical-align: middle; accent-color: var(--color-primary); }
+.report-facility-filter { position: relative; min-width: 10rem; align-self: center; }
+.report-facility-filter summary { padding: .5rem .75rem; border-radius: var(--radius-sm); border: 1px solid var(--color-border); cursor: pointer; }
+.report-facility-options { position: absolute; inset: calc(100% + .5rem) 0 auto auto; z-index: 15; width: min(22rem, 70vw); max-height: min(22rem, 50dvh); overflow: auto; padding: 1rem; background: var(--color-surface); box-shadow: var(--shadow-dialog); border-radius: var(--radius-card); }
+.report-facility-options label { display: flex; align-items: center; gap: .5rem; margin-block: .5rem; font-size: var(--font-size-xs); }
+.report-facility-options [hidden] { display: none; }
+.report-facility-options input[type='checkbox'] { width: 1rem; height: 1rem; flex-shrink: 0; }
+.ra-page .ra-filter-form { grid-template-columns: repeat(2, minmax(8rem, 1fr)) minmax(10rem, 1fr) auto; }
+.ra-page > .ra-card:has(.ra-filter-form) { overflow: visible; position: relative; z-index: 5; }
+/* Identity, read-only context, editing, then actions: one clear reading order. */
+.profile-editor { max-width: 38rem; margin-inline: auto; width: 100%; }
+.profile-identity { display: flex; align-items: center; gap: .75rem; }
+.profile-identity h2 { margin: 0; font-size: 1rem; }
+.profile-identity p, .profile-section-heading p { margin: .25rem 0 0; color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.profile-account { padding: .75rem 1rem; background: var(--color-surface-subtle); border-radius: var(--radius-card); }
+.profile-account .account-details { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.profile-section-heading h3 { margin: 0; font-size: var(--font-size-sm); }
+.table-edit-dialog .profile-form, .workspace-detail-body .profile-form { padding: 0; }
+.profile-form .user-form-footer { border-top: 1px solid var(--color-border); }
+/* Keep dialogs centered even when embedded inside a spaced details container. */
+.workspace-detail-body > .confirm-dialog { inset: 0; margin: auto; }
+.confirm-dialog .dialog-booking { margin-block: 1rem; padding: .75rem; }
+.confirm-dialog .dialog-actions { margin-top: 1rem; }
+.confirm-dialog h2 { font-size: 1.125rem; }
+.reservation-side { display: grid; gap: .75rem; min-width: 0; }
+.reservation-side .user-cancel-card .user-detail-card-body { display: grid; gap: .75rem; }
+.reservation-side .user-cancel-description { margin: 0; font-size: var(--font-size-xs); }
+.workspace-page[data-workspace-page='detail'] :is(.user-info-grid, .reservation-info-grid) { gap: .75rem 1rem; }
+.workspace-page[data-workspace-page='detail'] :is(.user-info-item, .reservation-info-item) { gap: .25rem; min-width: 0; }
+.workspace-page[data-workspace-page='detail'] :is(.user-info-item strong, .reservation-info-item strong) { overflow-wrap: anywhere; font-size: var(--font-size-sm); }
+.workspace-page[data-workspace-page='detail'] :is(.user-description-block, .progress-list) { margin-top: .75rem; padding-top: .75rem; }
+.workspace-page[data-workspace-page='detail'] :is(.user-card-heading, .user-detail-card-body, .panel-heading, .panel-body) { padding: .75rem; }
+.admin-reservation-detail { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 1fr); gap: .75rem; align-content: start; align-items: start; }
+.admin-reservation-detail > * + * { margin-top: 0; }
+.admin-reservation-detail .reservation-panel { padding: .875rem; margin: 0; }
+.reservation-primary, .reservation-secondary { display: grid; gap: .75rem; min-width: 0; }
+.admin-reservation-detail :is(.reservation-panel-header, .reservation-section-header) { margin-bottom: .75rem; }
+.admin-reservation-detail .reservation-info-grid { padding: 0; }
+.admin-reservation-detail :is(.reservation-button-row, .reservation-info-grid) { margin-top: .75rem; }
+.admin-reservation-detail .reservation-review-grid { grid-template-columns: minmax(0, 1fr); }
+.admin-reservation-detail textarea { min-height: 4.5rem; }
+@media (max-width: 1050px) {
+    .admin-reservation-detail { grid-template-columns: minmax(0, 1fr); }
+    .ra-page .ra-filter-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.admin-reservation-detail :is(.reservation-panel-header, .reservation-section-header, .reservation-button-row, .reservation-review-grid, .reservation-history-list) { padding: 0; }
+.admin-reservation-detail :is(.reservation-cancellation-form, .reservation-completion-form) { padding: 0; }
+.facilities-page .facility-table { table-layout: auto; }
+.facilities-page .facility-table th:nth-child(2) { width: 32%; }
+.master-data-page .master-table { table-layout: fixed; min-width: 0; width: 100%; }
+.master-data-page .master-table th:nth-child(2) { width: auto; }
+.master-data-page .master-table th:nth-child(3), .master-data-page .master-table th:nth-child(4) { width: 6rem; }
+.directory-pagination { margin-top: auto; }
+
+.workspace-page[data-workspace-page='detail'] .progress-list { margin: 0; padding-top: 0; }
+.workspace-page[data-workspace-page='detail'] :is(.user-detail-card-body, .panel-body) { padding-top: .25rem; }
+.profile-section-heading { margin-bottom: .5rem; }
+
+.master-data-page .master-row-actions { flex-wrap: nowrap; gap: .25rem; }

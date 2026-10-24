@@ -1,106 +1,22 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#BC0202">
-    <title>Create Account | CampusSpace</title>
-    <link rel="stylesheet" href="{% static 'Reservation/css/auth/auth.css' %}?v=15">
-</head>
-<body class="auth-page register-page">
-
-    <main class="auth-layout register-layout register-portal">
-        <div class="register-shell">
-
-            <section class="auth-brand" aria-label="CampusSpace">
-                <div class="brand-top">
-                    <div class="brand-lockup"
-                         role="img"
-                         aria-label="CampusSpace - Facility Reservation System">
-                        <div class="brand-word-image" aria-hidden="true">
-                            <img class="brand-logo"
-                                 src="{% static 'Reservation/images/campusspace-logo.png' %}"
-                                 alt=""
-                                 width="1080"
-                                 height="300">
-                        </div>
-                        <span>Facility Reservation System</span>
-                    </div>
-                </div>
-            </section>
-
-            <section class="auth-main register-main">
-                <div class="auth-form-wrapper register-wrapper">
-                    <div class="auth-heading">
-                        <h1>Create your account</h1>
-                        <p>Enter your details to start reserving campus facilities.</p>
-                    </div>
-
-                    {% if form.non_field_errors %}
-                        <div class="auth-alert" role="alert" aria-live="polite">
-                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <circle cx="12" cy="12" r="9"/>
-                                <path d="M12 8v5m0 3h.01"/>
-                            </svg>
-                            <div>
-                                <strong>We couldn't create your account.</strong>
-                                {% for error in form.non_field_errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    <form method="POST" class="auth-form register-form" aria-label="Create account">
-                        {% csrf_token %}
-
-                        {% for field in form %}
-                            <div class="form-group register-field register-field-{{ field.name }}">
-                                <label for="{{ field.id_for_label }}">
-                                    {{ field.label }}
-                                    {% if field.field.required %}
-                                        <span class="required-mark" aria-hidden="true">*</span>
-                                    {% endif %}
-                                </label>
-
-                                {{ field }}
-
-                                {% if field.help_text %}
-                                    <small class="field-help" id="{{ field.auto_id }}_helptext">
-                                        {{ field.help_text }}
-                                    </small>
-                                {% endif %}
-
-                                {% if field.errors %}
-                                    <small class="field-error" id="{{ field.auto_id }}_error">
-                                        {% for error in field.errors %}{{ error }}{% endfor %}
-                                    </small>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-
-                        <button type="submit" class="auth-submit">
-                            Create Account
-                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M5 12h13m-5-5 5 5-5 5"/>
-                            </svg>
-                        </button>
-                    </form>
-
-                    <div class="auth-register">
-                        Already have an account?
-                        <a href="{% url 'login' %}">Sign in</a>
-                    </div>
-                </div>
-
-                <div class="auth-bottom">
-                    &copy; {% now "Y" %} CampusSpace. All rights reserved.
-                </div>
-            </section>
-
+{% extends 'Reservation/registration/AuthBase.html' %}
+{% block title %}Create an account | Spasyo{% endblock %}
+{% block page_class %}register-page{% endblock %}
+{% block content %}
+    <div class="auth-heading"><h1>Create your account</h1><p>One account for campus spaces and reservations.</p></div>
+    {% if form.non_field_errors %}<div class="auth-alert" role="alert"><strong>We couldn't create your account.</strong>{{ form.non_field_errors }}</div>{% endif %}
+    <form method="post" class="auth-form register-form" aria-label="Create account">
+        {% csrf_token %}
+        <div class="register-fields">
+            {% include 'Reservation/components/field.html' with field=form.first_name %}
+            {% include 'Reservation/components/field.html' with field=form.last_name %}
+            {% include 'Reservation/components/field.html' with field=form.username %}
+            {% include 'Reservation/components/field.html' with field=form.email %}
+            {% include 'Reservation/components/field.html' with field=form.department %}
+            {% include 'Reservation/components/field.html' with field=form.contact_number %}
+            {% include 'Reservation/components/field.html' with field=form.password1 %}
+            {% include 'Reservation/components/field.html' with field=form.password2 %}
         </div>
-    </main>
-
-</body>
-</html>
+        <button type="submit" class="button button-primary auth-submit">Create account{% include 'Reservation/components/icon.html' with name='arrow-right' %}</button>
+    </form>
+    <p class="auth-register">Already have an account? <a href="{% url 'login' %}" class="text-link">Sign in{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a></p>
+{% endblock %}

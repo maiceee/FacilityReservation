@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="auth-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Welcome | Spasyo{% endblock %}</title>
+    {% include 'Reservation/components/styles.html' %}
+    <link rel="stylesheet" href="{% static 'Reservation/css/auth/auth.css' %}?v=21">
+    {% include 'Reservation/components/feedback_styles.html' %}
+    <link rel="stylesheet" href="{% static 'Reservation/css/motion.css' %}?v=4">
+</head>
+<body class="auth-page {% block page_class %}{% endblock %}">
+<a class="skip-link" href="#auth-content">Skip to form</a>
+<main class="auth-layout">
+    <section class="auth-brand" aria-label="About Spasyo">
+        <div>{% include 'Reservation/components/brand.html' with full=True %}</div>
+        <div class="auth-brand-content"><h2>Space for<br>what’s next.</h2><p>Find campus facilities, request your schedule, and bring your next gathering to life.</p><div class="auth-brand-art" aria-hidden="true">{% include 'Reservation/components/icon.html' with name='building-2' %}</div></div>
+        <p class="auth-brand-footer">Campus Facility Reservation</p>
+    </section>
+    <section class="auth-main" id="auth-content">
+        <div class="auth-form-scroll">
+            <div class="auth-form-wrapper">{% block content %}{% endblock %}</div>
+        </div>
+        <footer class="auth-bottom">© {% now "Y" %} Spasyo · Your campus, with room for more. {% include 'Reservation/components/keyboard_tools.html' %}</footer>
+    </section>
+</main>
+<script src="{% static 'Reservation/js/presentation.js' %}?v=3" defer></script>
+{% include 'Reservation/components/workspace.html' %}
+</body>
+</html>

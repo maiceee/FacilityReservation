@@ -1,18 +1,18 @@
 
 {% extends 'Reservation/admin/AdminBase.html' %}
 
-{% block title %}User Management | CampusSpace{% endblock %}
+{% block title %}User Management | Spasyo{% endblock %}
 
 {% block content %}
 
-<div class="user-management-page">
+<div class="user-management-page workspace-page" data-workspace-page="directory">
 
     <!-- PAGE HEADER -->
     <div class="page-header management-header">
         <div>
             <span class="page-eyebrow">ACCOUNT MANAGEMENT</span>
             <h1>User Management</h1>
-            <p>View and manage registered Basic User accounts.</p>
+
         </div>
     </div>
 
@@ -25,34 +25,24 @@
                 <label for="search">Search Users</label>
 
                 <div class="management-search-input">
-                    <svg viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                        <circle cx="11" cy="11" r="7"/>
-                        <path d="m20 20-4-4"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='search' %}
 
                     <input
                         type="search"
                         id="search"
                         name="search"
                         value="{{ search_query|default:'' }}"
-                        placeholder="Search by username, name, email or department"
+                        placeholder="Name, username, email…"
                     >
                 </div>
             </div>
 
             <div class="management-search-actions">
-                <button type="submit" class="management-search-button">
-                    Search
-                </button>
+                <button type="submit" class="icon-button management-search-button" aria-label="Search" title="Search">{% include 'Reservation/components/icon.html' with name='search' %}</button>
 
                 {% if search_query %}
                     <a href="{% url 'user_management' %}"
-                       class="management-clear-button">
-                        Clear
-                    </a>
+                       class="icon-button management-clear-button" aria-label="Clear filters" title="Clear filters">{% include 'Reservation/components/icon.html' with name='x' %}</a>
                 {% endif %}
             </div>
 
@@ -66,7 +56,7 @@
         <div class="management-table-heading">
             <div>
                 <h2>Registered Users</h2>
-                <p>Basic User account directory</p>
+
             </div>
 
             <span class="management-count">
@@ -76,15 +66,15 @@
 
         {% if users %}
 
-            <div class="management-table-scroll">
+            <div class="management-table-scroll" role="region" aria-label="Data table" tabindex="0">
                 <table class="management-table">
                     <thead>
                         <tr>
-                            <th>User</th>
-                            <th>Email</th>
-                            <th>Department</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th scope="col">User</th>
+
+                            <th scope="col">Department</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
 
@@ -106,12 +96,6 @@
                                         </div>
 
                                     </div>
-                                </td>
-
-                                <td>
-                                    <span class="management-email">
-                                        {{ account.email|default:"—" }}
-                                    </span>
                                 </td>
 
                                 <td>
@@ -137,13 +121,11 @@
 
                                         <a
                                             href="{% url 'admin_user_detail' account.id %}"
-                                            class="management-view-button">
-                                            View
-                                        </a>
+                                            class="icon-button management-view-button" aria-label="View {{ account.username }}" title="View {{ account.username }}">{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>
 
                                         <button
                                             type="button"
-                                            class="{% if account.is_active %}management-deactivate-button{% else %}management-activate-button{% endif %}"
+                                            class="button {% if account.is_active %}management-deactivate-button{% else %}management-activate-button{% endif %}"
                                             data-user-name="{{ account.username }}"
                                             data-user-action="{% if account.is_active %}Deactivate{% else %}Activate{% endif %}"
                                             data-form-id="status-form-{{ account.id }}"
@@ -176,13 +158,7 @@
 
             <div class="management-empty-state">
                 <div class="management-empty-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="28" height="28"
-                         fill="none" stroke="currentColor"
-                         stroke-width="1.8" stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="7"/>
-                        <path d="m20 20-4-4"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='search' %}
                 </div>
 
                 <h3>No users found</h3>
@@ -263,6 +239,14 @@ function openStatusModal(button) {
     const username = button.dataset.userName;
     const action = button.dataset.userAction;
     const formId = button.dataset.formId;
+
+    if (window.SpasyoConfirm?.open({
+        title: `${action} this account?`,
+        record: username,
+        description: 'This will update the user’s account access.',
+        actionLabel: action,
+        onConfirm: () => document.getElementById(formId).submit()
+    })) return;
 
     selectedStatusForm = document.getElementById(formId);
     previousFocus = button;

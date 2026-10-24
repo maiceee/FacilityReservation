@@ -1,32 +1,34 @@
 
 {% extends 'Reservation/admin/AdminBase.html' %}
 
-{% block title %}Facility Categories | CampusSpace{% endblock %}
+{% block title %}Facility Categories | Spasyo{% endblock %}
 
 {% block content %}
 
-<div class="master-data-page">
+<div class="master-data-page workspace-page" data-workspace-page="directory">
 
     <div class="master-data-header">
         <div>
             <span class="page-eyebrow">FACILITY MANAGEMENT</span>
             <h1>Facility Categories</h1>
-            <p>Organize and manage campus facility categories.</p>
+
         </div>
 
-        <a href="{% url 'category_create' %}"
+        <a href="{% url 'category_create' %}" data-edit-dialog
            class="master-add-button">
-            <span aria-hidden="true">+</span>
+            {% include 'Reservation/components/icon.html' with name='plus' %}
             Add Category
         </a>
     </div>
+
+    {% include 'Reservation/components/directory_controls.html' %}
 
     <section class="master-table-card">
 
         <div class="master-table-heading">
             <div>
                 <h2>Category Directory</h2>
-                <p>Registered facility categories and their status</p>
+
             </div>
 
             <span class="management-count">
@@ -36,40 +38,28 @@
 
         {% if categories %}
 
-            <div class="master-table-scroll">
+            <div class="master-table-scroll" role="region" aria-label="Data table" tabindex="0">
                 <table class="master-table">
 
                     <thead>
                         <tr>
-                            <th>Category</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th scope="col" class="selection-cell"><input type="checkbox" data-select-page aria-label="Select all records on this page"></th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {% for category in categories %}
                             <tr>
+                                <td class="selection-cell"><input type="checkbox" name="selected" value="{{ category.id }}:{% if category.is_active %}1{% else %}0{% endif %}" form="directory-bulk" data-select-record data-name="{{ category.name }}" aria-label="Select {{ category.name }}"></td>
                                 <td>
                                     <div class="master-name-cell">
 
                                         <div class="master-item-icon"
                                              aria-hidden="true">
-                                            <svg viewBox="0 0 24 24"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 stroke-width="1.8"
-                                                 stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <rect x="3" y="3"
-                                                      width="7" height="7" rx="1.5"/>
-                                                <rect x="14" y="3"
-                                                      width="7" height="7" rx="1.5"/>
-                                                <rect x="3" y="14"
-                                                      width="7" height="7" rx="1.5"/>
-                                                <rect x="14" y="14"
-                                                      width="7" height="7" rx="1.5"/>
-                                            </svg>
+                                            {% include 'Reservation/components/icon.html' with name='list-checks' %}
                                         </div>
 
                                         <strong>{{ category.name }}</strong>
@@ -86,7 +76,7 @@
                                     {% else %}
                                         <span class="management-status is-inactive">
                                             <span class="management-status-dot"></span>
-                                            Archived
+                                            Inactive
                                         </span>
                                     {% endif %}
                                 </td>
@@ -94,19 +84,15 @@
                                 <td>
                                     <div class="master-row-actions">
 
-                                        <a href="{% url 'category_update' category.id %}"
-                                           class="master-edit-button">
-                                            Edit
-                                        </a>
+                                        <a href="{% url 'category_update' category.id %}" data-edit-dialog
+                                           class="icon-button master-edit-button" aria-label="Edit {{ category.name }}" title="Edit {{ category.name }}">{% include 'Reservation/components/icon.html' with name='pencil' %}</a>
 
                                         {% if category.is_active %}
                                             <button type="button"
-                                                    class="master-archive-button"
+                                                    class="icon-button master-archive-button"
                                                     data-category-name="{{ category.name }}"
                                                     data-form-id="category-archive-{{ category.id }}"
-                                                    onclick="openCategoryArchive(this)">
-                                                Archive
-                                            </button>
+                                                    onclick="openCategoryArchive(this)" aria-label="Deactivate {{ category.name }}" title="Deactivate {{ category.name }}">{% include 'Reservation/components/icon.html' with name='x' %}</button>
 
                                             <form method="post"
                                                   action="{% url 'category_archive' category.id %}"
@@ -131,18 +117,7 @@
             <div class="master-empty-state">
 
                 <div class="master-empty-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"
-                         width="28" height="28"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-                        <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-                        <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-                        <rect x="14" y="14" width="7" height="7" rx="1.5"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='list-checks' %}
                 </div>
 
                 <h3>No categories available</h3>
@@ -152,10 +127,10 @@
 
         {% endif %}
 
+    {% include 'Reservation/components/directory_pagination.html' %}
     </section>
 
 </div>
-
 
 <div class="admin-modal-backdrop"
      id="categoryArchiveModal"
@@ -167,7 +142,7 @@
          aria-labelledby="categoryModalTitle">
 
         <div class="admin-modal-header">
-            <h2 id="categoryModalTitle">Archive Category</h2>
+            <h2 id="categoryModalTitle">Deactivate Category</h2>
 
             <button type="button"
                     class="admin-modal-close"
@@ -181,7 +156,7 @@
             <p id="categoryModalMessage"></p>
 
             <p class="master-modal-note">
-                This category will be marked as archived.
+                This category will be marked as inactive.
             </p>
         </div>
 
@@ -196,7 +171,7 @@
                     id="confirmCategoryArchive"
                     class="admin-modal-primary"
                     onclick="submitCategoryArchive()">
-                Archive Category
+                Deactivate Category
             </button>
         </div>
 
@@ -211,6 +186,13 @@ let selectedCategoryArchiveForm = null;
 let categoryPreviousFocus = null;
 
 function openCategoryArchive(button) {
+    if (window.SpasyoConfirm?.open({
+        title: 'Deactivate this category?',
+        record: button.dataset.categoryName,
+        description: 'This category will be marked as inactive.',
+        actionLabel: 'Deactivate',
+        onConfirm: () => document.getElementById(button.dataset.formId).submit()
+    })) return;
     const modal = document.getElementById("categoryArchiveModal");
     const message = document.getElementById("categoryModalMessage");
 
@@ -221,7 +203,7 @@ function openCategoryArchive(button) {
     categoryPreviousFocus = button;
 
     message.textContent =
-        `Are you sure you want to archive "${button.dataset.categoryName}"?`;
+        `Are you sure you want to deactivate "${button.dataset.categoryName}"?`;
 
     modal.hidden = false;
     document.body.classList.add("modal-open");

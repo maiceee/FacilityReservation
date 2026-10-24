@@ -1,0 +1,5 @@
+<header class="print-header">
+    <div class="document-brand">{% include 'Reservation/components/brand.html' with full=True %}</div>
+    <div class="print-title"><h1>{{ title }}</h1><p>{{ subtitle }}</p></div>
+</header>
+<div class="print-ref"><span>Reservation number</span><strong>#{{ reservation.id }}</strong></div>

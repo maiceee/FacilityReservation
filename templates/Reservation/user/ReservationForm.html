@@ -1,101 +1,29 @@
-
 {% extends 'Reservation/user/UserBase.html' %}
-
-{% block title %}Request Reservation | CampusSpace{% endblock %}
-
+{% block title %}Request a reservation | Spasyo{% endblock %}
+{% block breadcrumb %}Find a space / Request{% endblock %}
 {% block content %}
-
-<div class="user-modern-page">
-
-    <div class="user-page-header">
-
-        <span class="user-section-eyebrow">NEW BOOKING</span>
-
-        <h1>Request Reservation</h1>
-
-        <p>
-            Complete the form below to submit a facility
-            reservation request for administrator review.
-        </p>
+<div class="user-modern-page workspace-page" data-workspace-page="form">
+    <div class="user-page-header"><div><a href="{% url 'browse_facilities' %}" class="user-back-link">{% include 'Reservation/components/icon.html' with name='arrow-left' %}Back to facilities</a><h1>Request a reservation</h1></div></div>
+<div class="workspace-detail-body" role="region" aria-label="Form content" tabindex="0">
+    <div class="stack">
+        <section class="user-form-card">
+            <div class="user-card-heading"><div><h2>Event details</h2>{% include 'Reservation/components/hint.html' with label='Booking help' text='Fields marked * are required. Use Philippine local time and check facility hours. Your request remains Pending until approved; pending requests do not hold a time slot.' %}</div></div>
+            <form method="post" class="user-reservation-form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="user-form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="user-form-grid">
+                    {% include 'Reservation/components/field.html' with field=form.facility extra_class='field-wide' %}
+                    {% include 'Reservation/components/field.html' with field=form.event_name extra_class='field-wide' %}
+                    {% include 'Reservation/components/field.html' with field=form.start_datetime %}
+                    {% include 'Reservation/components/field.html' with field=form.end_datetime %}
+                    {% include 'Reservation/components/field.html' with field=form.expected_attendees %}
+                    {% include 'Reservation/components/field.html' with field=form.purpose extra_class='field-wide' %}
+                </div>
+                <div class="user-form-footer"><a href="{% url 'user_dashboard' %}" class="button">Cancel</a><button type="submit" class="button button-primary">Submit request{% include 'Reservation/components/icon.html' with name='arrow-right' %}</button></div>
+            </form>
+        </section>
 
     </div>
-
-    <section class="user-form-card">
-
-        <div class="user-card-heading">
-            <div>
-                <h2>Reservation Information</h2>
-                <p>Provide the event details and preferred schedule.</p>
-            </div>
-        </div>
-
-        <form method="post" class="user-reservation-form">
-
-            {% csrf_token %}
-
-            {% if form.non_field_errors %}
-
-                <div class="user-form-alert" role="alert">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-
-            {% endif %}
-
-            <div class="user-form-grid">
-
-                {% for field in form %}
-
-                    <div class="user-form-group">
-
-                        <label for="{{ field.id_for_label }}">
-                            {{ field.label }}
-
-                            {% if field.field.required %}
-                                <span class="user-required">*</span>
-                            {% endif %}
-                        </label>
-
-                        <div class="user-field-control">
-                            {{ field }}
-                        </div>
-
-                        {% if field.help_text %}
-                            <span class="user-field-help">
-                                {{ field.help_text }}
-                            </span>
-                        {% endif %}
-
-                        {% for error in field.errors %}
-                            <span class="user-field-error" role="alert">
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-
-                    </div>
-
-                {% endfor %}
-
-            </div>
-
-            <div class="user-form-footer">
-
-                <a href="{% url 'user_dashboard' %}"
-                   class="user-outline-button">
-                    Cancel
-                </a>
-
-                <button type="submit" class="user-primary-button">
-                    Submit Reservation Request
-                </button>
-
-            </div>
-
-        </form>
-
-    </section>
-
 </div>
-
+</div>
 {% endblock %}

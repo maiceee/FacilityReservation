@@ -2,52 +2,38 @@
 {% extends 'Reservation/admin/AdminBase.html' %}
 {% load static %}
 
-{% block title %}Reports & Analytics | CampusSpace{% endblock %}
+{% block title %}Reports & Analytics | Spasyo{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'Reservation/css/admin/report-admin.css' %}?v=6">
+
 {% endblock %}
 
 {% block content %}
-<div class="ra-page">
+<div class="ra-page workspace-page" data-workspace-page="reports" data-tabs data-reset-scroll>
 
     <header class="ra-header">
         <div class="ra-header-copy">
             <span class="ra-eyebrow">SYSTEM INSIGHTS</span>
             <h1>Reports &amp; Analytics</h1>
-            <p>Monitor reservation activity and facility utilization.</p>
+
         </div>
 
         <div class="ra-export-actions">
-            <a href="{% url 'export_reservations_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}"
+            <a href="{% url 'export_reservations_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;{{ facility_query }}"
                class="ra-export-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-                     aria-hidden="true">
-                    <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3"/>
-                </svg>
+                {% include 'Reservation/components/icon.html' with name='download' %}
                 Reservations CSV
             </a>
 
-            <a href="{% url 'export_facility_usage_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}"
+            <a href="{% url 'export_facility_usage_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;{{ facility_query }}"
                class="ra-export-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-                     aria-hidden="true">
-                    <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3"/>
-                </svg>
+                {% include 'Reservation/components/icon.html' with name='download' %}
                 Facility Usage CSV
             </a>
         </div>
     </header>
 
     <section class="ra-card">
-        <div class="ra-section-heading">
-            <div>
-                <h2>Report Filters</h2>
-                <p>Select a date range to view matching records.</p>
-            </div>
-        </div>
 
         <form method="get" class="ra-filter-form">
             <div class="ra-field">
@@ -62,9 +48,20 @@
                        value="{{ end_date }}">
             </div>
 
+            <div class="ra-field"><label id="report-facility-label">Facilities</label>
+            <details class="report-facility-filter">
+                <summary aria-labelledby="report-facility-label">Select facilities <span>({{ selected_facilities|length|default:'All' }})</span></summary>
+                <div class="report-facility-options">
+                    <label for="report-facility-search">Find a facility</label>
+                    <input type="search" id="report-facility-search" placeholder="Search facilities…" data-report-search>
+                    <p class="field-help">Choose one or more. No selection includes all.</p>
+                    {% for facility in report_facilities %}<label data-report-option><input type="checkbox" name="facility" value="{{ facility.pk }}" {% if facility.pk in selected_facilities %}checked{% endif %}>{{ facility.name }}</label>{% endfor %}
+                    <button type="button" class="button" data-report-clear>Clear selection</button>
+                </div>
+            </details><span class="field-help">Choose one or more facilities.</span></div>
             <div class="ra-filter-actions">
-                <button type="submit" class="ra-primary-btn">Apply Filter</button>
-                <a href="{% url 'reports' %}" class="ra-clear-btn">Clear</a>
+                <button type="submit" class="icon-button ra-primary-btn" aria-label="Apply filters" title="Apply filters">{% include 'Reservation/components/icon.html' with name='check' %}</button>
+                <a href="{% url 'reports' %}" class="icon-button ra-clear-btn" aria-label="Clear filters" title="Clear filters">{% include 'Reservation/components/icon.html' with name='x' %}</a>
             </div>
         </form>
     </section>
@@ -74,70 +71,59 @@
             <div class="ra-summary-top">
                 <span class="ra-summary-label">Total Reservations</span>
                 <span class="ra-summary-icon ra-icon-red" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="5" width="18" height="16" rx="2"/>
-                        <path d="M7 3v4M17 3v4M3 10h18"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='calendar-days' %}
                 </span>
             </div>
             <div class="ra-summary-value">{{ total_reservations }}</div>
-            <p>Reservations within the selected date range</p>
+
         </article>
 
         <article class="ra-summary-card">
             <div class="ra-summary-top">
                 <span class="ra-summary-label">Completed Events</span>
                 <span class="ra-summary-icon ra-icon-green" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="m8 12 3 3 5-6"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='circle-check' %}
                 </span>
             </div>
             <div class="ra-summary-value">{{ completed_reservations }}</div>
-            <p>Successfully completed reservations</p>
+
         </article>
 
         <article class="ra-summary-card">
             <div class="ra-summary-top">
                 <span class="ra-summary-label">Total Booked Hours</span>
                 <span class="ra-summary-icon ra-icon-blue" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="M12 7v5l3 2"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='clock-3' %}
                 </span>
             </div>
             <div class="ra-summary-value">
                 {{ total_booked_hours }} <span class="ra-value-unit">hrs</span>
             </div>
-            <p>Recorded facility booking duration</p>
+
         </article>
     </section>
 
-    <section class="ra-card ra-report-card">
+    <nav class="workspace-tabs report-tabs" data-tablist aria-label="Report type" hidden><button type="button" data-tab="report-reservations">{% include 'Reservation/components/icon.html' with name='calendar-days' %}Reservations</button><button type="button" data-tab="report-usage">{% include 'Reservation/components/icon.html' with name='building-2' %}Facility usage</button></nav>
+    <section class="ra-card ra-report-card" id="report-reservations" data-tab-panel>
         <div class="ra-section-heading">
             <div>
                 <h2>Reservation Report</h2>
-                <p>Detailed records of facility booking activity.</p>
+
             </div>
             <span class="ra-count">{{ reservations|length }} total</span>
         </div>
 
         {% if reservations %}
-        <div class="ra-table-scroll">
+        <div class="ra-table-scroll" role="region" aria-label="Data table" tabindex="0">
             <table class="ra-table">
                 <thead>
                     <tr>
-                        <th>Event</th>
-                        <th>Requester</th>
-                        <th>Facility</th>
-                        <th>Participants</th>
-                        <th>Schedule</th>
-                        <th>Status</th>
+                        <th scope="col">Event</th>
+                        <th scope="col">Requester</th>
+                        <th scope="col">Facility</th>
+
+                        <th scope="col">Schedule</th>
+                        <th scope="col">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -146,9 +132,7 @@
                         <td class="ra-event-name">{{ reservation.event_name }}</td>
                         <td>{{ reservation.user.get_full_name|default:reservation.user.username }}</td>
                         <td>{{ reservation.facility.name }}</td>
-                        <td>
-                            <span class="ra-participants-badge">{{ reservation.expected_attendees }}</span>
-                        </td>
+
                         <td>
                             <span class="ra-schedule-date">{{ reservation.start_datetime|date:"M d, Y" }}</span>
                             <small class="ra-schedule-time">
@@ -167,30 +151,29 @@
         </div>
         {% else %}
         <div class="ra-empty-state">
-            <div class="ra-empty-icon" aria-hidden="true">▤</div>
+            <div class="ra-empty-icon" aria-hidden="true">{% include 'Reservation/components/icon.html' with name='list-checks' %}</div>
             <h3>No reservation records found</h3>
             <p>Try changing the selected date range.</p>
         </div>
         {% endif %}
     </section>
 
-    <section class="ra-card ra-report-card">
+    <section class="ra-card ra-report-card" id="report-usage" data-tab-panel>
         <div class="ra-section-heading">
             <div>
                 <h2>Facility Usage</h2>
-                <p>Completed events and booked hours per facility.</p>
             </div>
             <span class="ra-count">{{ facility_usage_rows|length }} facilities</span>
         </div>
 
         {% if facility_usage_rows %}
-        <div class="ra-table-scroll">
+        <div class="ra-table-scroll" role="region" aria-label="Data table" tabindex="0">
             <table class="ra-table ra-usage-table">
                 <thead>
                     <tr>
-                        <th>Facility</th>
-                        <th>Completed Events</th>
-                        <th>Booked Hours</th>
+                        <th scope="col">Facility</th>
+                        <th scope="col">Completed Events</th>
+                        <th scope="col">Booked Hours</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -199,12 +182,7 @@
                         <td>
                             <div class="ra-facility-cell">
                                 <span class="ra-facility-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none"
-                                         stroke="currentColor" stroke-width="1.8"
-                                         stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="4" y="3" width="16" height="18" rx="2"/>
-                                        <path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>
-                                    </svg>
+                                    {% include 'Reservation/components/icon.html' with name='building-2' %}
                                 </span>
                                 <strong>{{ row.facility.name }}</strong>
                             </div>
@@ -221,7 +199,7 @@
         </div>
         {% else %}
         <div class="ra-empty-state">
-            <div class="ra-empty-icon" aria-hidden="true">▤</div>
+            <div class="ra-empty-icon" aria-hidden="true">{% include 'Reservation/components/icon.html' with name='list-checks' %}</div>
             <h3>No facility usage data available</h3>
             <p>No completed facility activity for the selected period.</p>
         </div>

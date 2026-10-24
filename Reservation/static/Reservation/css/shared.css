@@ -1,0 +1,427 @@
+/* SHARED FOUNDATIONS — used by user, administrator, and authentication layouts. */
+*, *::before, *::after  {
+    box-sizing: border-box;
+}
+
+body  {
+    margin: 0;
+    color: var(--color-text);
+    background: var(--color-canvas);
+    font: var(--font-weight-regular) var(--font-size-body) / var(--line-height) var(--font-family);
+    -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea  {
+    font: inherit;
+}
+
+a  {
+    color: inherit;
+    text-decoration: none;
+}
+
+button  {
+    cursor: pointer;
+}
+
+button:disabled  {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+h1, h2, h3, p  {
+    margin: 0;
+}
+
+h1, h2, h3, strong, th  {
+    font-weight: var(--font-weight-bold);
+}
+
+h1  {
+    font-size: var(--font-size-title);
+    line-height: 1.5;
+    padding-block: 2px;
+    overflow-wrap: anywhere;
+    letter-spacing: -.045em;
+}
+
+h2  {
+    font-size: var(--font-size-lg);
+    line-height: 1.4;
+    letter-spacing: -.025em;
+}
+
+h3  {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+p  {
+    color: var(--color-text-muted);
+}
+
+img, svg  {
+    max-width: 100%;
+}
+
+:focus-visible  {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 4px;
+}
+
+[hidden]  {
+    display: none !important;
+}
+
+.icon  {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: middle;
+}
+
+.brand  {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -.05em;
+    line-height: 1;
+}
+
+.brand-image {
+    display: block;
+    width: 8.5rem;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+.brand-image-full {
+    width: 21rem;
+}
+
+/* Buttons */
+.button, .user-outline-button, .user-danger-button  {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--control-height);
+    padding: var(--space-2) var(--space-5);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.35;
+    text-align: center;
+    transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+}
+
+.button:hover, .user-outline-button:hover  {
+    background: var(--color-canvas);
+    border-color: var(--color-text-muted);
+}
+
+.button-primary  {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.button-primary:hover  {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+.user-danger-button  {
+    border-color: var(--color-text);
+}
+
+.user-danger-button:hover  {
+    background: var(--color-text);
+    color: var(--color-on-primary);
+}
+
+.text-link  {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.text-link:hover  {
+    color: var(--color-text-muted);
+}
+
+/* Forms */
+.field, .user-form-group  {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    min-width: 0;
+}
+
+label  {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+}
+
+input:not([type='checkbox']):not([type='hidden']), select, textarea  {
+    width: 100%;
+    min-width: 0;
+    min-height: var(--control-height);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+}
+
+textarea  {
+    min-height: 8rem;
+    resize: vertical;
+}
+
+/* Keep numeric keyboard stepping; omit the browser's boxed spinner decoration. */
+input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+}
+
+/* The original boolean checkbox remains the submitted control. */
+:root input[type='checkbox'][name='is_active'] {
+    appearance: none;
+    position: relative;
+    width: 2rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+    margin: 0;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--clr-neutral-300);
+    cursor: pointer;
+    vertical-align: middle;
+}
+input[type='checkbox'][name='is_active']::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: .75rem;
+    height: .75rem;
+    border-radius: 50%;
+    background: var(--color-surface);
+}
+input[type='checkbox'][name='is_active']:checked {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+input[type='checkbox'][name='is_active']:checked::before {
+    transform: translateX(.875rem);
+}
+@media (forced-colors: active) {
+    :root input[type='checkbox'][name='is_active'] {
+        appearance: auto;
+    }
+    input[type='checkbox'][name='is_active']::before {
+        display: none;
+    }
+}
+
+input::placeholder, textarea::placeholder  {
+    color: var(--color-text-muted);
+}
+
+input:focus-visible, select:focus-visible, textarea:focus-visible  {
+    outline-offset: 2px;
+}
+
+input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='true']  {
+    border: 2px solid var(--color-text);
+}
+
+.field-help  {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+}
+
+.field-error  {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+}
+
+.field-help ul  {
+    padding-left: var(--space-5);
+    margin: 0;
+}
+
+/* Feedback and identity */
+.notice, .user-flash-message, .user-form-alert, .auth-alert  {
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.notice  {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+}
+
+.notice .icon  {
+    margin-top: var(--space-1);
+}
+
+.notice p  {
+    margin-top: var(--space-1);
+    font-size: var(--font-size-sm);
+}
+
+.user-form-alert, .auth-alert  {
+    border-left: 3px solid var(--color-text);
+}
+
+.avatar  {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--color-canvas);
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+.avatar-large  {
+    width: 4rem;
+    height: 4rem;
+    font-size: 1.5rem;
+}
+
+.skip-link  {
+    position: fixed;
+    top: -5rem;
+    left: var(--space-4);
+    z-index: 100;
+    padding: var(--space-3);
+    background: var(--color-surface);
+    border: 2px solid var(--color-text);
+}
+
+.skip-link:focus  {
+    top: var(--space-4);
+}
+
+.sr-only  {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Native date/time and select controls cannot display text placeholders. */
+.field-example {
+    display: block;
+    flex-basis: 100%;
+    margin-top: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: .6875rem;
+    font-weight: var(--font-weight-regular);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+.field-example.is-inline {
+    display: inline;
+    margin: 0 0 0 var(--space-1);
+}
+
+@media (prefers-reduced-motion: reduce)  {
+    *, *::before, *::after  {
+        scroll-behavior: auto !important;
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Familiar icon actions retain accessible names and native hover hints. */
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: var(--control-height);
+    min-width: var(--control-height);
+    min-height: var(--control-height);
+    padding: var(--space-2);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+}
+
+/* Native details is the fallback; interactions.js enhances help into a side popover. */
+.ui-hint {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: middle;
+    font-size: var(--font-size-xs);
+}
+
+.ui-hint summary {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    list-style: none;
+}
+
+.ui-hint summary::-webkit-details-marker {
+    display: none;
+}
+
+.ui-hint summary:hover, .ui-hint[open] summary {
+    background: var(--color-canvas);
+    color: var(--color-text);
+}
+
+.ui-hint-content {
+    max-width: 32rem;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-subtle);
+    overflow-wrap: anywhere;
+}
+
+h2:has(+ .ui-hint), h3:has(+ .ui-hint) {
+    display: inline;
+}
+
+/* One vertical content scrollbar; horizontal table/calendar rails stay subtle. */
+:is(.content, .user-main-content, .auth-form-scroll, .sidebar-nav, .user-sidebar,
+    [class$='table-scroll'], .table-responsive, .calendar-days-grid) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+}

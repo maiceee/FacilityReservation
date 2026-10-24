@@ -1,79 +1,24 @@
 {% extends 'Reservation/admin/AdminBase.html' %}
 
-{% block title %}Facilities | CampusSpace{% endblock %}
+{% block title %}Facilities | Spasyo{% endblock %}
 
 {% block content %}
-<div class="facilities-page">
+<div class="facilities-page workspace-page" data-workspace-page="directory">
 
     <header class="facilities-header">
         <div>
             <h1>Facilities</h1>
-            <p>Manage campus spaces, operating hours, capacity, and availability.</p>
+
         </div>
 
-        <a href="{% url 'facility_create' %}"
+        <a href="{% url 'facility_create' %}" data-edit-dialog data-editor-kind="facility"
            class="facility-add-button">
-            <svg viewBox="0 0 24 24"
-                 width="18"
-                 height="18"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2"
-                 stroke-linecap="round"
-                 aria-hidden="true">
-                <path d="M12 5v14M5 12h14"/>
-            </svg>
+            {% include 'Reservation/components/icon.html' with name='plus' %}
             Add Facility
         </a>
     </header>
 
-    <section class="facility-filter-card"
-             aria-labelledby="facility-search-title">
-        <form method="get"
-              class="facility-search-form"
-              role="search">
-            <div class="facility-search-field">
-                <label for="facility-search"
-                       id="facility-search-title">
-                    Search facilities
-                </label>
-
-                <div class="facility-search-input">
-                    <svg viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
-                         aria-hidden="true">
-                        <circle cx="11" cy="11" r="7"/>
-                        <path d="m20 20-4-4"/>
-                    </svg>
-
-                    <input type="search"
-                           id="facility-search"
-                           name="search"
-                           value="{{ search_query }}"
-                           placeholder="Search by code, name, category, or location"
-                           autocomplete="off">
-                </div>
-            </div>
-
-            <div class="facility-search-actions">
-                <button type="submit"
-                        class="facility-search-button">
-                    Search
-                </button>
-
-                {% if search_query %}
-                    <a href="{% url 'facility_list' %}"
-                       class="facility-clear-button">
-                        Clear
-                    </a>
-                {% endif %}
-            </div>
-        </form>
-    </section>
+    {% include 'Reservation/components/directory_controls.html' %}
 
     <section class="facility-table-card"
              aria-labelledby="facility-directory-title">
@@ -85,7 +30,7 @@
                         Results for “{{ search_query }}”
                     </p>
                 {% else %}
-                    <p>All registered campus facilities and their current status.</p>
+
                 {% endif %}
             </div>
 
@@ -95,15 +40,16 @@
         </div>
 
         {% if facilities %}
-            <div class="facility-table-scroll">
+            <div class="facility-table-scroll" role="region" aria-label="Data table" tabindex="0">
                 <table class="facility-table">
                     <thead>
                         <tr>
+                            <th scope="col" class="selection-cell"><input type="checkbox" data-select-page aria-label="Select all records on this page"></th>
                             <th scope="col">Facility</th>
                             <th scope="col">Category</th>
-                            <th scope="col">Location</th>
+
                             <th scope="col">Capacity</th>
-                            <th scope="col">Operating hours</th>
+
                             <th scope="col">Status</th>
                             <th scope="col">Actions</th>
                         </tr>
@@ -112,19 +58,12 @@
                     <tbody>
                         {% for facility in facilities %}
                             <tr>
+                                <td class="selection-cell"><input type="checkbox" name="selected" value="{{ facility.id }}:{% if facility.is_active %}1{% else %}0{% endif %}" form="directory-bulk" data-select-record data-name="{{ facility.name }}" aria-label="Select {{ facility.name }}"></td>
                                 <td>
                                     <div class="facility-name-cell">
                                         <div class="facility-icon-box"
                                              aria-hidden="true">
-                                            <svg viewBox="0 0 24 24"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 stroke-width="1.8"
-                                                 stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <rect x="4" y="3" width="16" height="18" rx="2"/>
-                                                <path d="M9 21v-5h6v5M8 8h2m4 0h2M8 12h2m4 0h2"/>
-                                            </svg>
+                                            {% include 'Reservation/components/icon.html' with name='building-2' %}
                                         </div>
 
                                         <div class="facility-name-details">
@@ -140,21 +79,9 @@
                                     </span>
                                 </td>
 
-                                <td class="facility-location">
-                                    {{ facility.location }}
-                                </td>
-
                                 <td>
                                     <span class="facility-capacity">
                                         {{ facility.capacity }} people
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="facility-hours">
-                                        {{ facility.opening_time|time:"g:i A" }}
-                                        –
-                                        {{ facility.closing_time|time:"g:i A" }}
                                     </span>
                                 </td>
 
@@ -169,31 +96,29 @@
                                         <span class="management-status is-inactive">
                                             <span class="management-status-dot"
                                                   aria-hidden="true"></span>
-                                            Archived
+                                            Inactive
                                         </span>
                                     {% endif %}
                                 </td>
 
                                 <td>
                                     <div class="facility-row-actions">
-                                        <a href="{% url 'facility_update' facility.id %}"
-                                           class="facility-edit-button"
-                                           aria-label="Edit {{ facility.name }}">
-                                            Edit
-                                        </a>
+                                        <a href="{% url 'facility_update' facility.id %}" data-edit-dialog
+                                           class="icon-button facility-edit-button"
+                                           aria-label="Edit {{ facility.name }}" title="Edit {{ facility.name }}">{% include 'Reservation/components/icon.html' with name='pencil' %}</a>
 
                                         {% if facility.is_active %}
                                             <form method="post"
                                                   action="{% url 'facility_archive' facility.id %}"
                                                   class="facility-archive-form"
-                                                  data-facility-name="{{ facility.name }}">
+                                                  data-facility-name="{{ facility.name }}"
+                                                  data-facility-code="{{ facility.facility_code }}"
+                                                  data-facility-location="{{ facility.location }}">
                                                 {% csrf_token %}
 
                                                 <button type="submit"
-                                                        class="facility-archive-button"
-                                                        aria-label="Archive {{ facility.name }}">
-                                                    Archive
-                                                </button>
+                                                        class="icon-button facility-archive-button"
+                                                        aria-label="Deactivate {{ facility.name }}" title="Deactivate {{ facility.name }}">{% include 'Reservation/components/icon.html' with name='x' %}</button>
                                             </form>
                                         {% endif %}
                                     </div>
@@ -207,17 +132,7 @@
             <div class="facility-empty-state">
                 <div class="facility-empty-icon"
                      aria-hidden="true">
-                    <svg viewBox="0 0 24 24"
-                         width="29"
-                         height="29"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <rect x="4" y="3" width="16" height="18" rx="2"/>
-                        <path d="M9 21v-5h6v5M8 8h2m4 0h2M8 12h2m4 0h2"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='building-2' %}
                 </div>
 
                 {% if search_query %}
@@ -233,7 +148,7 @@
                     <h3>No facilities yet</h3>
                     <p>Add the first campus facility to begin accepting reservations.</p>
                     <div class="facility-empty-actions">
-                        <a href="{% url 'facility_create' %}"
+                        <a href="{% url 'facility_create' %}" data-edit-dialog data-editor-kind="facility"
                            class="facility-add-button">
                             Add Facility
                         </a>
@@ -241,6 +156,7 @@
                 {% endif %}
             </div>
         {% endif %}
+    {% include 'Reservation/components/directory_pagination.html' %}
     </section>
 
 </div>
@@ -254,21 +170,12 @@
          aria-labelledby="facilityArchiveTitle"
          aria-describedby="facilityArchiveMessage facilityArchiveNote">
         <div class="admin-modal-header">
-            <h2 id="facilityArchiveTitle">Archive facility</h2>
+            <h2 id="facilityArchiveTitle">Deactivate facility</h2>
 
             <button type="button"
                     class="admin-modal-close"
                     aria-label="Close archive confirmation">
-                <svg viewBox="0 0 24 24"
-                     width="18"
-                     height="18"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="2"
-                     stroke-linecap="round"
-                     aria-hidden="true">
-                    <path d="m6 6 12 12M18 6 6 18"/>
-                </svg>
+                {% include 'Reservation/components/icon.html' with name='x' %}
             </button>
         </div>
 
@@ -276,7 +183,7 @@
             <p id="facilityArchiveMessage"></p>
             <p class="facility-modal-note"
                id="facilityArchiveNote">
-                Archived facilities remain in the directory but cannot accept new reservations.
+                Inactive facilities remain in the directory but cannot accept new reservations.
             </p>
         </div>
 
@@ -289,7 +196,7 @@
             <button type="button"
                     id="confirmFacilityArchive"
                     class="admin-modal-primary">
-                Archive facility
+                Deactivate facility
             </button>
         </div>
     </div>
@@ -311,10 +218,22 @@
     let archiveConfirmed = false;
 
     function openArchiveModal(form) {
+        if (window.SpasyoConfirm?.open({
+            title: 'Deactivate this facility?',
+            record: form.dataset.facilityName,
+            details: `${form.dataset.facilityCode} · ${form.dataset.facilityLocation}`,
+            description: 'Inactive facilities remain in the directory but cannot accept new reservations.',
+            actionLabel: 'Deactivate',
+            onConfirm: () => {
+                archiveConfirmed = true;
+                try { form.requestSubmit(); }
+                finally { archiveConfirmed = false; }
+            }
+        })) return;
         selectedForm = form;
         previousFocus = document.activeElement;
         message.textContent =
-            `Archive “${form.dataset.facilityName}”?`;
+            `Deactivate “${form.dataset.facilityName}”?`;
 
         modal.hidden = false;
         document.body.classList.add("modal-open");

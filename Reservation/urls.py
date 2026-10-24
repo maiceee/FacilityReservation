@@ -2,9 +2,11 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 
 from . import views
+from .directory import directory_bulk
 
 
 urlpatterns = [
+    path("manage/directory/<str:kind>/bulk/", directory_bulk, name="directory_bulk"),
 
     # =====================================================
     # AUTHENTICATION

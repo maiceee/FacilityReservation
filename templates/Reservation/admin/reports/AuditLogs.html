@@ -2,21 +2,21 @@
 {% extends 'Reservation/admin/AdminBase.html' %}
 {% load static %}
 
-{% block title %}Audit Logs | CampusSpace{% endblock %}
+{% block title %}Audit Logs | Spasyo{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'Reservation/css/admin/system-admin.css' %}?v=2">
+
 {% endblock %}
 
 {% block content %}
 
-<div class="system-page">
+<div class="system-page workspace-page" data-workspace-page="directory">
 
     <div class="system-page-header">
         <div>
             <span class="page-eyebrow">SYSTEM ADMINISTRATION</span>
             <h1>Audit Logs</h1>
-            <p>Review important system activities and administrative actions.</p>
+
         </div>
     </div>
 
@@ -28,16 +28,7 @@
                 <label for="audit-search">Search Audit Logs</label>
 
                 <div class="system-search-input-wrap">
-                    <svg viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         stroke-linecap="round"
-                         stroke-linejoin="round"
-                         aria-hidden="true">
-                        <circle cx="11" cy="11" r="7"/>
-                        <path d="m20 20-4-4"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='search' %}
 
                     <input
                         id="audit-search"
@@ -50,15 +41,11 @@
             </div>
 
             <div class="system-search-actions">
-                <button type="submit" class="system-primary-btn">
-                    Search
-                </button>
+                <button type="submit" class="system-primary-btn icon-button" aria-label="Search audit logs" title="Search audit logs">{% include 'Reservation/components/icon.html' with name='search' %}</button>
 
                 {% if search_query %}
                     <a href="{% url 'audit_logs' %}"
-                       class="system-outline-btn">
-                        Clear
-                    </a>
+                       class="system-outline-btn icon-button" aria-label="Clear search" title="Clear search">{% include 'Reservation/components/icon.html' with name='x' %}</a>
                 {% endif %}
             </div>
 
@@ -71,7 +58,7 @@
         <div class="system-card-heading">
             <div>
                 <h2>Activity History</h2>
-                <p>Recorded system actions and their associated details</p>
+
             </div>
 
             <span class="system-count">
@@ -81,16 +68,16 @@
 
         {% if logs %}
 
-            <div class="system-table-scroll">
+            <div class="system-table-scroll" role="region" aria-label="Data table" tabindex="0">
 
                 <table class="system-table">
                     <thead>
                         <tr>
-                            <th>Timestamp</th>
-                            <th>Actor</th>
-                            <th>Action</th>
-                            <th>Reference</th>
-                            <th>Description</th>
+                            <th scope="col">Timestamp</th>
+                            <th scope="col">Actor</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">Reference</th>
+                            <th scope="col">Description</th>
                         </tr>
                     </thead>
 
@@ -139,7 +126,7 @@
                                 </td>
 
                                 <td class="system-description">
-                                    {{ log.description|default:"—" }}
+                                    <details><summary>Details<span class="sr-only"> for {{ log.action }} · {{ log.timestamp|date:"M d, Y g:i A" }}</span></summary>{{ log.description|default:"—" }}</details>
                                 </td>
 
                             </tr>
@@ -153,7 +140,7 @@
         {% else %}
 
             <div class="system-empty-state">
-                <div class="system-empty-icon" aria-hidden="true">▤</div>
+                <div class="system-empty-icon" aria-hidden="true">{% include 'Reservation/components/icon.html' with name='list-checks' %}</div>
                 <h3>No audit log records found</h3>
                 <p>Try another search or check back after system activity.</p>
             </div>

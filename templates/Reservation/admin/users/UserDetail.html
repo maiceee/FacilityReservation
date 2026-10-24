@@ -1,31 +1,27 @@
 
 {% extends 'Reservation/admin/AdminBase.html' %}
 
-{% block title %}User Details | CampusSpace{% endblock %}
+{% block title %}User Details | Spasyo{% endblock %}
 
 {% block content %}
 
-<div class="user-detail-page">
+<div class="user-detail-page workspace-page" data-workspace-page="detail">
 
     <!-- PAGE HEADER -->
     <div class="user-detail-header">
         <div>
             <span class="page-eyebrow">ACCOUNT MANAGEMENT</span>
             <h1>User Details</h1>
-            <p>View account information and reservation history.</p>
+
         </div>
 
         <a href="{% url 'user_management' %}"
            class="user-detail-back">
-            <svg viewBox="0 0 24 24" width="17" height="17"
-                 fill="none" stroke="currentColor"
-                 stroke-width="1.8" stroke-linecap="round"
-                 stroke-linejoin="round" aria-hidden="true">
-                <path d="m15 18-6-6 6-6M9 12h12"/>
-            </svg>
+            {% include 'Reservation/components/icon.html' with name='arrow-left' %}
             Back to Users
         </a>
     </div>
+<div class="workspace-detail-body" role="region" aria-label="Details" tabindex="0">
 
     <!-- PROFILE OVERVIEW -->
     <section class="user-detail-profile-card">
@@ -70,7 +66,7 @@
         <div class="user-detail-section-heading">
             <div>
                 <h2>Account Information</h2>
-                <p>Registered user information</p>
+
             </div>
         </div>
 
@@ -141,7 +137,7 @@
         <div class="user-detail-section-heading">
             <div>
                 <h2>Reservation History</h2>
-                <p>Previous and current facility reservation records</p>
+
             </div>
 
             <span class="management-count">
@@ -151,17 +147,17 @@
 
         {% if reservation_history %}
 
-            <div class="user-detail-table-scroll">
+            <div class="user-detail-table-scroll" role="region" aria-label="Data table" tabindex="0">
                 <table class="user-detail-history-table">
 
                     <thead>
                         <tr>
-                            <th>Event</th>
-                            <th>Facility</th>
-                            <th>Start</th>
-                            <th>End</th>
-                            <th>Status</th>
-                            <th>Details</th>
+                            <th scope="col">Event</th>
+                            <th scope="col">Facility</th>
+                            <th scope="col">Schedule</th>
+
+                            <th scope="col">Status</th>
+                            <th scope="col">Details</th>
                         </tr>
                     </thead>
 
@@ -177,19 +173,7 @@
                                     {{ reservation.facility.name }}
                                 </td>
 
-                                <td>
-                                    {{ reservation.start_datetime|date:"M d, Y" }}
-                                    <span class="user-detail-time">
-                                        {{ reservation.start_datetime|date:"h:i A" }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    {{ reservation.end_datetime|date:"M d, Y" }}
-                                    <span class="user-detail-time">
-                                        {{ reservation.end_datetime|date:"h:i A" }}
-                                    </span>
-                                </td>
+                                <td>{{ reservation.start_datetime|date:"M d, Y" }}<span class="user-detail-time">{{ reservation.start_datetime|date:"g:i A" }} – {% if reservation.start_datetime.date != reservation.end_datetime.date %}{{ reservation.end_datetime|date:"M d, Y" }} · {% endif %}{{ reservation.end_datetime|date:"g:i A" }}</span></td>
 
                                 <td>
                                     <span class="status-badge status-{{ reservation.status|lower }}">
@@ -200,8 +184,8 @@
                                 <td>
                                     <a
                                         href="{% url 'reservation_detail_admin' reservation.id %}"
-                                        class="user-detail-view-link">
-                                        View Details →
+                                        class="user-detail-view-link icon-button" aria-label="View {{ reservation.event_name }}" title="View reservation">
+                                        {% include 'Reservation/components/icon.html' with name='arrow-right' %}
                                     </a>
                                 </td>
 
@@ -216,13 +200,7 @@
 
             <div class="user-detail-empty">
                 <div class="user-detail-empty-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="27" height="27"
-                         fill="none" stroke="currentColor"
-                         stroke-width="1.8" stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <rect x="3" y="5" width="18" height="16" rx="2"/>
-                        <path d="M7 3v4M17 3v4M3 10h18"/>
-                    </svg>
+                    {% include 'Reservation/components/icon.html' with name='calendar-days' %}
                 </div>
 
                 <h3>No reservation history</h3>
@@ -233,6 +211,7 @@
 
     </section>
 
+</div>
 </div>
 
 {% endblock %}

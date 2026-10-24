@@ -1,271 +1,30 @@
-
 {% extends 'Reservation/user/UserBase.html' %}
-{% load static %}
-
-{% block title %}User Dashboard | CampusSpace{% endblock %}
-
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'Reservation/css/user/user-pages.css' %}?v=2">
-{% endblock %}
-
+{% block title %}Home | Spasyo{% endblock %}
 {% block content %}
-
-<div class="user-modern-page">
-
-    <div class="user-welcome-banner">
-
-        <div class="user-welcome-content">
-
-            <span class="user-welcome-eyebrow">
-                CAMPUS FACILITY PORTAL
-            </span>
-
-            <h1>
-                Welcome back,
-                {{ request.user.first_name|default:request.user.username }}!
-            </h1>
-
-            <p>
-                Find the right space for your next event and
-                manage your facility reservations in one place.
-            </p>
-
-            <a href="{% url 'browse_facilities' %}"
-               class="user-welcome-button">
-                Explore Facilities
-                <span aria-hidden="true">→</span>
-            </a>
-
-        </div>
-
-        <div class="user-welcome-decoration" aria-hidden="true">
-            <div class="user-decoration-circle circle-one"></div>
-            <div class="user-decoration-circle circle-two"></div>
-            <div class="user-decoration-grid"></div>
-        </div>
-
+<div class="user-modern-page workspace-page" data-workspace-page="home">
+    <div class="user-page-header">
+        <div><h1>A space for your next idea.</h1></div>
+        <a href="{% url 'browse_facilities' %}" class="button button-primary">Find a space{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>
     </div>
-
-    <div class="user-section-heading">
-        <div>
-            <span class="user-section-eyebrow">GET STARTED</span>
-            <h2>Quick Actions</h2>
-            <p>Everything you need to manage your campus bookings.</p>
-        </div>
+    <div class="dashboard-grid">
+        <section class="panel next-booking">
+            <div class="panel-heading"><div><h2>Next on your schedule</h2></div></div>
+            {% if upcoming_reservations %}{% with reservation=upcoming_reservations.0 %}
+            <div class="panel-body">
+                <h3 class="next-booking-title">{{ reservation.event_name }}</h3>
+                {% include 'Reservation/components/status.html' %}
+                <div class="booking-meta">{% include 'Reservation/components/icon.html' with name='building-2' %}<span>{{ reservation.facility.name }}</span></div>
+                <div class="booking-meta">{% include 'Reservation/components/icon.html' with name='calendar-days' %}<span>{{ reservation.start_datetime|date:"M d, Y · g:i A" }} – {{ reservation.end_datetime|date:"M d, Y · g:i A" }}</span></div>
+                <a href="{% url 'reservation_detail_user' reservation.id %}" class="button">View reservation{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>
+            </div>{% endwith %}{% else %}
+            <div class="user-empty-state">{% include 'Reservation/components/icon.html' with name='calendar-days' %}<h3>Your first gathering starts here.</h3><p>You don't have any upcoming reservations yet.</p><a href="{% url 'browse_facilities' %}" class="button button-primary">Explore campus spaces</a></div>
+            {% endif %}
+        </section>
+        {% include 'Reservation/components/booking_steps.html' %}
     </div>
-
-    <div class="user-action-grid">
-
-        <a href="{% url 'browse_facilities' %}"
-           class="user-action-card">
-
-            <span class="user-action-icon action-indigo">
-                <svg viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.8"
-                     stroke-linecap="round"
-                     stroke-linejoin="round"
-                     aria-hidden="true">
-                    <rect x="4" y="3" width="16" height="18" rx="2"/>
-                    <path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>
-                </svg>
-            </span>
-
-            <h3>Browse Facilities</h3>
-
-            <p>
-                Explore campus spaces, capacities,
-                amenities, and operating hours.
-            </p>
-
-            <span class="user-action-link">
-                Browse Facilities →
-            </span>
-
-        </a>
-
-        <a href="{% url 'reservation_create' %}"
-           class="user-action-card">
-
-            <span class="user-action-icon action-cyan">
-                <svg viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.8"
-                     stroke-linecap="round"
-                     stroke-linejoin="round"
-                     aria-hidden="true">
-                    <rect x="3" y="5" width="18" height="16" rx="2"/>
-                    <path d="M7 3v4M17 3v4M3 10h18M12 13v5M9.5 15.5h5"/>
-                </svg>
-            </span>
-
-            <h3>Request Reservation</h3>
-
-            <p>
-                Submit a booking request for
-                your preferred facility and schedule.
-            </p>
-
-            <span class="user-action-link">
-                Create Request →
-            </span>
-
-        </a>
-
-        <a href="{% url 'my_reservations' %}"
-           class="user-action-card">
-
-            <span class="user-action-icon action-green">
-                <svg viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.8"
-                     stroke-linecap="round"
-                     stroke-linejoin="round"
-                     aria-hidden="true">
-                    <path d="M8 6h13M8 12h13M8 18h13"/>
-                    <path d="m3 6 1.5 1.5L6 5M3 12l1.5 1.5L6 11M3 18l1.5 1.5L6 17"/>
-                </svg>
-            </span>
-
-            <h3>My Reservations</h3>
-
-            <p>
-                Track reservation statuses and
-                review your upcoming schedules.
-            </p>
-
-            <span class="user-action-link">
-                View Reservations →
-            </span>
-
-        </a>
-
-    </div>
-
     <section class="user-data-card">
-
-        <div class="user-data-heading">
-
-            <div>
-                <span class="user-section-eyebrow">
-                    YOUR SCHEDULE
-                </span>
-
-                <h2>Upcoming Reservations</h2>
-
-                <p>Keep track of your scheduled facility bookings.</p>
-            </div>
-
-            <a href="{% url 'my_reservations' %}"
-               class="user-outline-button">
-                View All →
-            </a>
-
-        </div>
-
-        {% if upcoming_reservations %}
-
-            <div class="user-table-scroll">
-
-                <table class="user-modern-table">
-
-                    <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>Facility</th>
-                            <th>Schedule</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {% for reservation in upcoming_reservations %}
-
-                            <tr>
-
-                                <td>
-                                    <strong class="user-table-primary">
-                                        {{ reservation.event_name }}
-                                    </strong>
-                                </td>
-
-                                <td>
-                                    {{ reservation.facility.name }}
-                                </td>
-
-                                <td>
-                                    <span class="user-table-date">
-                                        {{ reservation.start_datetime|date:"M d, Y" }}
-                                    </span>
-
-                                    <span class="user-table-time">
-                                        {{ reservation.start_datetime|date:"h:i A" }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="user-status-badge user-status-{{ reservation.status|lower }}">
-                                        {{ reservation.get_status_display }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <a
-                                        href="{% url 'reservation_detail_user' reservation.id %}"
-                                        class="user-table-link"
-                                    >
-                                        View Details →
-                                    </a>
-                                </td>
-
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        {% else %}
-
-            <div class="user-empty-state">
-
-                <span class="user-empty-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.6"
-                         stroke-linecap="round"
-                         stroke-linejoin="round">
-                        <rect x="3" y="5" width="18" height="16" rx="2"/>
-                        <path d="M7 3v4M17 3v4M3 10h18"/>
-                    </svg>
-                </span>
-
-                <h3>No upcoming reservations</h3>
-
-                <p>
-                    You don't have any upcoming facility bookings yet.
-                </p>
-
-                <a href="{% url 'reservation_create' %}"
-                   class="user-primary-button">
-                    Request a Reservation
-                </a>
-
-            </div>
-
-        {% endif %}
-
+        <div class="user-data-heading"><div><h2>Upcoming reservations</h2></div><a href="{% url 'my_reservations' %}" class="text-link">View all{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a></div>
+        {% if upcoming_reservations %}{% include 'Reservation/components/reservation_table.html' with reservations=upcoming_reservations %}{% else %}<div class="user-inline-empty">Your upcoming requests will appear here after you submit a reservation.</div>{% endif %}
     </section>
-
 </div>
-
 {% endblock %}

@@ -1,22 +1,23 @@
-
 {% extends 'Reservation/user/UserBase.html' %}
 
-{% block title %}Reservation Details | CampusSpace{% endblock %}
+{% block title %}Reservation Details | Spasyo{% endblock %}
+
+{% block breadcrumb %}My reservations / #{{ reservation.id }}{% endblock %}
 
 {% block content %}
 
-<div class="user-modern-page">
+<div class="user-modern-page workspace-page" data-workspace-page="detail">
 
     <div class="user-detail-header">
 
         <div>
             <a href="{% url 'my_reservations' %}"
                class="user-back-link">
-                ← Back to My Reservations
+                {% include 'Reservation/components/icon.html' with name='arrow-left' %} Back to my reservations
             </a>
 
             <span class="user-section-eyebrow">BOOKING INFORMATION</span>
-            <h1>Reservation Details</h1>
+            <h1>{{ reservation.event_name }}</h1>
 
             <p class="user-detail-subtitle">
                 Reservation #{{ reservation.id }}
@@ -28,13 +29,27 @@
         </span>
 
     </div>
+<div class="workspace-detail-body" role="region" aria-label="Details" tabindex="0">
 
+    <div class="notice">
+        {% include 'Reservation/components/icon.html' with name='circle-alert' %}
+        <div><strong>{{ reservation.get_status_display }}</strong><p>
+        {% if reservation.status == 'PENDING' %}Your request is awaiting administrator review. This time slot is not reserved yet.
+        {% elif reservation.status == 'APPROVED' %}Your booking is approved. The facility is reserved for your scheduled event.
+        {% elif reservation.status == 'CHECKED_IN' %}Your event is in progress. Check-in has been recorded by an administrator.
+        {% elif reservation.status == 'COMPLETED' %}Your event is complete. This booking is part of your reservation history.
+        {% elif reservation.status == 'REJECTED' %}This request was rejected. Review the reason below.
+        {% elif reservation.status == 'CANCELLED' %}This reservation was cancelled and no longer holds a time slot.
+        {% elif reservation.status == 'NO_SHOW' %}Attendance was not recorded. This booking was marked as No Show.
+        {% endif %}</p></div>
+    </div>
+    <div class="content-with-aside">
     <section class="user-detail-card">
 
         <div class="user-card-heading">
             <div>
                 <h2>Booking Information</h2>
-                <p>Your event and reservation schedule</p>
+
             </div>
         </div>
 
@@ -97,6 +112,11 @@
         </div>
 
     </section>
+    <div class="reservation-side"><aside class="panel"><div class="panel-heading"><h2>Request progress</h2></div><div class="panel-body"><ul class="progress-list">
+        <li><strong>Request submitted</strong><p>{{ reservation.created_at|date:"M d, Y · g:i A" }}</p></li>
+        {% if reservation.decision_at %}<li><strong>Administrator decision</strong><p>{{ reservation.decision_at|date:"M d, Y · g:i A" }}</p></li>{% endif %}
+        <li><strong>{{ reservation.get_status_display }}</strong><p>Current reservation status</p></li>
+    </ul></div></aside>
 
     {% if reservation.status == 'PENDING' or reservation.status == 'APPROVED' %}
 
@@ -105,7 +125,7 @@
             <div class="user-card-heading">
                 <div>
                     <h2>Cancel Reservation</h2>
-                    <p>Manage an existing booking request</p>
+
                 </div>
             </div>
 
@@ -113,13 +133,14 @@
 
                 <p class="user-cancel-description">
                     You may cancel this reservation before its scheduled
-                    start time. Cancellation cannot be undone.
+                    start time. Once applied, cancellation cannot be reversed.
                 </p>
 
                 <form
                     method="post"
                     action="{% url 'reservation_cancel_user' reservation.id %}"
-                    onsubmit="return confirm('Are you sure you want to cancel this reservation?');"
+                    onsubmit="return this.dataset.confirmationReady === 'true' || confirm('Are you sure you want to cancel this reservation?');"
+                    data-confirm-cancellation
                 >
                     {% csrf_token %}
 
@@ -134,15 +155,18 @@
 
     {% endif %}
 
-    <div class="user-detail-actions">
-
-        <a href="{% url 'my_reservations' %}"
-           class="user-outline-button">
-            Back to My Reservations
-        </a>
-
+    </div>
     </div>
 
+    <dialog class="confirm-dialog" id="cancel-confirmation" aria-labelledby="cancel-title" aria-describedby="cancel-description">
+        <h2 id="cancel-title">Cancel this reservation?</h2>
+        <p id="cancel-description">Once applied, this cancellation cannot be reversed. You will need a new request if your plans change.</p>
+        <div class="dialog-booking"><strong>{{ reservation.event_name }} · #{{ reservation.id }}</strong><p>{{ reservation.facility.name }}<br>{{ reservation.start_datetime|date:"M d, Y · g:i A" }} – {{ reservation.end_datetime|date:"M d, Y · g:i A" }}</p></div>
+        <p>You can cancel only before the scheduled start.</p>
+        <div class="dialog-actions"><button type="button" class="button" data-dialog-close autofocus>Keep reservation</button><button type="button" class="button button-primary" data-confirm-submit>Yes, cancel reservation</button></div>
+    </dialog>
+
+</div>
 </div>
 
 {% endblock %}
