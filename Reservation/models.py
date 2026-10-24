@@ -1,6 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.conf import settings
+from django.core.validators import RegexValidator
+from django.db.models.functions import Lower
+
+
+philippine_mobile_validator = RegexValidator(
+    regex=r'^09\d{9}$',
+    message=(
+        'Enter an 11-digit Philippine mobile number starting with 09 '
+        '(for example, 09171234567).'
+    ),
+    code='invalid_philippine_mobile_number',
+)
 
 
 # =========================================================
@@ -51,8 +63,9 @@ class User(AbstractUser):
     )
 
     contact_number = models.CharField(
-        max_length=20,
-        blank=True
+        max_length=11,
+        blank=True,
+        validators=[philippine_mobile_validator]
     )
 
     objects = UserManager()
@@ -137,6 +150,14 @@ class Facility(models.Model):
     is_active = models.BooleanField(
         default=True
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                Lower('facility_code'),
+                name='unique_facility_code_ci',
+            )
+        ]
 
     def __str__(self):
         return f'{self.facility_code} - {self.name}'

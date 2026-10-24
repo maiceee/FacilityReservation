@@ -12,6 +12,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from .forms import ReservationRequestForm, ReservationRescheduleForm
 from .models import (
     AuditLog,
     ClosureBlock,
@@ -167,6 +168,126 @@ class RoleAndAccessRestrictionTest(TestCase):
 
         self.assertRedirects(response, reverse('login'))
         self.assertNotIn(SESSION_KEY, self.client.session)
+
+
+class InactiveAccountLoginTest(TestCase):
+    message = (
+        'Your account has been deactivated. You are currently unable to '
+        'log in. Please contact the system administrator for assistance '
+        'or to request account reactivation.'
+    )
+
+    def setUp(self):
+        self.password = 'TestPassword123!'
+        self.inactive_user = User.objects.create_user(
+            username='inactive-login-user',
+            password=self.password,
+            role='BASIC_USER',
+            is_active=False,
+        )
+
+    def test_correct_credentials_show_deactivated_account_message(self):
+        response = self.client.post(
+            reverse('login'),
+            {
+                'username': self.inactive_user.username,
+                'password': self.password,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.message)
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+    def test_wrong_password_does_not_disclose_deactivated_status(self):
+        response = self.client.post(
+            reverse('login'),
+            {
+                'username': self.inactive_user.username,
+                'password': 'WrongPassword123!',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self.message)
+        self.assertContains(
+            response,
+            'Please enter a correct username and password.',
+        )
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+    def test_active_account_can_still_log_in(self):
+        active_user = User.objects.create_user(
+            username='active-login-user',
+            password=self.password,
+            role='BASIC_USER',
+        )
+
+        response = self.client.post(
+            reverse('login'),
+            {
+                'username': active_user.username,
+                'password': self.password,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            int(self.client.session[SESSION_KEY]),
+            active_user.pk,
+        )
+
+
+class AuthenticationHistoryProtectionTest(TestCase):
+    def setUp(self):
+        self.password = 'TestPassword123!'
+        self.user = User.objects.create_user(
+            username='history-protection-user',
+            password=self.password,
+            role='BASIC_USER',
+        )
+
+    def assert_response_is_not_cached(self, response):
+        cache_control = response.headers.get('Cache-Control', '')
+        self.assertIn('no-cache', cache_control)
+        self.assertIn('no-store', cache_control)
+        self.assertIn('must-revalidate', cache_control)
+
+    def test_authenticated_pages_and_logout_are_not_cached(self):
+        self.client.force_login(self.user)
+
+        dashboard_response = self.client.get(reverse('user_dashboard'))
+        self.assertEqual(dashboard_response.status_code, 200)
+        self.assert_response_is_not_cached(dashboard_response)
+
+        logout_response = self.client.post(reverse('logout'))
+        self.assertRedirects(logout_response, reverse('login'))
+        self.assert_response_is_not_cached(logout_response)
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+        previous_page_response = self.client.get(reverse('user_dashboard'))
+        self.assertRedirects(previous_page_response, reverse('login'))
+
+    def test_authenticated_user_cannot_reopen_login_page(self):
+        login_response = self.client.get(reverse('login'))
+        self.assert_response_is_not_cached(login_response)
+
+        response = self.client.post(
+            reverse('login'),
+            {
+                'username': self.user.username,
+                'password': self.password,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+
+        previous_page_response = self.client.get(reverse('login'))
+        self.assertRedirects(
+            previous_page_response,
+            reverse('dashboard_redirect'),
+            fetch_redirect_response=False,
+        )
+        self.assert_response_is_not_cached(previous_page_response)
 
 
 class RegistrationRoleTamperingTest(TestCase):
@@ -415,6 +536,50 @@ class ReservationValidationRulesTest(TestCase):
                 end_datetime=past_start + timedelta(hours=1)
             )
 
+    def test_reservation_calendar_enforces_configured_date_window(self):
+        local_now = timezone.make_aware(
+            datetime(2026, 10, 20, 14, 35),
+            timezone.get_current_timezone(),
+        )
+
+        with patch(
+            'Reservation.forms.timezone.localtime',
+            return_value=local_now,
+        ):
+            form = ReservationRequestForm()
+            reschedule_form = ReservationRescheduleForm()
+
+        expected_minimum = '2026-10-20T14:35'
+        expected_maximum = '2026-11-19T23:59'
+        self.assertEqual(
+            form.fields['start_datetime'].widget.attrs['min'],
+            expected_minimum,
+        )
+        self.assertEqual(
+            form.fields['end_datetime'].widget.attrs['min'],
+            expected_minimum,
+        )
+        self.assertEqual(
+            form.fields['start_datetime'].widget.attrs['max'],
+            expected_maximum,
+        )
+        self.assertEqual(
+            form.fields['end_datetime'].widget.attrs['max'],
+            expected_maximum,
+        )
+        self.assertEqual(
+            reschedule_form.fields[
+                'start_datetime'
+            ].widget.attrs['max'],
+            expected_maximum,
+        )
+        self.assertEqual(
+            reschedule_form.fields[
+                'end_datetime'
+            ].widget.attrs['max'],
+            expected_maximum,
+        )
+
     def test_same_day_and_operating_hour_rules(self):
         early_start = future_datetime(days=5, hour=7)
         with self.assertRaisesMessage(
@@ -457,12 +622,48 @@ class ReservationValidationRulesTest(TestCase):
         too_far_start = future_datetime(days=31, hour=10)
         with self.assertRaisesMessage(
             ValidationError,
-            'only be requested up to 30 days in advance'
+            'only be requested up to 30 calendar days in advance'
         ):
             self.validate(
                 start_datetime=too_far_start,
                 end_datetime=too_far_start + timedelta(hours=1)
             )
+
+    def test_advance_window_includes_entire_final_calendar_date(self):
+        local_now = timezone.make_aware(
+            datetime(2026, 10, 20, 14, 35),
+            timezone.get_current_timezone(),
+        )
+        final_date_start = timezone.make_aware(
+            datetime(2026, 11, 19, 17, 0),
+            timezone.get_current_timezone(),
+        )
+        following_date_start = timezone.make_aware(
+            datetime(2026, 11, 20, 10, 0),
+            timezone.get_current_timezone(),
+        )
+
+        with patch(
+            'Reservation.services.timezone.now',
+            return_value=local_now,
+        ):
+            self.assertTrue(
+                self.validate(
+                    start_datetime=final_date_start,
+                    end_datetime=final_date_start + timedelta(hours=1),
+                )
+            )
+
+            with self.assertRaisesMessage(
+                ValidationError,
+                'only be requested up to 30 calendar days in advance',
+            ):
+                self.validate(
+                    start_datetime=following_date_start,
+                    end_datetime=(
+                        following_date_start + timedelta(hours=1)
+                    ),
+                )
 
     def test_active_closure_blocks_reservation_request(self):
         ClosureBlock.objects.create(

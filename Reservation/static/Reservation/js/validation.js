@@ -1,5 +1,5 @@
-/* Form feedback only: native/server errors and full-page submission status.
-   No validation rules, field values, endpoints, or submitter values are changed. */
+/* Accessible native/server feedback, full-page submission status, and the
+   debounced facility-code availability check. Server validation remains final. */
 (() => {
     'use strict';
     const groups = '.field, .user-form-group, .rv-form-field, .facility-form-group, .master-form-group, .closures-form-group, .system-settings-field';
@@ -7,6 +7,7 @@
     const pendingSummaries = new Set();
     const buttonDefaults = new WeakMap();
     const submitting = new Map();
+    const facilityCodeForms = new WeakSet();
     let nextId = 0;
     const targetFor = (control) => control.closest('.select-control')?.querySelector('.control-trigger') || control;
     const describe = (control, error) => {
@@ -21,6 +22,10 @@
     };
     const summarize = (form) => {
         let summary = form.querySelector('.ui-validation-summary');
+        if (form.classList.contains('register-form')) {
+            summary?.remove();
+            return null;
+        }
         const errors = [...form.querySelectorAll(groups)].flatMap((group) => {
             const error = group.querySelector('[role="alert"]');
             const control = group.querySelector('input[name], select[name], textarea[name]');
@@ -70,6 +75,130 @@
         if (pendingSummaries.has(form)) return;
         pendingSummaries.add(form);
         queueMicrotask(() => { pendingSummaries.delete(form); summarize(form); });
+    };
+    const initializeFacilityCodeChecks = (root) => {
+        const forms = root.matches?.('.facility-detail-form[data-facility-code-check-url]')
+            ? [root]
+            : [...root.querySelectorAll('.facility-detail-form[data-facility-code-check-url]')];
+
+        forms.forEach((form) => {
+            if (facilityCodeForms.has(form)) return;
+
+            const control = form.querySelector('[name="facility_code"]');
+            const group = control?.closest('.facility-form-group');
+            const endpoint = form.dataset.facilityCodeCheckUrl;
+
+            if (!control || !group || !endpoint) return;
+
+            facilityCodeForms.add(form);
+            let debounceTimer = null;
+            let request = null;
+            let checkedValue = null;
+            const message = (
+                'A facility with this code already exists. '
+                + 'Enter a unique facility code.'
+            );
+
+            const removeDescription = (id) => {
+                if (!id) return;
+                const ids = (control.getAttribute('aria-describedby') || '')
+                    .split(/\s+/)
+                    .filter((value) => value && value !== id);
+
+                if (ids.length) control.setAttribute('aria-describedby', ids.join(' '));
+                else control.removeAttribute('aria-describedby');
+            };
+
+            const clearLiveError = () => {
+                const error = group.querySelector('[data-facility-code-live-error]');
+                if (error) {
+                    removeDescription(error.id);
+                    error.remove();
+                }
+                control.setCustomValidity('');
+                if (!group.querySelector('[role="alert"]')) {
+                    control.removeAttribute('aria-invalid');
+                }
+                scheduleSummary(form);
+            };
+
+            const clearStaleServerError = () => {
+                const error = group.querySelector(
+                    '.facility-field-error:not([data-facility-code-live-error])'
+                );
+                if (!error) return;
+                removeDescription(error.id);
+                error.remove();
+                scheduleSummary(form);
+            };
+
+            const showDuplicateError = () => {
+                clearLiveError();
+                const error = document.createElement('div');
+                const paragraph = document.createElement('p');
+                error.className = 'facility-field-error';
+                error.id = `facility-code-live-error-${++nextId}`;
+                error.dataset.facilityCodeLiveError = '';
+                error.setAttribute('role', 'alert');
+                paragraph.textContent = message;
+                error.append(paragraph);
+                group.append(error);
+                control.setCustomValidity(message);
+                describe(control, error);
+                scheduleSummary(form);
+            };
+
+            const checkAvailability = async (value) => {
+                request?.abort();
+                const controller = new AbortController();
+                request = controller;
+                const parameters = new URLSearchParams({ facility_code: value });
+                if (form.dataset.facilityId) {
+                    parameters.set('exclude_facility', form.dataset.facilityId);
+                }
+
+                try {
+                    const response = await fetch(`${endpoint}?${parameters}`, {
+                        credentials: 'same-origin',
+                        headers: { Accept: 'application/json' },
+                        signal: controller.signal,
+                    });
+                    const contentType = response.headers.get('content-type') || '';
+                    if (!response.ok || !contentType.includes('application/json')) {
+                        throw new Error('Facility code check unavailable');
+                    }
+                    const result = await response.json();
+                    if (controller.signal.aborted || control.value.trim() !== value) return;
+                    checkedValue = value;
+                    if (result.exists) showDuplicateError();
+                    else clearLiveError();
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        checkedValue = null;
+                        clearLiveError();
+                    }
+                }
+            };
+
+            control.addEventListener('input', () => {
+                const value = control.value.trim();
+                window.clearTimeout(debounceTimer);
+                request?.abort();
+                clearStaleServerError();
+
+                if (!value) {
+                    checkedValue = null;
+                    clearLiveError();
+                    return;
+                }
+
+                if (value !== checkedValue) clearLiveError();
+                debounceTimer = window.setTimeout(
+                    () => checkAvailability(value),
+                    450,
+                );
+            });
+        });
     };
     document.addEventListener('invalid', (event) => {
         const control = event.target;
@@ -133,5 +262,9 @@
         submitting.clear();
     });
     initialize(document);
-    document.addEventListener('workspace:form-ready', (event) => initialize(event.target));
+    initializeFacilityCodeChecks(document);
+    document.addEventListener('workspace:form-ready', (event) => {
+        initialize(event.target);
+        initializeFacilityCodeChecks(event.target);
+    });
 })();

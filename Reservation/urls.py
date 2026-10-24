@@ -3,6 +3,7 @@ from django.contrib.auth import views as auth_views
 
 from . import views
 from .directory import directory_bulk
+from .forms import AccountAuthenticationForm
 
 
 urlpatterns = [
@@ -27,7 +28,9 @@ urlpatterns = [
     path(
         'login/',
         auth_views.LoginView.as_view(
-            template_name='Reservation/registration/LoginForm.html'
+            template_name='Reservation/registration/LoginForm.html',
+            authentication_form=AccountAuthenticationForm,
+            redirect_authenticated_user=True,
         ),
         name='login'
     ),
@@ -141,6 +144,12 @@ urlpatterns = [
         'manage/facilities/',
         views.facility_list,
         name='facility_list'
+    ),
+
+    path(
+        'manage/facilities/check-code/',
+        views.facility_code_availability,
+        name='facility_code_availability'
     ),
 
     path(

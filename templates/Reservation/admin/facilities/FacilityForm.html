@@ -39,7 +39,10 @@
 
         </div>
 
-        <form method="post" class="facility-detail-form">
+        <form method="post"
+              class="facility-detail-form"
+              data-facility-code-check-url="{% url 'facility_code_availability' %}"
+              {% if form.instance.pk %}data-facility-id="{{ form.instance.pk }}"{% endif %}>
 
             {% csrf_token %}
 

@@ -3,10 +3,12 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth import SESSION_KEY, logout
 from django.shortcuts import redirect
+from django.views.decorators.cache import never_cache
 
 
 def admin_required(view_function):
     @wraps(view_function)
+    @never_cache
     def wrapper(request, *args, **kwargs):
 
         if not request.user.is_authenticated:
@@ -36,6 +38,7 @@ def admin_required(view_function):
 
 def basic_user_required(view_function):
     @wraps(view_function)
+    @never_cache
     def wrapper(request, *args, **kwargs):
 
         if not request.user.is_authenticated:

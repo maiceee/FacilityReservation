@@ -1,8 +1,12 @@
+from datetime import timedelta
+
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.utils import timezone
 
 from .models import (
     User,
+    philippine_mobile_validator,
     FacilityCategory,
     Amenity,
     Facility,
@@ -11,6 +15,77 @@ from .models import (
     ClosureBlock,
     SystemSetting,
 )
+
+
+def reservation_datetime_bounds():
+    local_now = timezone.localtime()
+    booking_settings = SystemSetting.objects.first()
+    advance_booking_days = (
+        booking_settings.advance_booking_days
+        if booking_settings is not None
+        else SystemSetting._meta.get_field(
+            'advance_booking_days'
+        ).get_default()
+    )
+    latest_booking_date = (
+        local_now.date() + timedelta(days=advance_booking_days)
+    )
+
+    return (
+        local_now.replace(
+            second=0,
+            microsecond=0,
+        ).strftime('%Y-%m-%dT%H:%M'),
+        f'{latest_booking_date.isoformat()}T23:59',
+    )
+
+
+# =========================================================
+# AUTHENTICATION
+# =========================================================
+
+class AccountAuthenticationForm(AuthenticationForm):
+    deactivated_message = (
+        'Your account has been deactivated. You are currently unable to '
+        'log in. Please contact the system administrator for assistance '
+        'or to request account reactivation.'
+    )
+
+    def clean(self):
+        try:
+            return super().clean()
+        except forms.ValidationError:
+            username = self.cleaned_data.get('username')
+            password = self.cleaned_data.get('password')
+
+            if username and password:
+                try:
+                    account = User._default_manager.get_by_natural_key(
+                        username
+                    )
+                except User.DoesNotExist:
+                    account = None
+
+                if (
+                    account is not None
+                    and not account.is_active
+                    and account.check_password(password)
+                ):
+                    raise forms.ValidationError(
+                        self.deactivated_message,
+                        code='inactive',
+                    )
+
+            raise
+
+    def confirm_login_allowed(self, user):
+        if not user.is_active:
+            raise forms.ValidationError(
+                self.deactivated_message,
+                code='inactive',
+            )
+
+        super().confirm_login_allowed(user)
 
 
 # =========================================================
@@ -38,8 +113,21 @@ class UserRegistrationForm(UserCreationForm):
     )
 
     contact_number = forms.CharField(
-        max_length=20,
-        required=True
+        max_length=11,
+        min_length=11,
+        required=True,
+        validators=[philippine_mobile_validator],
+        help_text='Use 11 digits starting with 09, such as 09171234567.',
+        widget=forms.TextInput(
+            attrs={
+                'inputmode': 'numeric',
+                'autocomplete': 'tel-national',
+                'pattern': r'09[0-9]{9}',
+                'minlength': '11',
+                'maxlength': '11',
+                'placeholder': '09171234567',
+            }
+        )
     )
 
     class Meta:
@@ -90,6 +178,18 @@ class UserProfileForm(forms.ModelForm):
             'last_name',
             'contact_number',
         ]
+        widgets = {
+            'contact_number': forms.TextInput(
+                attrs={
+                    'inputmode': 'numeric',
+                    'autocomplete': 'tel-national',
+                    'pattern': r'09[0-9]{9}',
+                    'minlength': '11',
+                    'maxlength': '11',
+                    'placeholder': '09171234567',
+                }
+            ),
+        }
 
     def clean_email(self):
         email = self.cleaned_data['email'].strip().lower()
@@ -238,7 +338,8 @@ class FacilityForm(forms.ModelForm):
 
         if duplicate:
             raise forms.ValidationError(
-                'This facility code is already in use.'
+                'A facility with this code already exists. '
+                'Enter a unique facility code.'
             )
 
         return facility_code
@@ -336,6 +437,10 @@ class ReservationRequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        minimum_datetime, maximum_datetime = (
+            reservation_datetime_bounds()
+        )
+
         self.fields['facility'].queryset = (
             Facility.objects.filter(
                 is_active=True,
@@ -354,6 +459,19 @@ class ReservationRequestForm(forms.ModelForm):
         ].input_formats = [
             '%Y-%m-%dT%H:%M'
         ]
+
+        self.fields['start_datetime'].widget.attrs['min'] = (
+            minimum_datetime
+        )
+        self.fields['end_datetime'].widget.attrs['min'] = (
+            minimum_datetime
+        )
+        self.fields['start_datetime'].widget.attrs['max'] = (
+            maximum_datetime
+        )
+        self.fields['end_datetime'].widget.attrs['max'] = (
+            maximum_datetime
+        )
 
 
 # =========================================================
@@ -421,6 +539,21 @@ class ReservationRescheduleForm(forms.Form):
             attrs={'rows': 4}
         )
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        minimum_datetime, maximum_datetime = (
+            reservation_datetime_bounds()
+        )
+
+        for field_name in ('start_datetime', 'end_datetime'):
+            self.fields[field_name].widget.attrs.update(
+                {
+                    'min': minimum_datetime,
+                    'max': maximum_datetime,
+                }
+            )
 
 
 # =========================================================

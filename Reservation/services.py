@@ -174,14 +174,16 @@ def validate_reservation_schedule(
             f'{booking_settings.max_event_duration_hours} hours.'
         )
 
-    latest_allowed_start = now + timedelta(
-        days=booking_settings.advance_booking_days
+    latest_allowed_date = (
+        timezone.localdate(now)
+        + timedelta(days=booking_settings.advance_booking_days)
     )
 
-    if start_datetime > latest_allowed_start:
+    if local_start.date() > latest_allowed_date:
         errors.append(
             f'Reservations may only be requested up to '
-            f'{booking_settings.advance_booking_days} days in advance.'
+            f'{booking_settings.advance_booking_days} calendar days '
+            f'in advance.'
         )
 
     # -----------------------------------------------------

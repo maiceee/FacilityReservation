@@ -6,7 +6,7 @@ from threading import Barrier
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import close_old_connections
+from django.db import IntegrityError, close_old_connections, transaction
 from django.test import SimpleTestCase, TestCase, TransactionTestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -93,6 +93,45 @@ class CustomAdministrationInterfaceTest(TestCase):
             response.content.lstrip().startswith(b'<!DOCTYPE html>')
         )
 
+    def test_new_account_is_first_and_remains_in_unfiltered_user_list(self):
+        administrator = User.objects.create_user(
+            username='userlistadmin',
+            password='TestPassword123!',
+            role='ADMIN',
+        )
+        older_account = User.objects.create_user(
+            username='older-user-account',
+            password='TestPassword123!',
+            role='BASIC_USER',
+            first_name='Zed',
+            last_name='Zulu',
+        )
+        newest_account = User.objects.create_user(
+            username='newest-user-account',
+            password='TestPassword123!',
+            role='BASIC_USER',
+            first_name='Amy',
+            last_name='Alpha',
+        )
+        self.client.force_login(administrator)
+
+        search_response = self.client.get(
+            reverse('user_management'),
+            {'search': newest_account.username},
+        )
+        self.assertEqual(
+            list(search_response.context['users']),
+            [newest_account],
+        )
+
+        unfiltered_response = self.client.get(reverse('user_management'))
+        listed_users = list(unfiltered_response.context['users'])
+
+        self.assertEqual(listed_users[0], newest_account)
+        self.assertIn(older_account, listed_users)
+        self.assertContains(unfiltered_response, newest_account.username)
+        self.assertContains(unfiltered_response, older_account.username)
+
 
 class RegistrationAndProfileAuditTest(TestCase):
 
@@ -156,6 +195,69 @@ class RegistrationAndProfileAuditTest(TestCase):
             AuditLog.objects.filter(action='ACCOUNT_REGISTERED').exists()
         )
 
+    def test_registration_rejects_invalid_philippine_contact_numbers(self):
+        invalid_numbers = (
+            '0917123456',
+            '091712345678',
+            '09171ABC567',
+            '08171234567',
+        )
+
+        for index, contact_number in enumerate(invalid_numbers):
+            with self.subTest(contact_number=contact_number):
+                response = self.client.post(
+                    reverse('register'),
+                    {
+                        'username': f'invalidcontact{index}',
+                        'first_name': 'Invalid',
+                        'last_name': 'Contact',
+                        'email': f'invalidcontact{index}@example.com',
+                        'department': 'Engineering',
+                        'contact_number': contact_number,
+                        'password1': 'SecurePassword123!',
+                        'password2': 'SecurePassword123!',
+                    }
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(
+                    response,
+                    'Enter an 11-digit Philippine mobile number',
+                )
+                self.assertFalse(
+                    User.objects.filter(
+                        username=f'invalidcontact{index}'
+                    ).exists()
+                )
+
+    def test_duplicate_username_and_email_errors_are_field_errors(self):
+        response = self.client.post(
+            reverse('register'),
+            {
+                'username': self.user.username,
+                'first_name': 'Duplicate',
+                'last_name': 'Account',
+                'email': self.user.email.upper(),
+                'department': 'Engineering',
+                'contact_number': '09175556666',
+                'password1': 'SecurePassword123!',
+                'password2': 'SecurePassword123!',
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(
+            response.context['form'],
+            'username',
+            'A user with that username already exists.',
+        )
+        self.assertFormError(
+            response.context['form'],
+            'email',
+            'An account with this email already exists.',
+        )
+        self.assertContains(response, 'class="field-error"', count=2)
+
     def test_profile_update_creates_audit_record(self):
         self.client.force_login(self.user)
 
@@ -180,6 +282,33 @@ class RegistrationAndProfileAuditTest(TestCase):
         self.assertIn('First name', audit.description)
         self.assertIn('Contact number', audit.description)
         self.assertNotIn('09179998888', audit.description)
+
+    def test_profile_rejects_invalid_philippine_contact_number(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse('user_profile'),
+            {
+                'first_name': self.user.first_name,
+                'last_name': self.user.last_name,
+                'contact_number': '12345678901',
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(
+            response.context['form'],
+            'contact_number',
+            (
+                'Enter an 11-digit Philippine mobile number starting with '
+                '09 (for example, 09171234567).'
+            ),
+        )
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.contact_number, '09170000000')
+        self.assertFalse(
+            AuditLog.objects.filter(action='PROFILE_UPDATED').exists()
+        )
 
     def test_unchanged_profile_does_not_create_audit_record(self):
         self.client.force_login(self.user)
@@ -334,6 +463,139 @@ class FacilityManagementTest(TestCase):
                 reference=f'Facility #{self.facility.pk}'
             ).exists()
         )
+
+    def test_duplicate_facility_code_is_blocked_case_insensitively(self):
+        response = self.client.post(
+            reverse('facility_create'),
+            {
+                'facility_code': '  lib-201  ',
+                'name': 'Duplicate Library Room',
+                'category': self.category.pk,
+                'location': 'Main Library',
+                'capacity': 20,
+                'description': 'Duplicate code test.',
+                'opening_time': '08:00',
+                'closing_time': '17:00',
+                'is_active': 'on',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(
+            response.context['form'],
+            'facility_code',
+            (
+                'A facility with this code already exists. '
+                'Enter a unique facility code.'
+            ),
+        )
+        self.assertContains(
+            response,
+            'A facility with this code already exists.',
+        )
+        self.assertEqual(Facility.objects.count(), 2)
+        self.assertFalse(
+            AuditLog.objects.filter(action='FACILITY_CREATED').exists()
+        )
+
+    def test_updating_facility_can_keep_its_current_code(self):
+        response = self.client.post(
+            reverse('facility_update', args=[self.facility.pk]),
+            {
+                'facility_code': 'lib-201',
+                'name': self.facility.name,
+                'category': self.category.pk,
+                'location': self.facility.location,
+                'capacity': self.facility.capacity,
+                'description': self.facility.description,
+                'opening_time': '08:00',
+                'closing_time': '18:00',
+                'is_active': 'on',
+            },
+        )
+
+        self.assertRedirects(response, reverse('facility_list'))
+        self.facility.refresh_from_db()
+        self.assertEqual(self.facility.facility_code, 'LIB-201')
+
+    def test_database_blocks_case_insensitive_facility_code_duplicate(self):
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Facility.objects.create(
+                    facility_code='lib-201',
+                    name='Direct Duplicate',
+                    category=self.category,
+                    location='Main Library',
+                    capacity=10,
+                    opening_time='08:00',
+                    closing_time='17:00',
+                    is_active=True,
+                )
+
+    def test_facility_code_availability_reports_duplicates_and_unique_codes(self):
+        endpoint = reverse('facility_code_availability')
+
+        duplicate_response = self.client.get(
+            endpoint,
+            {'facility_code': '  lib-201  '},
+        )
+        unique_response = self.client.get(
+            endpoint,
+            {'facility_code': 'LAB-301'},
+        )
+
+        self.assertEqual(duplicate_response.status_code, 200)
+        self.assertEqual(
+            duplicate_response.json(),
+            {'exists': True, 'normalized_code': 'LIB-201'},
+        )
+        self.assertEqual(unique_response.status_code, 200)
+        self.assertEqual(
+            unique_response.json(),
+            {'exists': False, 'normalized_code': 'LAB-301'},
+        )
+
+    def test_facility_code_availability_excludes_facility_being_edited(self):
+        response = self.client.get(
+            reverse('facility_code_availability'),
+            {
+                'facility_code': 'lib-201',
+                'exclude_facility': self.facility.pk,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {'exists': False, 'normalized_code': 'LIB-201'},
+        )
+
+    def test_facility_form_enables_live_code_availability_check(self):
+        response = self.client.get(reverse('facility_create'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            (
+                'data-facility-code-check-url="'
+                f'{reverse("facility_code_availability")}"'
+            ),
+        )
+
+    def test_facility_code_availability_is_admin_only(self):
+        basic_user = User.objects.create_user(
+            username='facility-code-basic-user',
+            password='TestPassword123!',
+            role='BASIC_USER',
+        )
+        self.client.force_login(basic_user)
+
+        response = self.client.get(
+            reverse('facility_code_availability'),
+            {'facility_code': self.facility.facility_code},
+        )
+
+        self.assertRedirects(response, reverse('user_dashboard'))
 
 
 class InvalidFilterHandlingTest(TestCase):

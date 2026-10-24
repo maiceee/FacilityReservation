@@ -8,9 +8,10 @@ from django.contrib.auth import logout
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count, Q, Sum, F, ExpressionWrapper, DurationField
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_GET
 from datetime import datetime, timedelta
 from django.core.paginator import Paginator
 
@@ -338,9 +339,8 @@ def user_management(request):
         )
 
     users = users.order_by(
-        'last_name',
-        'first_name',
-        'username'
+        '-date_joined',
+        '-pk'
     )
 
     return render(
@@ -676,6 +676,34 @@ def facility_list(request):
     context = directory_context(request, 'facility')
     context['facilities'] = context['page_obj']
     return render(request, 'Reservation/admin/facilities/FacilityList.html', context)
+
+
+@admin_required
+@require_GET
+def facility_code_availability(request):
+    facility_code = (
+        request.GET.get('facility_code') or ''
+    ).strip().upper()
+    _, facility_id = parse_positive_id_filter(
+        request.GET.get('exclude_facility')
+    )
+
+    duplicate_query = Facility.objects.none()
+
+    if facility_code:
+        duplicate_query = Facility.objects.filter(
+            facility_code__iexact=facility_code
+        )
+
+        if facility_id is not None:
+            duplicate_query = duplicate_query.exclude(pk=facility_id)
+
+    return JsonResponse(
+        {
+            'exists': duplicate_query.exists(),
+            'normalized_code': facility_code,
+        }
+    )
 
 
 @admin_required
