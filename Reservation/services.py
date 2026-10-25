@@ -279,12 +279,18 @@ def create_reservation_request(
 # APPROVE RESERVATION
 # =========================================================
 
-@transaction.atomic
 def approve_reservation(
     reservation_id,
     admin_user,
     reason
 ):
+    from .expiry import expire_pending_reservations
+    expire_pending_reservations(reservation_id=reservation_id)
+    return _approve_reservation(reservation_id, admin_user, reason)
+
+
+@transaction.atomic
+def _approve_reservation(reservation_id, admin_user, reason):
     """
     Approves a Pending reservation.
 
@@ -316,6 +322,8 @@ def approve_reservation(
     )
 
     if reservation.status != 'PENDING':
+        if reservation.auto_cancelled:
+            raise ValidationError('This request was automatically cancelled because its scheduled start was reached.')
         raise ValidationError(
             'Only pending reservations can be approved.'
         )
@@ -378,12 +386,18 @@ def approve_reservation(
 # REJECT RESERVATION
 # =========================================================
 
-@transaction.atomic
 def reject_reservation(
     reservation_id,
     admin_user,
     reason
 ):
+    from .expiry import expire_pending_reservations
+    expire_pending_reservations(reservation_id=reservation_id)
+    return _reject_reservation(reservation_id, admin_user, reason)
+
+
+@transaction.atomic
+def _reject_reservation(reservation_id, admin_user, reason):
     reservation = (
         Reservation.objects
         .select_for_update()
@@ -391,6 +405,8 @@ def reject_reservation(
     )
 
     if reservation.status != 'PENDING':
+        if reservation.auto_cancelled:
+            raise ValidationError('This request was automatically cancelled because its scheduled start was reached.')
         raise ValidationError(
             'Only pending reservations can be rejected.'
         )

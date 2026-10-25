@@ -1,7 +1,7 @@
 
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-print-document>
 
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,8 @@
 
     {% include 'Reservation/components/styles.html' %}
     <link rel="stylesheet"
-          href="{% static 'Reservation/css/admin/documents.css' %}?v=2">
+          href="{% static 'Reservation/css/admin/documents.css' %}?v=5">
+    {% include 'Reservation/components/feedback_styles.html' %}
 </head>
 
 <body>
@@ -101,9 +102,7 @@
             <div>
                 <dt>Status</dt>
                 <dd>
-                    <span class="print-status">
-                        {{ reservation.get_status_display }}
-                    </span>
+                    {% include 'Reservation/components/document_status.html' %}
                 </dd>
             </div>
 
@@ -141,7 +140,7 @@
     </div>
 
     <footer class="print-footer">
-        Spasyo · Campus Facility Reservation System
+        Spasyo &middot; All times are Philippine local time (UTC+8).
     </footer>
 
 </main>

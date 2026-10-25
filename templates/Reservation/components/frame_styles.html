@@ -1,4 +1,9 @@
 {% load static %}
-<link rel="stylesheet" href="{% static 'Reservation/css/frame.css' %}?v=11">
+<link rel="stylesheet" href="{% static 'Reservation/css/frame.css' %}?v=28">
 {% include 'Reservation/components/feedback_styles.html' %}
-<link rel="stylesheet" href="{% static 'Reservation/css/motion.css' %}?v=4">
+<link rel="stylesheet" href="{% static 'Reservation/css/motion.css' %}?v=13">
+{# Reserve the enhanced tab layout before paint; release it if enhancement fails. #}
+<script>
+    document.documentElement.classList.add('workspace-enhanced');
+    window.addEventListener('load', () => document.documentElement.classList.remove('workspace-enhanced'), { once: true });
+</script>

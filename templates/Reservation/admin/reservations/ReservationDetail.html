@@ -94,7 +94,7 @@
         </div>
     </section>
 
-    {% if reservation.decision_by %}
+    {% if reservation.decision_by or reservation.auto_cancelled %}
         <section class="reservation-panel">
             <div class="reservation-section-header">
                 <h2>Decision Information</h2>
@@ -104,7 +104,7 @@
                 <div class="reservation-info-item">
                     <span>Reviewed By</span>
                     <strong>
-                        {{ reservation.decision_by.get_full_name|default:reservation.decision_by.username }}
+                        {% if reservation.auto_cancelled %}System{% else %}{{ reservation.decision_by.get_full_name|default:reservation.decision_by.username }}{% endif %}
                     </strong>
                 </div>
 
@@ -272,6 +272,7 @@
             <div class="reservation-button-row">
 
                 <a href="{% url 'reservation_reschedule' reservation.id %}"
+                   data-edit-dialog data-editor-kind="reschedule"
                    class="reservation-btn reservation-btn-primary">
                     Reschedule
                 </a>

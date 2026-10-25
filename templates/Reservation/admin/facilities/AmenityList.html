@@ -92,7 +92,7 @@
                                                     class="icon-button master-archive-button"
                                                     data-amenity-name="{{ amenity.name }}"
                                                     data-form-id="amenity-archive-{{ amenity.id }}"
-                                                    onclick="openAmenityArchive(this)" aria-label="Deactivate {{ amenity.name }}" title="Deactivate {{ amenity.name }}">{% include 'Reservation/components/icon.html' with name='x' %}</button>
+                                                    onclick="openAmenityArchive(this)" aria-label="Deactivate {{ amenity.name }}" title="Deactivate {{ amenity.name }}">{% include 'Reservation/components/icon.html' with name='circle-x' %}</button>
 
                                             <form method="post"
                                                   action="{% url 'amenity_archive' amenity.id %}"

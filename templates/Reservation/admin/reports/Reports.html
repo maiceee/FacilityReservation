@@ -48,17 +48,16 @@
                        value="{{ end_date }}">
             </div>
 
-            <div class="ra-field"><label id="report-facility-label">Facilities</label>
+            <div class="ra-field report-facility-field"><span class="control-label" id="report-facility-label">Facilities</span>
             <details class="report-facility-filter">
-                <summary aria-labelledby="report-facility-label">Select facilities <span>({{ selected_facilities|length|default:'All' }})</span></summary>
+                <summary aria-labelledby="report-facility-label report-facility-count">Select facilities <span id="report-facility-count">({{ selected_facilities|length|default:'All' }})</span>{% include 'Reservation/components/icon.html' with name='chevron-down' %}</summary>
                 <div class="report-facility-options">
                     <label for="report-facility-search">Find a facility</label>
                     <input type="search" id="report-facility-search" placeholder="Search facilities…" data-report-search>
-                    <p class="field-help">Choose one or more. No selection includes all.</p>
                     {% for facility in report_facilities %}<label data-report-option><input type="checkbox" name="facility" value="{{ facility.pk }}" {% if facility.pk in selected_facilities %}checked{% endif %}>{{ facility.name }}</label>{% endfor %}
                     <button type="button" class="button" data-report-clear>Clear selection</button>
                 </div>
-            </details><span class="field-help">Choose one or more facilities.</span></div>
+            </details><span class="field-help">No selection includes all.</span></div>
             <div class="ra-filter-actions">
                 <button type="submit" class="icon-button ra-primary-btn" aria-label="Apply filters" title="Apply filters">{% include 'Reservation/components/icon.html' with name='check' %}</button>
                 <a href="{% url 'reports' %}" class="icon-button ra-clear-btn" aria-label="Clear filters" title="Clear filters">{% include 'Reservation/components/icon.html' with name='x' %}</a>
@@ -156,6 +155,7 @@
             <p>Try changing the selected date range.</p>
         </div>
         {% endif %}
+        {% include "Reservation/components/directory_pagination.html" %}
     </section>
 
     <section class="ra-card ra-report-card" id="report-usage" data-tab-panel>

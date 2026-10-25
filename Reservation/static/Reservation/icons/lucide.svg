@@ -89,4 +89,4 @@
   <ns0:path xmlns:ns0="http://www.w3.org/2000/svg" d="M7 16h10" />
   <ns0:path xmlns:ns0="http://www.w3.org/2000/svg" d="M8 12h.01" />
   <ns0:rect xmlns:ns0="http://www.w3.org/2000/svg" width="20" height="16" x="2" y="4" rx="2" />
-</symbol></svg>
+</symbol><symbol id="circle-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></symbol><symbol id="bell" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></symbol><symbol id="circle-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol></svg>

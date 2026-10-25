@@ -39,7 +39,6 @@
         <div class="user-card-heading">
             <div>
                 <h2>Facility Information</h2>
-                <p>Overview of this campus facility</p>
             </div>
         </div>
 
@@ -89,7 +88,6 @@
         <div class="user-card-heading">
             <div>
                 <h2>Amenities</h2>
-                <p>Facilities and equipment available in this space</p>
             </div>
         </div>
 
@@ -126,9 +124,9 @@
         <div class="user-card-heading">
             <div>
                 <h2>Available Reservation Slots</h2>
-                <p>
+                <p data-help-description>
                     Available time periods for the next
-                    {{ availability_days }} day{{ availability_days|pluralize }}
+                    {{ availability_days }} day{{ availability_days|pluralize }}. Start with up to 1 hour; review and edit before submitting.
                 </p>
             </div>
 
@@ -145,6 +143,7 @@
                             <th>Date</th>
                             <th>Available From</th>
                             <th>Available Until</th>
+                            <th scope="col"><span class="sr-only">Request a time</span></th>
                         </tr>
                     </thead>
 
@@ -154,6 +153,7 @@
                                 <td>{{ slot.date|date:"M d, Y" }}</td>
                                 <td>{{ slot.start_datetime|date:"h:i A" }}</td>
                                 <td>{{ slot.end_datetime|date:"h:i A" }}</td>
+                                <td>{% if slot.booking_url %}<a href="{{ slot.booking_url }}" class="text-link" data-edit-dialog data-editor-kind="reservation" aria-label="Reserve {{ facility.name }} on {{ slot.date|date:'M d, Y' }} from {{ slot.booking_start|date:'g:i A' }}">Reserve this time</a>{% endif %}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -266,20 +266,6 @@
         {% endif %}
 
     </section>
-    </div>
-
-    <div class="user-detail-actions">
-
-        <a href="{% url 'browse_facilities' %}"
-           class="user-outline-button">
-            Back to Facilities
-        </a>
-
-        <a href="{% url 'reservation_create' %}?facility={{ facility.id }}" data-edit-dialog data-editor-kind="reservation"
-           class="button button-primary">
-            {% include 'Reservation/components/icon.html' with name='plus' %}New reservation
-        </a>
-
     </div>
 
 </div>

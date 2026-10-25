@@ -8,6 +8,8 @@
     const undoDelay = 12000;
     const jobs = new Set();
     let pending = null;
+    const pendingListeners = new Set();
+    const notifyPending = () => pendingListeners.forEach(listener => listener(Boolean(pending)));
     const icon = (name) => {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('class', 'icon');
@@ -33,9 +35,9 @@
         const dismiss = () => { job.element.remove(); host(); };
         if (typeof job.element.animate === 'function' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
             job.element.style.pointerEvents = 'none';
-            job.element.animate([{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-6px)' }], { duration: 160, easing: 'ease-out', fill: 'forwards' }).finished.then(dismiss, dismiss);
+            job.element.animate([{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-6px)' }], { duration: parseFloat(getComputedStyle(job.element).getPropertyValue('--duration-toast-exit')) || 140, easing: getComputedStyle(job.element).getPropertyValue('--ease-exit').trim() || 'ease-out', fill: 'forwards' }).finished.then(dismiss, dismiss);
         } else dismiss();
-        if (pending === job) pending = null;
+        if (pending === job) { pending = null; notifyPending(); }
         host();
     };
     const schedule = (job) => {
@@ -128,21 +130,55 @@
     };
     window.SpasyoNotifications = {
         show, consume,
+        hasPendingAction: () => Boolean(pending),
+        subscribePending(listener) {
+            pendingListeners.add(listener);
+            return () => pendingListeners.delete(listener);
+        },
         deferAction({ label, record, action }) {
             if (pending) {
                 show('Finish or undo the pending action first.', { severity: 'warning' });
                 return;
             }
             pending = show(`${label}${record ? `: ${record}` : ''} scheduled.`, {
-                severity: 'info', duration: undoDelay, undo: true, action
+                severity: 'info', duration: undoDelay, undo: true, action,
+                description: 'Not submitted yet. Apply now or Undo before leaving this page.'
             });
+            notifyPending();
         }
     };
+    // Prevent ordinary page navigation from silently abandoning a queued POST.
+    // Never auto-submit on unload: the user must resolve the original action.
+    const explainPending = () => {
+        show('Apply or undo the pending action before leaving this page.', { severity: 'warning', duration: 5000 });
+        pending?.element.querySelector('button')?.focus();
+    };
+    document.addEventListener('click', (event) => {
+        if (!pending || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest('a[href]');
+        if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+        const url = new URL(link.href, location.href);
+        const current = new URL(location.href);
+        if (url.hash && url.origin === current.origin && url.pathname === current.pathname && url.search === current.search) return;
+        event.preventDefault();
+        explainPending();
+    }, true);
+    document.addEventListener('submit', (event) => {
+        if (!pending) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        explainPending();
+    }, true);
+    window.addEventListener('beforeunload', (event) => {
+        if (!pending) return;
+        event.preventDefault();
+        event.returnValue = '';
+    });
     document.addEventListener('visibilitychange', () => jobs.forEach((job) => { job.last = Date.now(); }));
     document.addEventListener('toggle', (event) => { if (event.target.tagName === 'DIALOG') host(); }, true);
     window.addEventListener('pagehide', () => {
         jobs.forEach((job) => { clearTimeout(job.timer); job.element.remove(); });
-        jobs.clear(); pending = null; stack.hidden = true;
+        jobs.clear(); pending = null; stack.hidden = true; notifyPending();
     });
     consume();
 })();

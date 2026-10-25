@@ -1,5 +1,5 @@
 <div class="directory-controls">
-    <nav class="directory-tabs" aria-label="Directory status">
+    <nav class="directory-tabs" aria-label="Directory status" data-directory-kind="{{ directory_kind }}">
         {% for tab in directory_tabs %}<a href="{{ tab.url }}" {% if tab.active %}aria-current="page"{% endif %}>{{ tab.label }} <span>{{ tab.count }}</span></a>{% endfor %}
     </nav>
     <form method="get" class="directory-search" role="search">
@@ -17,5 +17,5 @@
     <input type="hidden" name="page" value="{{ page_obj.number }}">
     <span data-selection-count aria-live="polite">Select records on this page</span>
     <button type="submit" name="operation" value="activate" class="button" data-bulk-action>{% include 'Reservation/components/icon.html' with name='circle-check' %}Activate</button>
-    <button type="submit" name="operation" value="deactivate" class="button" data-bulk-action>{% include 'Reservation/components/icon.html' with name='x' %}Deactivate</button>
+    <button type="submit" name="operation" value="deactivate" class="button" data-bulk-action>{% include 'Reservation/components/icon.html' with name='circle-x' %}Deactivate</button>
 </form>

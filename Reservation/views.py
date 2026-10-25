@@ -10,12 +10,13 @@ from django.db import transaction
 from django.db.models import Count, Q, Sum, F, ExpressionWrapper, DurationField
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET
 from datetime import datetime, timedelta
 from django.core.paginator import Paginator
 
-from .decorators import admin_required, basic_user_required
+from .decorators import admin_required, basic_user_required, workspace_editor
 from .forms import (
     UserRegistrationForm,
     UserProfileForm,
@@ -61,6 +62,14 @@ from .services import (
 # =========================================================
 # QUERY FILTER VALIDATION
 # =========================================================
+
+
+def pagination_query(request):
+    """Keep repeated filters while replacing only the current page number."""
+    params = request.GET.copy()
+    params.pop('page', None)
+    return params.urlencode()
+
 
 def parse_iso_date_filter(value):
     normalized_value = (value or '').strip()
@@ -170,18 +179,14 @@ def admin_dashboard(request):
     # DASHBOARD CARDS
     # =====================================================
 
-    pending_requests = Reservation.objects.filter(
-        status='PENDING'
-    ).count()
-
-    approved_upcoming = Reservation.objects.filter(
-        status='APPROVED',
-        start_datetime__gte=now
-    ).count()
-
-    completed_events = Reservation.objects.filter(
-        status='COMPLETED'
-    ).count()
+    totals = Reservation.objects.aggregate(
+        pending=Count('pk', filter=Q(status='PENDING')),
+        upcoming=Count('pk', filter=Q(status='APPROVED', start_datetime__gte=now)),
+        completed=Count('pk', filter=Q(status='COMPLETED')),
+    )
+    pending_requests = totals['pending']
+    approved_upcoming = totals['upcoming']
+    completed_events = totals['completed']
 
     active_facilities = Facility.objects.filter(
         is_active=True
@@ -211,6 +216,7 @@ def admin_dashboard(request):
 
     monthly_labels = []
     monthly_booking_data = []
+    monthly_counts = {}
 
     for month_offset in range(5, -1, -1):
 
@@ -239,18 +245,19 @@ def admin_dashboard(request):
                 day=1
             )
 
-        booking_count = Reservation.objects.filter(
-            start_datetime__date__gte=month_start,
-            start_datetime__date__lt=next_month_start
-        ).count()
+        # Match the local-date chart boundaries using index-friendly datetimes.
+        month_start_at = timezone.make_aware(datetime.combine(month_start, datetime.min.time()))
+        next_month_at = timezone.make_aware(datetime.combine(next_month_start, datetime.min.time()))
+        monthly_counts[f'month_{month_offset}'] = Count('pk', filter=Q(
+            start_datetime__gte=month_start_at, start_datetime__lt=next_month_at,
+        ))
 
         monthly_labels.append(
             month_start.strftime('%b %Y')
         )
 
-        monthly_booking_data.append(
-            booking_count
-        )
+    counts = Reservation.objects.aggregate(**monthly_counts)
+    monthly_booking_data = [counts[key] for key in monthly_counts]
 
     # =====================================================
     # FACILITY USAGE CHART
@@ -342,12 +349,15 @@ def user_management(request):
         '-date_joined',
         '-pk'
     )
+    page = Paginator(users, 25).get_page(request.GET.get('page'))
 
     return render(
         request,
         'Reservation/admin/users/UserManagement.html',
         {
-            'users': users,
+            'users': page.object_list,
+            'page_obj': page,
+            'directory_query': pagination_query(request),
             'search_query': search_query,
         }
     )
@@ -431,6 +441,7 @@ def category_list(request):
 
 
 @admin_required
+@workspace_editor('category_list')
 def category_create(request):
     if request.method == 'POST':
         form = FacilityCategoryForm(
@@ -468,6 +479,7 @@ def category_create(request):
 
 
 @admin_required
+@workspace_editor('category_list')
 def category_update(request, category_id):
     category = get_object_or_404(
         FacilityCategory,
@@ -555,6 +567,7 @@ def amenity_list(request):
 
 
 @admin_required
+@workspace_editor('amenity_list')
 def amenity_create(request):
     if request.method == 'POST':
         form = AmenityForm(
@@ -592,6 +605,7 @@ def amenity_create(request):
 
 
 @admin_required
+@workspace_editor('amenity_list')
 def amenity_update(request, amenity_id):
     amenity = get_object_or_404(
         Amenity,
@@ -707,6 +721,7 @@ def facility_code_availability(request):
 
 
 @admin_required
+@workspace_editor('facility_list')
 def facility_create(request):
     if request.method == 'POST':
         form = FacilityForm(
@@ -744,6 +759,7 @@ def facility_create(request):
 
 
 @admin_required
+@workspace_editor('facility_list')
 def facility_update(request, facility_id):
     facility = get_object_or_404(
         Facility,
@@ -1243,6 +1259,7 @@ def admin_calendar(request):
 # =========================================================
 
 @admin_required
+@workspace_editor('reservation_detail_admin', workspace_args=('reservation_id',))
 def reservation_reschedule(request, reservation_id):
     reservation = get_object_or_404(
         Reservation,
@@ -1489,19 +1506,23 @@ def closure_list(request):
             'facility',
             'created_by'
         )
-        .order_by('-start_datetime')
+        .order_by('-start_datetime', '-pk')
     )
 
+    page = Paginator(closures, 25).get_page(request.GET.get('page'))
     return render(
         request,
         'Reservation/admin/closures/ClosureList.html',
         {
-            'closures': closures
+            'closures': page.object_list,
+            'page_obj': page,
+            'directory_query': pagination_query(request),
         }
     )
 
 
 @admin_required
+@workspace_editor('closure_list')
 def closure_create(request):
     conflicting_reservations = Reservation.objects.none()
 
@@ -1685,7 +1706,7 @@ def reports(request):
             'facility',
             'user'
         )
-        .order_by('-start_datetime')
+        .order_by('-start_datetime', '-pk')
     )
 
     if selected_facilities is not None:
@@ -1701,11 +1722,12 @@ def reports(request):
             start_datetime__date__lte=parsed_end_date
         )
 
-    total_reservations = reservations.count()
-
-    completed_reservations = reservations.filter(
-        status='COMPLETED'
-    ).count()
+    report_counts = reservations.aggregate(
+        total=Count('pk'),
+        completed=Count('pk', filter=Q(status='COMPLETED')),
+    )
+    total_reservations = report_counts['total']
+    completed_reservations = report_counts['completed']
 
     facility_usage_rows, total_booked_hours = (
         build_facility_usage_report(
@@ -1714,12 +1736,15 @@ def reports(request):
             facility_ids=selected_facilities
         )
     )
+    page = Paginator(reservations, 25).get_page(request.GET.get('page'))
 
     return render(
         request,
         'Reservation/admin/reports/Reports.html',
         {
-            'reservations': reservations,
+            'reservations': page.object_list,
+            'page_obj': page,
+            'directory_query': pagination_query(request),
             'report_facilities': Facility.objects.order_by('name', 'pk'),
             'selected_facilities': selected_facilities or [],
             'facility_query': urlencode({'facility': selected_facilities or []}, doseq=True),
@@ -1879,14 +1904,17 @@ def audit_logs(request):
         )
 
     logs = logs.order_by(
-        '-timestamp'
+        '-timestamp', '-pk'
     )
+    page = Paginator(logs, 25).get_page(request.GET.get('page'))
 
     return render(
         request,
         'Reservation/admin/reports/AuditLogs.html',
         {
-            'logs': logs,
+            'logs': page.object_list,
+            'page_obj': page,
+            'directory_query': pagination_query(request),
             'search_query': search_query,
         }
     )
@@ -1897,6 +1925,7 @@ def audit_logs(request):
 # =========================================================
 
 @admin_required
+@workspace_editor('admin_dashboard')
 def system_settings(request):
     settings_object = get_system_settings()
 
@@ -1954,27 +1983,29 @@ def system_settings(request):
 
 @basic_user_required
 def user_dashboard(request):
-    upcoming = (
+    now = timezone.now()
+    confirmed = (
         Reservation.objects
         .filter(
             user=request.user,
-            start_datetime__gte=timezone.now()
-        )
-        .exclude(
-            status__in=[
-                'REJECTED',
-                'CANCELLED',
-            ]
+            status__in=['APPROVED', 'CHECKED_IN'],
+            end_datetime__gt=now,
         )
         .select_related('facility')
-        .order_by('start_datetime')[:5]
+        .order_by('start_datetime', 'pk')
     )
+    ongoing = confirmed.filter(start_datetime__lte=now).first()
+    upcoming = list(confirmed.filter(start_datetime__gt=now)[:5])
+    highlighted = ongoing or (upcoming[0] if upcoming else None)
 
     return render(
         request,
         'Reservation/user/UserDashboard.html',
         {
-            'upcoming_reservations': upcoming
+            'upcoming_reservations': upcoming,
+            'highlighted_reservation': highlighted,
+            'has_ongoing_reservation': ongoing is not None,
+            'pending_request_count': Reservation.objects.filter(user=request.user, status='PENDING').count(),
         }
     )
 
@@ -1984,6 +2015,7 @@ def user_dashboard(request):
 # =========================================================
 
 @basic_user_required
+@workspace_editor('user_dashboard')
 def user_profile(request):
     if request.method == 'POST':
         form = UserProfileForm(
@@ -2288,6 +2320,25 @@ def facility_detail_user(request, facility_id):
                 'end_datetime': closing_datetime,
             })
 
+    # Offer an editable starting point, not a claim that a slot is held.
+    for slot in available_slots:
+        # A suggestion leaves time to complete the form; this is not a booking rule.
+        start = max(timezone.localtime(slot['start_datetime']), timezone.localtime(now) + timedelta(minutes=10))
+        rounded_start = start.replace(second=0, microsecond=0)
+        if rounded_start < start:
+            rounded_start += timedelta(minutes=1)
+        end = min(
+            timezone.localtime(slot['end_datetime']).replace(second=0, microsecond=0),
+            rounded_start + timedelta(hours=min(1, booking_settings.max_event_duration_hours)),
+        )
+        if end > rounded_start:
+            slot['booking_start'] = rounded_start
+            slot['booking_url'] = reverse('reservation_create') + '?' + urlencode({
+                'facility': facility.pk,
+                'start_datetime': rounded_start.strftime('%Y-%m-%dT%H:%M'),
+                'end_datetime': end.strftime('%Y-%m-%dT%H:%M'),
+            })
+
     return render(
         request,
         'Reservation/user/FacilityDetail.html',
@@ -2307,6 +2358,7 @@ def facility_detail_user(request, facility_id):
 # =========================================================
 
 @basic_user_required
+@workspace_editor('browse_facilities')
 def reservation_create(request):
     if request.method == 'POST':
         form = ReservationRequestForm(
@@ -2365,9 +2417,16 @@ def reservation_create(request):
         if facility_id:
             initial['facility'] = facility_id
 
-        form = ReservationRequestForm(
-            initial=initial
-        )
+        form = ReservationRequestForm(initial=initial)
+        # GET values only prefill an unbound form. POST always uses its own data
+        # and the existing service rechecks hours, capacity, conflicts and limits.
+        try:
+            start = datetime.strptime(request.GET.get('start_datetime', '')[:32], '%Y-%m-%dT%H:%M')
+            end = datetime.strptime(request.GET.get('end_datetime', '')[:32], '%Y-%m-%dT%H:%M')
+            if start < end:
+                form.initial.update(start_datetime=start, end_datetime=end)
+        except (ValueError, TypeError):
+            pass
 
     return render(
         request,
@@ -2384,22 +2443,36 @@ def reservation_create(request):
 
 @basic_user_required
 def my_reservations(request):
-    reservations = (
-        Reservation.objects
-        .filter(
-            user=request.user
-        )
-        .select_related('facility')
-        .order_by('-start_datetime')
-    )
-
-    return render(
-        request,
-        'Reservation/user/MyReservations.html',
-        {
-            'reservations': reservations
-        }
-    )
+    now = timezone.now()
+    records = Reservation.objects.filter(user=request.user).select_related('facility')
+    has_reservations = records.exists()
+    search = request.GET.get('search', '').strip()[:200]
+    status = request.GET.get('status', '')
+    period = request.GET.get('period', 'all')
+    if status not in dict(Reservation.STATUS_CHOICES):
+        status = ''
+    if period not in ('all', 'upcoming', 'past'):
+        period = 'all'
+    if search:
+        records = records.filter(Q(event_name__icontains=search) | Q(facility__name__icontains=search))
+    if status:
+        records = records.filter(status=status)
+    if period == 'upcoming':
+        records = records.filter(end_datetime__gt=now,
+                                 status__in=['PENDING', 'APPROVED', 'CHECKED_IN'])
+    elif period == 'past':
+        records = records.filter(end_datetime__lte=now)
+    ordering = ('start_datetime', 'pk') if period == 'upcoming' else ('-start_datetime', '-pk')
+    page = Paginator(records.order_by(*ordering), 25).get_page(request.GET.get('page'))
+    return render(request, 'Reservation/user/MyReservations.html', {
+        'reservations': page.object_list, 'page_obj': page,
+        'has_reservations': has_reservations, 'search_query': search,
+        'status_filter': status, 'period_filter': period,
+        'status_choices': Reservation.STATUS_CHOICES,
+        'filters_active': bool(search or status or period != 'all'),
+        'directory_query': urlencode({'search': search, 'status': status, 'period': period}),
+        'schedule_now': now,
+    })
 
 
 @basic_user_required
@@ -2419,7 +2492,8 @@ def reservation_detail_user(
         request,
         'Reservation/user/ReservationDetail.html',
         {
-            'reservation': reservation
+            'reservation': reservation,
+            'schedule_now': timezone.now(),
         }
     )
 

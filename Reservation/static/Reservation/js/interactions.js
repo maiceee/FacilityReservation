@@ -29,7 +29,10 @@
         };
         dialog.addEventListener('pointerdown', (event) => { startedOutside = outside(event); });
         dialog.addEventListener('click', (event) => {
-            if (startedOutside && outside(event) && dialog.open && !dialog.querySelector('form[data-saving="true"]')) dialog.close();
+            if (startedOutside && outside(event) && dialog.open && !dialog.querySelector('form[data-saving="true"]')) {
+                if (dialog.id === 'table-edit-dialog' && window.SpasyoEditor) window.SpasyoEditor.requestClose();
+                else dialog.close();
+            }
             startedOutside = false;
         });
     });
@@ -96,25 +99,6 @@
             if (popup.matches(':popover-open') && !popup.contains(event.target)) popup.hidePopover();
         }, { capture: true, passive: true });
     };
-    document.querySelectorAll('.ui-hint').forEach((hint) => {
-        const trigger = hint.querySelector('summary');
-        const source = hint.querySelector('.ui-hint-content');
-        if (!trigger || !source) return;
-        const popup = document.createElement('div');
-        popup.className = 'context-popover hint-popover';
-        popup.textContent = source.textContent;
-        popup.setAttribute('role', 'note');
-        document.body.append(popup);
-        connectPopover(trigger, popup, true);
-        trigger.setAttribute('role', 'button');
-        trigger.setAttribute('aria-describedby', popup.id);
-        trigger.addEventListener('keydown', (event) => {
-            if (event.key !== 'Escape' || !popup.matches(':popover-open')) return;
-            event.preventDefault();
-            popup.hidePopover();
-        });
-    });
-
     const tools = document.querySelector('.keyboard-tools');
     if (!tools) return;
     const help = tools.querySelector('.keyboard-help-trigger');

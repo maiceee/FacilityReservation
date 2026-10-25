@@ -22,6 +22,7 @@
         </a>
     </header>
 <div class="workspace-detail-body" role="region" aria-label="Form content" tabindex="0">
+<div class="stack" data-editor-content>
 
     <section class="closures-form-card"
              aria-labelledby="closure-form-title">
@@ -176,22 +177,5 @@
 
 </div>
 </div>
-{% endblock %}
-
-{% block extra_script %}
-<script>
-(() => {
-    const form = document.getElementById("closure-create-form");
-    const submitButton = document.getElementById("closure-submit-button");
-
-    form.addEventListener("submit", () => {
-        if (!form.checkValidity()) {
-            return;
-        }
-
-        submitButton.disabled = true;
-        submitButton.textContent = "Creating…";
-    });
-})();
-</script>
+</div>
 {% endblock %}

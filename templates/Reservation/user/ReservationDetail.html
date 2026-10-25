@@ -33,13 +33,13 @@
 
     <div class="notice">
         {% include 'Reservation/components/icon.html' with name='circle-alert' %}
-        <div><strong>{{ reservation.get_status_display }}</strong><p>
-        {% if reservation.status == 'PENDING' %}Your request is awaiting administrator review. This time slot is not reserved yet.
+        <div><strong>{% if reservation.status == 'PENDING' and reservation.start_datetime <= schedule_now %}Start time passed · Still pending{% else %}{{ reservation.get_status_display }}{% endif %}</strong><p>
+        {% if reservation.status == 'PENDING' %}{% if reservation.start_datetime <= schedule_now %}The requested start time has passed. Your request still needs administrator review and does not hold a slot.{% else %}Your request is awaiting administrator review. This time slot is not reserved yet.{% endif %}
         {% elif reservation.status == 'APPROVED' %}Your booking is approved. The facility is reserved for your scheduled event.
         {% elif reservation.status == 'CHECKED_IN' %}Your event is in progress. Check-in has been recorded by an administrator.
         {% elif reservation.status == 'COMPLETED' %}Your event is complete. This booking is part of your reservation history.
         {% elif reservation.status == 'REJECTED' %}This request was rejected. Review the reason below.
-        {% elif reservation.status == 'CANCELLED' %}This reservation was cancelled and no longer holds a time slot.
+        {% elif reservation.status == 'CANCELLED' %}{% if reservation.auto_cancelled %}Automatically cancelled because your request was not approved before its scheduled start. Submit a new request to choose another time.{% else %}This reservation was cancelled and no longer holds a time slot.{% endif %}
         {% elif reservation.status == 'NO_SHOW' %}Attendance was not recorded. This booking was marked as No Show.
         {% endif %}</p></div>
     </div>
@@ -114,11 +114,12 @@
     </section>
     <div class="reservation-side"><aside class="panel"><div class="panel-heading"><h2>Request progress</h2></div><div class="panel-body"><ul class="progress-list">
         <li><strong>Request submitted</strong><p>{{ reservation.created_at|date:"M d, Y · g:i A" }}</p></li>
-        {% if reservation.decision_at %}<li><strong>Administrator decision</strong><p>{{ reservation.decision_at|date:"M d, Y · g:i A" }}</p></li>{% endif %}
+        {% if reservation.decision_at %}<li><strong>{% if reservation.auto_cancelled %}Automatically cancelled{% else %}Administrator decision{% endif %}</strong><p>{{ reservation.decision_at|date:"M d, Y · g:i A" }}</p></li>{% endif %}
         <li><strong>{{ reservation.get_status_display }}</strong><p>Current reservation status</p></li>
     </ul></div></aside>
 
     {% if reservation.status == 'PENDING' or reservation.status == 'APPROVED' %}
+    {% if reservation.start_datetime > schedule_now %}
 
         <section class="user-detail-card user-cancel-card">
 
@@ -153,6 +154,7 @@
 
         </section>
 
+    {% endif %}
     {% endif %}
 
     </div>

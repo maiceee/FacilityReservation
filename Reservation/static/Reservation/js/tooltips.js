@@ -2,7 +2,7 @@
 (() => {
     'use strict';
     if (!('showPopover' in HTMLElement.prototype)) return;
-    const selector = '[title], [data-tooltip], .icon-button[aria-label], .ui-hint > summary';
+    const selector = '[title], [data-tooltip], .icon-button[aria-label]';
     const tooltip = document.createElement('div');
     tooltip.id = 'workspace-tooltip';
     tooltip.className = 'context-popover ui-tooltip';
@@ -20,7 +20,6 @@
 
     const eligible = (control) => {
         if (control.matches('.shortcut-close, .keyboard-help-trigger, [data-no-tooltip]')) return false;
-        if (control.matches('.ui-hint > summary')) return true;
         if (control.dataset.tooltip) return control.dataset.tooltipClipped !== 'true' || clipped(control);
         if (control.matches('.icon-button[aria-label]')) {
             return !control.closest('.control-popover') && !/^(close|search|apply|clear|choose|previous|next|first page|last page)/i.test(control.getAttribute('aria-label'));

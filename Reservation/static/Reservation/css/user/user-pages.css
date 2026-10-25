@@ -4,6 +4,23 @@
     gap: var(--section-gap);
 }
 
+.home-header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.pending-schedule-note {
+    display: block;
+    max-width: 16rem;
+    margin-top: var(--space-1);
+    color: var(--color-warning-text);
+    font-size: var(--font-size-xs);
+    line-height: 1.4;
+    white-space: normal;
+}
+
 .user-page-header, .user-detail-header  {
     display: flex;
     align-items: center;
@@ -47,7 +64,7 @@
 
 .user-data-card, .user-detail-card, .user-form-card, .panel  {
     min-width: 0;
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
     background: var(--color-surface);
     overflow: hidden;
@@ -200,7 +217,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
     padding: var(--space-4);
     transition: border-color var(--duration-fast) var(--ease-standard);
@@ -223,7 +240,7 @@
 .facility-placeholder .icon  {
     width: 2rem;
     height: 2rem;
-    stroke-width: 1.2;
+    stroke-width: var(--icon-stroke-width);
 }
 
 .user-facility-category  {
@@ -292,14 +309,14 @@
     padding: var(--space-3) var(--space-5);
     background: var(--color-surface-subtle);
     color: var(--color-text-muted);
-    border-block: 1px solid var(--color-border);
+    border-block: var(--border-width) solid var(--color-border);
     font-size: var(--font-size-xs);
     white-space: nowrap;
 }
 
 .user-modern-table td  {
     padding: var(--table-cell-padding) var(--space-4);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
     vertical-align: middle;
     overflow-wrap: anywhere;
 }
@@ -359,7 +376,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-pill);
     background: var(--color-canvas);
     font-size: .6875rem;
@@ -436,7 +453,7 @@
 .user-description-block  {
     margin-top: var(--space-6);
     padding-top: var(--space-5);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
 }
 
 .user-description-block p  {
@@ -492,7 +509,7 @@
     gap: var(--space-3);
     margin-top: var(--space-8);
     padding-top: var(--space-5);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
 }
 
 .user-profile-heading  {
@@ -567,7 +584,7 @@
     width: min(34rem, calc(100% - 2rem));
     max-height: calc(100dvh - 2rem);
     padding: var(--page-padding);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
     color: var(--color-text);
     background: var(--color-surface);

@@ -5,3 +5,12 @@
     </header>
     <div class="workspace-dialog-body" data-edit-body aria-busy="false"></div>
 </dialog>
+
+<dialog class="confirm-dialog signout-dialog" id="editor-discard-dialog" aria-labelledby="editor-discard-title" aria-describedby="editor-discard-description">
+    <h2 id="editor-discard-title">Discard your changes?</h2>
+    <p id="editor-discard-description">Closing the editor discards your current entries. Keep editing to finish, or discard changes to close.</p>
+    <div class="dialog-actions">
+        <button type="button" class="button button-primary" data-keep-editing autofocus>Keep editing</button>
+        <button type="button" class="button" data-discard-edits>Discard changes</button>
+    </div>
+</dialog>

@@ -197,6 +197,9 @@ class FacilityAmenity(models.Model):
 # RESERVATION
 # =========================================================
 
+PENDING_EXPIRY_REASON = 'Automatically cancelled: the request was not approved before its scheduled start.'
+
+
 class Reservation(models.Model):
 
     STATUS_CHOICES = [
@@ -266,6 +269,13 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f'{self.event_name} - {self.status}'
+
+    @property
+    def auto_cancelled(self):
+        return self.status == 'CANCELLED' and self.decision_reason == PENDING_EXPIRY_REASON
+
+    class Meta:
+        indexes = [models.Index(fields=['status', 'start_datetime'], name='reservation_expiry_idx')]
 
 
 # =========================================================
@@ -430,6 +440,23 @@ class AuditLog(models.Model):
 # =========================================================
 # SYSTEM SETTING
 # =========================================================
+
+class Notification(models.Model):
+    """A private, durable booking update for one account."""
+
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                  related_name='notifications')
+    reservation = models.ForeignKey(Reservation, null=True, blank=True,
+                                    on_delete=models.SET_NULL, related_name='notifications')
+    title = models.CharField(max_length=100)
+    message = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-id']
+        indexes = [models.Index(fields=['recipient', 'read_at', '-id'])]
+
 
 class SystemSetting(models.Model):
 

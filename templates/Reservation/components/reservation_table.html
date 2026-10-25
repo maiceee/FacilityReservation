@@ -5,7 +5,7 @@
             <tr>
                 <td><strong class="user-table-primary" title="{{ reservation.event_name }}">{{ reservation.event_name }}</strong><span class="table-secondary">{{ reservation.facility.name }} · #{{ reservation.id }}</span></td>
                 <td><span class="user-table-date">{{ reservation.start_datetime|date:"M d, Y" }}</span><span class="user-table-time">{{ reservation.start_datetime|date:"g:i A" }} – {% if reservation.start_datetime.date != reservation.end_datetime.date %}{{ reservation.end_datetime|date:"M d, Y" }} · {% endif %}{{ reservation.end_datetime|date:"g:i A" }}</span></td>
-                <td>{% include 'Reservation/components/status.html' %}</td>
+                <td>{% include 'Reservation/components/status.html' %}{% if reservation.auto_cancelled %}<span class="pending-schedule-note">Not approved before start</span>{% endif %}</td>
                 <td><a href="{% url 'reservation_detail_user' reservation.id %}" class="user-table-link icon-button" aria-label="View {{ reservation.event_name }}" title="View reservation">{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a></td>
             </tr>
         {% endfor %}</tbody>

@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Administration | Spasyo{% endblock %}</title>
     {% include 'Reservation/components/styles.html' %}
-    <link rel="stylesheet" href="{% static 'Reservation/css/admin/admin.css' %}?v=spasyo-10">
+    <link rel="stylesheet" href="{% static 'Reservation/css/admin/admin.css' %}?v=spasyo-12">
     {% include 'Reservation/components/frame_styles.html' %}
+    <link rel="stylesheet" href="{% static 'Reservation/css/notification-center.css' %}?v=3">
     {% block extra_head %}{% endblock %}
 </head>
 <body class="admin-page" data-form-actor="{{ request.user.pk }}">
@@ -88,13 +89,13 @@
                 <label for="sidebar-toggle" class="mobile-menu-button" aria-label="Open navigation">{% include 'Reservation/components/icon.html' with name='menu' %}</label>
                 <div class="topbar-heading"><span class="topbar-eyebrow">SPASYO / ADMINISTRATION</span><strong>Campus workspace</strong></div>
             </div>
-            <div class="topbar-right">{% include 'Reservation/components/keyboard_tools.html' %}<span class="topbar-role">{{ request.user.first_name|default:request.user.username }}</span><span class="avatar" aria-hidden="true">{{ request.user.username|first|upper }}</span></div>
+            <div class="topbar-right">{% include 'Reservation/components/notification_center.html' %}{% include 'Reservation/components/keyboard_tools.html' %}<span class="topbar-role">{{ request.user.first_name|default:request.user.username }}</span><span class="avatar" aria-hidden="true">{{ request.user.username|first|upper }}</span></div>
         </header>
         <main class="content" id="admin-content" tabindex="-1">
             <div class="admin-content-inner">
                 {% if messages %}<div class="messages-container">{% for message in messages %}<div class="message {{ message.tags }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}
                 {% block content %}{% endblock %}
-                <footer class="admin-footer">Spasyo · Administration. All times are Philippine local time.</footer>
+                <footer class="admin-footer">All times are Philippine local time (UTC+8).</footer>
             </div>
         </main>
     </div>
@@ -108,10 +109,11 @@
         <button type="button" class="button button-primary" data-admin-confirm-submit>Confirm</button>
     </div>
 </dialog>
-<script src="{% static 'Reservation/js/admin-presentation.js' %}?v=5" defer></script>
+<script src="{% static 'Reservation/js/admin-presentation.js' %}?v=6" defer></script>
 {% include 'Reservation/components/edit_dialog.html' %}
-<script src="{% static 'Reservation/js/table-editor.js' %}?v=7" defer></script>
+<script src="{% static 'Reservation/js/table-editor.js' %}?v=12" defer></script>
 {% block extra_script %}{% endblock %}
 {% include 'Reservation/components/workspace.html' %}
+<script src="{% static 'Reservation/js/notification-center.js' %}?v=3" defer></script>
 </body>
 </html>

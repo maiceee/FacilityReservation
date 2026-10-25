@@ -270,7 +270,7 @@ class RegistrationAndProfileAuditTest(TestCase):
             }
         )
 
-        self.assertRedirects(response, reverse('user_profile'))
+        self.assertRedirects(response, reverse('user_profile'), fetch_redirect_response=False)
         self.user.refresh_from_db()
         audit = AuditLog.objects.get(
             action='PROFILE_UPDATED',
@@ -322,7 +322,7 @@ class RegistrationAndProfileAuditTest(TestCase):
             }
         )
 
-        self.assertRedirects(response, reverse('user_profile'))
+        self.assertRedirects(response, reverse('user_profile'), fetch_redirect_response=False)
         self.assertFalse(
             AuditLog.objects.filter(action='PROFILE_UPDATED').exists()
         )
@@ -571,7 +571,7 @@ class FacilityManagementTest(TestCase):
         )
 
     def test_facility_form_enables_live_code_availability_check(self):
-        response = self.client.get(reverse('facility_create'))
+        response = self.client.get(reverse('facility_create'), HTTP_X_SPASYO_EDITOR='1')
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(
@@ -1077,7 +1077,7 @@ class ClosureCreationTest(TestCase):
         return timezone.localtime(value).strftime('%Y-%m-%dT%H:%M')
 
     def test_closure_form_displays_correct_content(self):
-        response = self.client.get(reverse('closure_create'))
+        response = self.client.get(reverse('closure_create'), HTTP_X_SPASYO_EDITOR='1')
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(

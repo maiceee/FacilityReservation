@@ -47,7 +47,8 @@
         details.textContent = options.details || '';
         details.hidden = !options.details;
         context.hidden = !options.record && !options.details;
-        description.textContent = options.description || 'Confirm to submit this action, or go back to review your changes.';
+        description.textContent = options.description ?? 'Confirm to submit this action, or go back to review your changes.';
+        description.hidden = !description.textContent;
         confirmButton.textContent = options.actionLabel || 'Confirm';
         dialog.showModal();
         return true;

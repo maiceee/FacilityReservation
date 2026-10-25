@@ -1,6 +1,6 @@
 <details class="ui-hint">
-    <summary aria-label="{{ label|default:'Help' }}" title="{{ label|default:'Help' }}">
-        {% include 'Reservation/components/icon.html' with name='info' %}
+    <summary aria-label="{{ label|default:'Help' }}" data-no-tooltip>
+        {% include 'Reservation/components/icon.html' with name='circle-help' %}
     </summary>
     <div class="ui-hint-content">{{ text }}</div>
 </details>

@@ -4,9 +4,12 @@ from django.contrib.auth import views as auth_views
 from . import views
 from .directory import directory_bulk
 from .forms import AccountAuthenticationForm
+from .notification_views import notification_feed, notification_read
 
 
 urlpatterns = [
+    path('notifications/', notification_feed, name='notification_feed'),
+    path('notifications/read/', notification_read, name='notification_read'),
     path("manage/directory/<str:kind>/bulk/", directory_bulk, name="directory_bulk"),
 
     # =====================================================

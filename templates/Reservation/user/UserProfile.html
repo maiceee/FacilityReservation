@@ -13,9 +13,10 @@
     <section class="profile-account" aria-label="Read-only account details">
         <dl class="account-details"><div><dt>Email address</dt><dd>{{ request.user.email|default:'Not provided' }}</dd></div><div><dt>Department</dt><dd>{{ request.user.department|default:'Not provided' }}</dd></div></dl>
     </section>
+    {% include 'Reservation/components/appearance.html' %}
     <form method="post" class="user-reservation-form profile-form">
         {% csrf_token %}
-        <div class="profile-section-heading"><h3>Personal information</h3><p>Edit your name and contact number.</p></div>
+        <div class="profile-section-heading"><h3>Personal information</h3></div>
         {% if form.non_field_errors %}<div class="user-form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
         <div class="user-form-grid">{% for field in form %}{% include 'Reservation/components/field.html' %}{% endfor %}</div>
         <div class="user-form-footer"><button type="submit" class="button button-primary">{% include 'Reservation/components/icon.html' with name='check' %}Save changes</button></div>

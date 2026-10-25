@@ -4,9 +4,26 @@
 {% block content %}
 <div class="user-modern-page workspace-page" data-workspace-page="directory">
     <div class="user-page-header"><div><h1>My reservations</h1></div><a href="{% url 'reservation_create' %}" data-edit-dialog data-editor-kind="reservation" class="button button-primary">{% include 'Reservation/components/icon.html' with name='plus' %}New reservation</a></div>
+    {% if has_reservations %}
+    <section class="user-filter-card" aria-label="Filter your reservations">
+        <form method="get" class="user-facility-filter reservation-history-filter" action="{% url 'my_reservations' %}">
+            <div class="user-filter-field"><label for="reservation-search">Event or facility</label><input id="reservation-search" data-example-ready="true" name="search" type="search" value="{{ search_query }}" placeholder="Search reservations…" maxlength="200"></div>
+            <div class="user-filter-field"><label for="reservation-status">Status</label><select id="reservation-status" data-example-ready="true" name="status"><option value="">All statuses</option>{% for value, label in status_choices %}<option value="{{ value }}"{% if status_filter == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <div class="user-filter-field"><label for="reservation-period">Schedule</label><select id="reservation-period" data-example-ready="true" name="period"><option value="all"{% if period_filter == 'all' %} selected{% endif %}>All dates</option><option value="upcoming"{% if period_filter == 'upcoming' %} selected{% endif %}>Upcoming / ongoing</option><option value="past"{% if period_filter == 'past' %} selected{% endif %}>Past</option></select></div>
+            <div class="user-filter-actions"><button type="submit" class="button button-primary icon-button" aria-label="Search reservations" title="Search reservations">{% include 'Reservation/components/icon.html' with name='search' %}</button>{% if filters_active %}<a href="{% url 'my_reservations' %}" class="button icon-button" aria-label="Clear filters" title="Clear filters">{% include 'Reservation/components/icon.html' with name='x' %}</a>{% endif %}</div>
+        </form>
+    </section>
+    {% endif %}
     <section class="user-data-card">
-        <div class="user-data-heading"><div><h2>All reservations</h2></div><span class="user-results-count">{{ reservations|length }} shown</span></div>
-        {% if reservations %}{% include 'Reservation/components/reservation_table.html' %}{% else %}<div class="user-empty-state">{% include 'Reservation/components/icon.html' with name='calendar-days' %}<h3>No reservations yet</h3><p>Once you submit a request, it appears here with its current status.</p><a href="{% url 'browse_facilities' %}" class="button button-primary">Find a space</a></div>{% endif %}
+        <div class="user-data-heading"><div><h2>{% if filters_active %}Matching reservations{% else %}All reservations{% endif %}</h2></div><span class="user-results-count">{{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }}</span></div>
+        {% if reservations %}
+            {% include 'Reservation/components/reservation_table.html' %}
+            {% include 'Reservation/components/directory_pagination.html' %}
+        {% elif has_reservations %}
+            <div class="user-empty-state">{% include 'Reservation/components/icon.html' with name='search' %}<h3>No matching reservations</h3><p>Try another event, facility, status, or schedule.</p><a href="{% url 'my_reservations' %}" class="button">Clear filters</a></div>
+        {% else %}
+            <div class="user-empty-state">{% include 'Reservation/components/icon.html' with name='calendar-days' %}<h3>No reservations yet</h3><p>Once you submit a request, it appears here with its current status.</p><a href="{% url 'browse_facilities' %}" class="button button-primary">Find a space</a></div>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

@@ -1,0 +1,7 @@
+<span class="print-status status-badge status-{{ reservation.status|lower }}">
+    {% if reservation.status == 'APPROVED' %}{% include 'Reservation/components/icon.html' with name='calendar-check-2' %}
+    {% elif reservation.status == 'CHECKED_IN' %}{% include 'Reservation/components/icon.html' with name='users' %}
+    {% elif reservation.status == 'COMPLETED' %}{% include 'Reservation/components/icon.html' with name='circle-check' %}
+    {% else %}{% include 'Reservation/components/icon.html' with name='circle-alert' %}{% endif %}
+    {{ reservation.get_status_display }}
+</span>

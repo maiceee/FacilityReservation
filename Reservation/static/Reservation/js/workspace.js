@@ -2,7 +2,7 @@
 (() => {
     'use strict';
     // Labelled form submissions share a text-only treatment; navigation and icon-only controls keep icons.
-    document.querySelectorAll('form:not([data-signout]) button[type="submit"]').forEach((button) => {
+    document.querySelectorAll('form:not([data-signout]):not([data-bulk-form]) button[type="submit"]').forEach((button) => {
         if (button.textContent.trim() && !button.classList.contains('icon-button')) {
             button.querySelectorAll('svg.icon').forEach((icon) => icon.remove());
         }
@@ -17,15 +17,8 @@
         if (panels.some((panel) => !panel)) return;
         list.hidden = false;
         list.setAttribute('role', 'tablist');
-        const moveIndicator = () => {
-            const active = list.querySelector('[aria-selected="true"]');
-            if (!active) return;
-            list.style.setProperty('--tab-left', `${active.offsetLeft}px`);
-            list.style.setProperty('--tab-top', `${active.offsetTop}px`);
-            list.style.setProperty('--tab-width', `${active.offsetWidth}px`);
-            list.style.setProperty('--tab-height', `${active.offsetHeight}px`);
-            list.classList.add('has-tab-indicator');
-        };
+        const pill = window.SpasyoTabMotion.mount(list);
+        const moveIndicator = () => pill.reset();
         const activate = (index, focus = false) => {
             tabs.forEach((tab, i) => {
                 tab.id ||= `${tab.dataset.tab}-tab`;
@@ -43,6 +36,7 @@
         };
         tabs.forEach((tab, index) => {
             tab.addEventListener('click', () => {
+                if (tab.getAttribute('aria-selected') === 'true') return;
                 activate(index);
                 if (root.hasAttribute('data-reset-scroll')) {
                     const content = root.closest('.content');
@@ -61,7 +55,16 @@
             });
         });
         activate(0);
-        if (typeof ResizeObserver === "function") new ResizeObserver(moveIndicator).observe(list);
+        root.dataset.tabsReady = 'true';
+    });
+
+    // Clicking the current sidebar destination should not reload the document.
+    // Other links retain native history, modified clicks and navigation guards.
+    document.addEventListener('click', (event) => {
+        if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest('.sidebar-nav a[href], .user-sidebar-nav a[href]');
+        if (!link || link.hasAttribute('data-edit-dialog') || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+        if (link.href === location.href && !link.closest('.has-tab-indicator')) event.preventDefault();
     });
 
     // Full day/booking details use a bounded dialog; hints use adjacent popovers.
@@ -111,7 +114,7 @@
         result.type = 'button';
         return result;
     };
-    const setupPopover = (trigger, popup, width = 280) => {
+    const setupPopover = (trigger, popup, width = 280, preferredHeight = 360) => {
         popup.popover = 'auto';
         popup.id = `control-popup-${++controlId}`;
         trigger.setAttribute('aria-controls', popup.id);
@@ -121,12 +124,13 @@
             const popupWidth = Math.min(Math.max(box.width, width), window.innerWidth - 24);
             const below = window.innerHeight - box.bottom - 12;
             const above = box.top - 12;
-            const available = below >= 220 || below >= above ? below : above;
-            const height = Math.min(360, Math.max(100, available));
+            const useBelow = below >= preferredHeight || below >= above;
+            const available = useBelow ? below : above;
+            const height = Math.min(preferredHeight, Math.max(100, available));
             popup.style.width = `${popupWidth}px`;
             popup.style.maxHeight = `${height}px`;
             popup.style.left = `${Math.max(12, Math.min(box.left, window.innerWidth - popupWidth - 12))}px`;
-            popup.style.top = `${below >= 220 || below >= above ? box.bottom + 6 : Math.max(12, box.top - height - 6)}px`;
+            popup.style.top = `${useBelow ? box.bottom + 6 : Math.max(12, box.top - height - 6)}px`;
         };
         trigger.addEventListener('click', () => {
             if (popup.matches(':popover-open')) popup.hidePopover();
@@ -154,7 +158,7 @@
     }, { capture: true, passive: true });
 
     // Searchable options update the original select; no options or values are invented.
-    const enhanceSelects = (root) => root.querySelectorAll('select:not([multiple]):not(.native-select)').forEach((select) => {
+    const enhanceSelects = (root) => root.querySelectorAll('select:not([multiple]):not(.native-select):not([data-picker-period])').forEach((select) => {
         const wrap = make('div', 'select-control');
         const trigger = button('control-trigger');
         const value = make('span');
@@ -248,6 +252,7 @@
         trigger.append(icon('calendar-days'));
         const popup = make('div', 'control-popover');
         popup.setAttribute('role', 'dialog');
+        popup.classList.add('date-picker-popover');
         popup.setAttribute('aria-label', `Choose ${label.toLowerCase()}`);
         const header = make('div', 'date-picker-header');
         const previous = button('icon-button');
@@ -269,11 +274,50 @@
         let month = localDate(selected);
         month.setDate(1);
         const withTime = input.type === 'datetime-local';
-        const time = make('input');
-        time.type = 'time';
-        time.setAttribute('aria-label', `${label} time`);
+        // Explicit time segments avoid a second browser-owned picker over the calendar.
+        const timeGroup = make('div', 'date-picker-time');
+        const timeLabel = make('span', 'date-picker-time-label', 'Time');
+        const segments = make('div', 'date-picker-time-segments');
+        const hour = make('input');
+        const minute = make('input');
+        [hour, minute].forEach((part, index) => {
+            part.type = 'text';
+            part.inputMode = 'numeric';
+            part.maxLength = 2;
+            part.placeholder = index ? 'MM' : 'HH';
+            part.setAttribute('aria-label', `${label} ${index ? 'minute' : 'hour'}`);
+            part.autocomplete = 'off';
+        });
+        const period = make('select');
+        period.dataset.pickerPeriod = '';
+        period.setAttribute('aria-label', `${label} AM or PM`);
+        ['AM', 'PM'].forEach((value) => {
+            const option = make('option', '', value);
+            option.value = value;
+            period.append(option);
+        });
+        const colon = make('span', '', ':');
+        colon.setAttribute('aria-hidden', 'true');
+        segments.append(hour, colon, minute, period);
+        timeGroup.append(timeLabel, segments);
+        const timeError = make('p', 'date-picker-time-error', 'Enter an hour from 1–12 and minutes from 00–59.');
+        timeError.hidden = true;
+        timeError.id = `picker-time-error-${++controlId}`;
+        timeError.setAttribute('role', 'status');
+        const validPart = (part, maximum) => /^\d{1,2}$/.test(part.value) && Number(part.value) >= (part === hour ? 1 : 0) && Number(part.value) <= maximum;
         const commit = () => {
-            input.value = selected + (withTime ? `T${time.value || '09:00'}` : '');
+            if (withTime && (!validPart(hour, 12) || !validPart(minute, 59))) {
+                timeError.hidden = false;
+                [hour, minute].forEach((part, index) => {
+                    part.setAttribute('aria-invalid', String(!validPart(part, index ? 59 : 12)));
+                    part.setAttribute('aria-describedby', timeError.id);
+                });
+                (!validPart(hour, 12) ? hour : minute).focus();
+                return;
+            }
+            const hours = Number(hour.value) % 12 + (period.value === 'PM' ? 12 : 0);
+            const time = `${String(hours).padStart(2, '0')}:${minute.value.padStart(2, '0')}`;
+            input.value = selected + (withTime ? `T${time}` : '');
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.dispatchEvent(new Event('change', { bubbles: true }));
             popup.hidePopover();
@@ -283,11 +327,18 @@
             const footer = make('div', 'date-picker-footer');
             const apply = button('button button-primary', 'Apply');
             apply.addEventListener('click', commit);
-            time.addEventListener('keydown', (event) => {
+            segments.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') { event.preventDefault(); commit(); }
             });
-            footer.append(time, apply);
-            popup.append(footer);
+            [hour, minute].forEach((part, index) => part.addEventListener('input', () => {
+                if (validPart(part, index ? 59 : 12)) {
+                    part.removeAttribute('aria-invalid');
+                    part.removeAttribute('aria-describedby');
+                }
+                if (validPart(hour, 12) && validPart(minute, 59)) timeError.hidden = true;
+            }));
+            footer.append(timeGroup, apply);
+            popup.append(footer, timeError);
         }
         const render = (focusDate) => {
             heading.textContent = month.toLocaleDateString('en', { month: 'long', year: 'numeric' });
@@ -323,12 +374,17 @@
         next.addEventListener('click', () => { month.setMonth(month.getMonth() + 1); render(); });
         input.before(wrap);
         wrap.append(input, trigger, popup);
-        setupPopover(trigger, popup, 288);
+        setupPopover(trigger, popup, withTime ? 320 : 288, withTime ? 390 : 340);
         trigger.addEventListener('click', () => {
             selected = input.value.slice(0, 10) || isoDate(new Date());
             month = localDate(selected);
             month.setDate(1);
-            time.value = input.value.slice(11, 16) || '09:00';
+            const [hours, minutes] = (input.value.slice(11, 16) || '09:00').split(':').map(Number);
+            hour.value = String(hours % 12 || 12).padStart(2, '0');
+            minute.value = String(minutes).padStart(2, '0');
+            period.value = hours >= 12 ? 'PM' : 'AM';
+            timeError.hidden = true;
+            [hour, minute].forEach((part) => { part.removeAttribute('aria-invalid'); part.removeAttribute('aria-describedby'); });
             render();
         });
         render();

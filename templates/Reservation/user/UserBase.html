@@ -6,9 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Spasyo{% endblock %}</title>
     {% include 'Reservation/components/styles.html' %}
-    <link rel="stylesheet" href="{% static 'Reservation/css/user/user.css' %}?v=5">
-    <link rel="stylesheet" href="{% static 'Reservation/css/user/user-pages.css' %}?v=9">
+    <link rel="stylesheet" href="{% static 'Reservation/css/user/user.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'Reservation/css/user/user-pages.css' %}?v=11">
     {% include 'Reservation/components/frame_styles.html' %}
+    <link rel="stylesheet" href="{% static 'Reservation/css/notification-center.css' %}?v=3">
     {% block extra_head %}{% endblock %}
 </head>
 <body class="user-portal-body" data-form-actor="{{ request.user.pk }}">
@@ -30,19 +31,20 @@
     <div class="user-main">
         <header class="user-topbar">
             <div class="user-topbar-left">Your campus / {% block breadcrumb %}Home{% endblock %}</div>
-            <div class="user-topbar-right">{% include 'Reservation/components/keyboard_tools.html' %}<a href="{% url 'user_profile' %}" data-edit-dialog data-editor-kind="profile" data-editor-title="My profile" class="user-topbar-profile"><span class="user-topbar-name">{{ request.user.get_full_name|default:request.user.username }}</span><span class="avatar" aria-hidden="true">{{ request.user.username|first|upper }}</span><span class="sr-only">My profile</span></a></div>
+            <div class="user-topbar-right">{% include 'Reservation/components/notification_center.html' %}{% include 'Reservation/components/keyboard_tools.html' %}<a href="{% url 'user_profile' %}" data-edit-dialog data-editor-kind="profile" data-editor-title="My profile" class="user-topbar-profile"><span class="user-topbar-name">{{ request.user.get_full_name|default:request.user.username }}</span><span class="avatar" aria-hidden="true">{{ request.user.username|first|upper }}</span><span class="sr-only">My profile</span></a></div>
         </header>
         <main class="user-main-content" id="main-content">
             {% if messages %}<div class="user-flash-messages">{% for message in messages %}<div class="user-flash-message {{ message.tags }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}
             {% block content %}{% endblock %}
-            <footer class="portal-footer">Spasyo · Your campus, with room for more. All times are Philippine local time.</footer>
+            <footer class="portal-footer">All times are Philippine local time (UTC+8).</footer>
         </main>
     </div>
 </div>
 <script src="{% static 'Reservation/js/presentation.js' %}?v=3" defer></script>
 {% include 'Reservation/components/edit_dialog.html' %}
-<script src="{% static 'Reservation/js/table-editor.js' %}?v=7" defer></script>
+<script src="{% static 'Reservation/js/table-editor.js' %}?v=12" defer></script>
 {% block extra_script %}{% endblock %}
 {% include 'Reservation/components/workspace.html' %}
+<script src="{% static 'Reservation/js/notification-center.js' %}?v=3" defer></script>
 </body>
 </html>

@@ -214,8 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    const theme = getComputedStyle(document.documentElement);
-    const themeColor = (name) => theme.getPropertyValue(name).trim();
+    const themeColor = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     Chart.defaults.font.family = themeColor('--font-family');
     Chart.defaults.color = themeColor('--color-text-muted');
     const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
@@ -233,9 +232,11 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    const renderCharts = (animate = true) => {
     const monthlyCanvas = document.getElementById("monthlyBookingChart");
 
     if (monthlyCanvas) {
+        Chart.getChart(monthlyCanvas)?.destroy();
         monthlyCanvas.setAttribute('aria-label', monthlyLabels.map((label, index) => `${label}: ${monthlyBookings[index]} bookings`).join('; '));
         new Chart(monthlyCanvas, {
             type: "bar",
@@ -244,20 +245,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     label: "Bookings",
                     data: monthlyBookings,
-                    backgroundColor: themeColor('--color-primary'),
+                    backgroundColor: themeColor('--color-chart-primary'),
                     hoverBackgroundColor: themeColor('--color-primary-hover'),
                     borderRadius: 7,
                     maxBarThickness: 38
                 }]
             },
             options: {
-                animation: motionPreference.matches ? false : { duration: chartDuration, easing: 'easeOutQuart' },
+                animation: !animate || motionPreference.matches ? false : { duration: chartDuration, easing: 'easeOutQuart' },
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: themeColor('--color-text'),
+                        backgroundColor: themeColor('--color-surface-subtle'),
+                        titleColor: themeColor('--color-text'), bodyColor: themeColor('--color-text'),
+                        borderColor: themeColor('--color-border-strong'), borderWidth: 1,
                         padding: 12,
                         cornerRadius: 8
                     }
@@ -281,6 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const facilityCanvas = document.getElementById("facilityUsageChart");
 
     if (facilityCanvas && facilityLabels.length > 0) {
+        Chart.getChart(facilityCanvas)?.destroy();
         facilityCanvas.setAttribute('aria-label', facilityLabels.map((label, index) => `${label}: ${facilityUsage[index]} reservations`).join('; '));
         new Chart(facilityCanvas, {
             type: "bar",
@@ -296,14 +300,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 }]
             },
             options: {
-                animation: motionPreference.matches ? false : { duration: chartDuration, easing: 'easeOutQuart' },
+                animation: !animate || motionPreference.matches ? false : { duration: chartDuration, easing: 'easeOutQuart' },
                 indexAxis: "y",
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: themeColor('--color-text'),
+                        backgroundColor: themeColor('--color-surface-subtle'),
+                        titleColor: themeColor('--color-text'), bodyColor: themeColor('--color-text'),
+                        borderColor: themeColor('--color-border-strong'), borderWidth: 1,
                         padding: 12,
                         cornerRadius: 8
                     }
@@ -323,6 +329,13 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+    };
+    document.addEventListener('spasyo:theme-change', () => {
+        Chart.defaults.color = themeColor('--color-text-muted');
+        renderCharts(false);
+    });
+    renderCharts();
+
 });
 </script>
 {% endblock %}

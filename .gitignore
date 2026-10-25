@@ -6,6 +6,7 @@ __pycache__/
 /.agents/
 /db.sqlite3
 /test_db.sqlite3
+/*.sqlite3-*
 staticfiles/
 media/
 tmp/

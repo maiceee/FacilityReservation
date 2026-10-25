@@ -7,7 +7,7 @@
 <div class="workspace-detail-body" role="region" aria-label="Form content" tabindex="0">
     <div class="stack">
         <section class="user-form-card">
-            <div class="user-card-heading"><div><h2>Event details</h2>{% include 'Reservation/components/hint.html' with label='Booking help' text='Fields marked * are required. Use Philippine local time and check facility hours. Your request remains Pending until approved; pending requests do not hold a time slot.' %}</div></div>
+            <div class="user-card-heading"><div><h2>Event details</h2></div></div>
             <form method="post" class="user-reservation-form">
                 {% csrf_token %}
                 {% if form.non_field_errors %}<div class="user-form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
@@ -19,7 +19,8 @@
                     {% include 'Reservation/components/field.html' with field=form.expected_attendees %}
                     {% include 'Reservation/components/field.html' with field=form.purpose extra_class='field-wide' %}
                 </div>
-                <div class="user-form-footer"><a href="{% url 'user_dashboard' %}" class="button">Cancel</a><button type="submit" class="button button-primary">Submit request{% include 'Reservation/components/icon.html' with name='arrow-right' %}</button></div>
+                <p class="booking-policy" id="booking-policy">Requests require approval. Pending requests do not reserve a slot.</p>
+                <div class="user-form-footer"><a href="{% url 'user_dashboard' %}" class="button">Cancel</a><button type="submit" class="button button-primary" aria-describedby="booking-policy">Submit request{% include 'Reservation/components/icon.html' with name='arrow-right' %}</button></div>
             </form>
         </section>
 

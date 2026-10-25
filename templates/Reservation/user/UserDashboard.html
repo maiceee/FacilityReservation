@@ -4,12 +4,15 @@
 <div class="user-modern-page workspace-page" data-workspace-page="home">
     <div class="user-page-header">
         <div><h1>A space for your next idea.</h1></div>
-        <a href="{% url 'browse_facilities' %}" class="button button-primary">Find a space{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>
+        <div class="home-header-actions">
+            {% if pending_request_count %}<a href="{% url 'my_reservations' %}?status=PENDING&amp;period=all" class="button">{% include 'Reservation/components/icon.html' with name='clock' %}Awaiting approval · {{ pending_request_count }}</a>{% endif %}
+            <a href="{% url 'browse_facilities' %}" class="button button-primary">Find a space{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>
+        </div>
     </div>
     <div class="dashboard-grid">
         <section class="panel next-booking">
-            <div class="panel-heading"><div><h2>Next on your schedule</h2></div></div>
-            {% if upcoming_reservations %}{% with reservation=upcoming_reservations.0 %}
+            <div class="panel-heading"><div><h2>{% if has_ongoing_reservation %}Currently happening{% else %}Next on your schedule{% endif %}</h2></div></div>
+            {% if highlighted_reservation %}{% with reservation=highlighted_reservation %}
             <div class="panel-body">
                 <h3 class="next-booking-title">{{ reservation.event_name }}</h3>
                 {% include 'Reservation/components/status.html' %}
@@ -17,14 +20,14 @@
                 <div class="booking-meta">{% include 'Reservation/components/icon.html' with name='calendar-days' %}<span>{{ reservation.start_datetime|date:"M d, Y · g:i A" }} – {{ reservation.end_datetime|date:"M d, Y · g:i A" }}</span></div>
                 <a href="{% url 'reservation_detail_user' reservation.id %}" class="button">View reservation{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a>
             </div>{% endwith %}{% else %}
-            <div class="user-empty-state">{% include 'Reservation/components/icon.html' with name='calendar-days' %}<h3>Your first gathering starts here.</h3><p>You don't have any upcoming reservations yet.</p><a href="{% url 'browse_facilities' %}" class="button button-primary">Explore campus spaces</a></div>
+            <div class="user-empty-state">{% include 'Reservation/components/icon.html' with name='calendar-days' %}<h3>No confirmed bookings ahead.</h3><p>Pending requests remain in My reservations until reviewed.</p><a href="{% url 'my_reservations' %}" class="button">My reservations</a></div>
             {% endif %}
         </section>
         {% include 'Reservation/components/booking_steps.html' %}
     </div>
     <section class="user-data-card">
         <div class="user-data-heading"><div><h2>Upcoming reservations</h2></div><a href="{% url 'my_reservations' %}" class="text-link">View all{% include 'Reservation/components/icon.html' with name='arrow-right' %}</a></div>
-        {% if upcoming_reservations %}{% include 'Reservation/components/reservation_table.html' with reservations=upcoming_reservations %}{% else %}<div class="user-inline-empty">Your upcoming requests will appear here after you submit a reservation.</div>{% endif %}
+        {% if upcoming_reservations %}{% include 'Reservation/components/reservation_table.html' with reservations=upcoming_reservations %}{% else %}<div class="user-inline-empty">No upcoming confirmed reservations.</div>{% endif %}
     </section>
 </div>
 {% endblock %}

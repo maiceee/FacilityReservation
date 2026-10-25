@@ -1,4 +1,9 @@
 /* Motion supports changes of state without moving dense content around. */
+/* Match the first enhanced panel before deferred scripts run. On load the
+   bootstrap class is removed, so a failed script retains readable fallback
+   panels. With JavaScript disabled the original full content stays visible. */
+.workspace-enhanced [data-tabs]:not([data-tabs-ready]) > [data-tab-panel] ~ [data-tab-panel] { display: none; }
+.workspace-enhanced [data-tabs]:not([data-tabs-ready]) [data-tablist][hidden] { display: flex; visibility: hidden; }
 :is(button, a, .button, .user-nav-link,
     .sidebar a, .user-sidebar a, input, textarea, select, summary, .control-option,
     .workspace-tabs [role='tab'], tbody tr, .user-facility-card) {
@@ -22,7 +27,7 @@ input[role='switch']::before {
     transition: transform var(--duration-fast) var(--ease-standard);
 }
 /* Opacity-only panel entry avoids shifting tables and scroll containers. */
-:is(.auth-form-wrapper, [role='tabpanel']:not([hidden]),
+:is(.auth-form-wrapper,
     .date-picker-grid, .control-options, .user-flash-message, .message) {
     animation: spasyo-reveal var(--duration-normal) var(--ease-standard) both;
 }
@@ -41,6 +46,10 @@ input[role='switch']::before {
             overlay var(--duration-dialog) allow-discrete;
     }
     dialog[open] { opacity: 1; transform: none; }
+    dialog:not([open]), dialog:not([open])::backdrop {
+        transition-duration: var(--duration-dialog-exit);
+        transition-timing-function: var(--ease-exit);
+    }
     dialog:not([open]) { pointer-events: none; }
     dialog:not([open])::backdrop { pointer-events: none; }
     dialog::backdrop {
@@ -77,28 +86,57 @@ input[role='switch']::before {
     :is(.button, .icon-button, .control-trigger):active { translate: none; }
 }
 
-/* Native same-origin navigation preserves the shell while the content crossfades. */
+/* Keep the outgoing document until its replacement is ready. Swap snapshots
+   without crossfading text or animating different page sizes. Navigation still
+   uses normal documents, browser history and native beforeunload safeguards. */
 @view-transition { navigation: auto; }
 @media (prefers-reduced-motion: no-preference) {
     .sidebar, .user-sidebar { view-transition-name: workspace-sidebar; }
-    .sidebar .nav-link.active, .user-sidebar .user-nav-link.active { view-transition-name: navigation-selection; }
-    .directory-tabs [aria-current='page'] { view-transition-name: directory-selection; }
+    .topbar, .user-topbar { view-transition-name: workspace-topbar; }
     .workspace-page { view-transition-name: workspace-content; }
-    ::view-transition-group(*) { animation-duration: 240ms; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
-    ::view-transition-old(workspace-sidebar), ::view-transition-new(workspace-sidebar) { animation: none; mix-blend-mode: normal; }
-    ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+    ::view-transition-group(*), ::view-transition-new(*) {
+        animation: none;
+        mix-blend-mode: normal;
+    }
+    ::view-transition-old(*) { animation: none; opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
     ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 
 /* One sliding surface keeps tab movement coherent without moving table content. */
-.workspace-tabs.has-tab-indicator { position: relative; isolation: isolate; }
-.workspace-tabs.has-tab-indicator::before {
+.tab-indicator-root, .has-tab-indicator { position: relative; isolation: isolate; }
+.has-tab-indicator::before {
     content: ''; position: absolute; left: 0; top: 0; z-index: -1;
     width: var(--tab-width); height: var(--tab-height);
     transform: translate(var(--tab-left), var(--tab-top));
     border-radius: var(--radius-pill); background: var(--color-primary);
-    transition: transform var(--duration-normal) var(--ease-standard), width var(--duration-normal) var(--ease-standard);
+    transition: transform var(--duration-fast) var(--ease-standard);
 }
-.workspace-tabs.has-tab-indicator [aria-selected='true'] { background: transparent; box-shadow: none; }
+:is(.workspace-tabs, .directory-tabs, .inbox-tabs, .appearance-options).has-tab-indicator [data-pill-selected='true'] { background: transparent; box-shadow: none; color: var(--color-on-primary); }
+:is(.workspace-tabs, .directory-tabs, .inbox-tabs, .appearance-options).has-tab-indicator [data-pill-selected='false'] { background: transparent; color: var(--color-text-muted); }
+
+.sidebar-nav.has-tab-indicator { overflow-x: hidden; }
+
+/* Sidebar links share the direct pill controller; retain their existing shape and colour. */
+:is(.sidebar-nav, .user-sidebar-nav).has-tab-indicator::before {
+    border-radius: var(--radius-sm);
+    background: var(--color-sidebar-active);
+    max-width: 100%;
+}
+:is(.sidebar-nav, .user-sidebar-nav).has-tab-indicator a:is(.active, :hover) {
+    background: transparent;
+}
+:is(.sidebar-nav, .user-sidebar-nav).has-tab-indicator a[data-pill-selected='true'] {
+    color: var(--color-on-primary);
+    font-weight: 700;
+}
+:is(.sidebar-nav, .user-sidebar-nav).has-tab-indicator a[data-pill-selected='false'] {
+    font-weight: 400;
+}
+:is(.sidebar-nav, .user-sidebar-nav).has-tab-indicator a[data-pill-selected='true'] > .icon {
+    color: var(--color-accent);
+}
+:is(.sidebar-nav, .user-sidebar-nav).has-tab-indicator a[data-pill-selected='false'] > .icon {
+    color: inherit;
+}

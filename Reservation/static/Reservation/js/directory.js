@@ -5,24 +5,37 @@
     const rows = [...document.querySelectorAll('[data-select-record]')];
     const all = document.querySelector('[data-select-page]');
     const actions = [...form.querySelectorAll('[data-bulk-action]')];
+    let submitting = false;
     const selected = () => rows.filter(row => row.checked);
+    const applies = (row, operation) => row.value.endsWith(operation === 'activate' ? ':0' : ':1');
     const refresh = () => {
         const count = selected().length;
         form.querySelector('[data-selection-count]').textContent = count ? `${count} selected · this page only` : 'Select records on this page';
-        actions.forEach(button => { button.disabled = !count; });
+        const busy = submitting || Boolean(window.SpasyoNotifications?.hasPendingAction());
+        actions.forEach(button => {
+            button.disabled = busy || !selected().some(row => applies(row, button.value));
+        });
         if (all) { all.checked = count > 0 && count === rows.length; all.indeterminate = count > 0 && count < rows.length; }
     };
     all?.addEventListener('change', () => { rows.forEach(row => { row.checked = all.checked; }); refresh(); });
     rows.forEach(row => row.addEventListener('change', refresh));
+    window.SpasyoNotifications?.subscribePending(refresh);
+    window.addEventListener('pageshow', () => { submitting = false; refresh(); });
     refresh();
     form.addEventListener('submit', event => {
         event.preventDefault();
-        const selection = selected().map(row => ({ value: row.value, name: row.dataset.name }));
-        if (!selection.length || !event.submitter) return;
+        if (submitting || window.SpasyoNotifications?.hasPendingAction() || !event.submitter) return;
         const operation = event.submitter.value;
+        if (!['activate', 'deactivate'].includes(operation)) return;
+        const selection = selected().filter(row => applies(row, operation))
+            .map(row => ({ value: row.value, name: row.dataset.name }));
+        if (!selection.length) return;
+        const skipped = selected().length - selection.length;
         const label = operation === 'activate' ? 'Activate' : 'Deactivate';
         // Snapshot IDs + expected status at confirmation, never read a later selection.
         const submit = () => {
+            if (submitting) return;
+            submitting = true;
             form.querySelectorAll('[data-bulk-snapshot]').forEach(node => node.remove());
             rows.forEach(row => { row.disabled = true; });
             for (const [name, value] of [...selection.map(row => ['selected', row.value]), ['operation', operation]]) {
@@ -34,13 +47,12 @@
             form.submit();
         };
         const options = {
-            title: `${label} ${selection.length} selected record(s)?`,
-            record: `${selection.length} selected record(s)`,
-            details: selection.map(row => row.name).join(', '),
-            description: 'Only these selected records will change. Existing reservations stay in the system. Already-matching statuses are skipped.',
+            title: `${label} ${selection.length} ${selection.length === 1 ? 'record' : 'records'}?`,
+            record: selection.map(row => row.name).join(', '),
+            description: skipped ? `${skipped} already ${operation === 'activate' ? 'active' : 'inactive'} will stay unchanged.` : '',
             actionLabel: label, onConfirm: submit
         };
-        if (!window.SpasyoConfirm?.open(options) && window.confirm(`${options.title}\n${options.details}`)) submit();
+        if (!window.SpasyoConfirm?.open(options) && window.confirm(`${options.title}\n${options.record}`)) submit();
     });
 })();
 

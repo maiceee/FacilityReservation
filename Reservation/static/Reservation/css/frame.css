@@ -93,7 +93,7 @@
     .user-detail-info-card, .user-detail-history-card, .ra-card, .ra-summary-card,
     .system-filter-card, .system-table-card, .system-settings-card, .user-data-card,
     .user-detail-card, .user-form-card, .panel, .user-facility-card) {
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
 }
 .workspace-page :is(.calendar-filter-card, .calendar-navigation-card,
     .facility-filter-card, .management-filter-card, .system-filter-card) {
@@ -263,7 +263,7 @@
     justify-content: flex-end;
     gap: var(--space-1);
     padding: var(--space-1) var(--space-3);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
     font-size: var(--font-size-xs);
 }
 .rv-pagination .icon-button {
@@ -341,7 +341,8 @@
 .table-edit-dialog {
     width: min(24rem, calc(100% - 2rem));
 }
-.table-edit-dialog[data-editor='facility'], .table-edit-dialog[data-editor='closure'] {
+.table-edit-dialog[data-editor='facility'], .table-edit-dialog[data-editor='closure'],
+.table-edit-dialog[data-editor='reschedule'] {
     width: min(36rem, calc(100% - 2rem));
 }
 .table-edit-dialog[data-editor='reservation'] {
@@ -440,8 +441,13 @@
     gap: var(--space-2);
     grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
 }
-.table-edit-dialog :is(.master-detail-form, .facility-detail-form, .closures-detail-form, .user-reservation-form) {
+.table-edit-dialog :is(.master-detail-form, .facility-detail-form, .closures-detail-form, .user-reservation-form, .rv-stacked-form) {
     padding: 0;
+}
+.table-edit-dialog .closures-form-card {
+    padding: 0;
+    border: 0;
+    box-shadow: none;
 }
 .table-edit-dialog .workspace-dialog-body > p {
     margin-bottom: var(--space-3);
@@ -453,7 +459,7 @@
     gap: var(--space-2);
     padding-top: var(--space-3);
     margin-top: var(--space-3);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
 }
 .table-edit-dialog .master-detail-form > .modal-form-actions {
     margin-top: 0;
@@ -494,14 +500,14 @@
 }
 .calendar-day-heading {
     flex-shrink: 0;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
 }
 .calendar-day-content {
     flex: 1;
     align-content: start;
 }
 .schedule-entry {
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     background: var(--color-surface);
 }
 .schedule-day-open {
@@ -545,7 +551,7 @@
     grid-row: 3;
     min-height: 0;
     overflow: hidden;
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
 }
 .chart-grid > .workspace-tabs {
@@ -683,10 +689,29 @@
     display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0;
 }
 .directory-controls { justify-content: space-between; flex-wrap: wrap; }
-.directory-tabs { display: inline-flex; padding: .25rem; gap: .25rem; border-radius: var(--radius-pill); background: var(--color-surface-subtle); }
-.directory-tabs a { display: inline-flex; align-items: center; gap: .5rem; padding: .4rem .75rem; color: var(--color-text-muted); border-radius: var(--radius-pill); font-size: var(--font-size-xs); text-decoration: none; }
+.directory-tabs {
+    position: relative;
+    isolation: isolate;
+    display: inline-grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: var(--space-1);
+    gap: var(--space-1);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-subtle);
+}
+.directory-tabs a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: .4rem .75rem;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-xs);
+    text-decoration: none;
+}
 .directory-tabs a[aria-current='page'] { background: var(--color-primary); color: white; }
-.directory-tabs span { font-size: .6875rem; font-variant-numeric: tabular-nums; opacity: .8; }
+.directory-tabs a span { font-size: .6875rem; font-variant-numeric: tabular-nums; opacity: .8; }
 .directory-search { display: flex; align-items: center; gap: .25rem; flex: 0 1 22rem; }
 .directory-search input[type='search'] { width: 100%; min-width: 8rem; }
 .directory-bulk { font-size: var(--font-size-xs); }
@@ -697,7 +722,7 @@
 .workspace-page :is(th, td).selection-cell { width: 2.5rem; min-width: 2.5rem; padding-inline: .75rem; }
 .selection-cell input { width: 1rem; height: 1rem; vertical-align: middle; accent-color: var(--color-primary); }
 .report-facility-filter { position: relative; min-width: 10rem; align-self: center; }
-.report-facility-filter summary { padding: .5rem .75rem; border-radius: var(--radius-sm); border: 1px solid var(--color-border); cursor: pointer; }
+.report-facility-filter summary { padding: .5rem .75rem; border-radius: var(--radius-sm); border: var(--border-width) solid var(--color-border); cursor: pointer; }
 .report-facility-options { position: absolute; inset: calc(100% + .5rem) 0 auto auto; z-index: 15; width: min(22rem, 70vw); max-height: min(22rem, 50dvh); overflow: auto; padding: 1rem; background: var(--color-surface); box-shadow: var(--shadow-dialog); border-radius: var(--radius-card); }
 .report-facility-options label { display: flex; align-items: center; gap: .5rem; margin-block: .5rem; font-size: var(--font-size-xs); }
 .report-facility-options [hidden] { display: none; }
@@ -713,7 +738,7 @@
 .profile-account .account-details { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
 .profile-section-heading h3 { margin: 0; font-size: var(--font-size-sm); }
 .table-edit-dialog .profile-form, .workspace-detail-body .profile-form { padding: 0; }
-.profile-form .user-form-footer { border-top: 1px solid var(--color-border); }
+.profile-form .user-form-footer { border-top: var(--border-width) solid var(--color-border); }
 /* Keep dialogs centered even when embedded inside a spaced details container. */
 .workspace-detail-body > .confirm-dialog { inset: 0; margin: auto; }
 .confirm-dialog .dialog-booking { margin-block: 1rem; padding: .75rem; }
@@ -747,7 +772,16 @@
 .facilities-page .facility-table th:nth-child(2) { width: 32%; }
 .master-data-page .master-table { table-layout: fixed; min-width: 0; width: 100%; }
 .master-data-page .master-table th:nth-child(2) { width: auto; }
-.master-data-page .master-table th:nth-child(3), .master-data-page .master-table th:nth-child(4) { width: 6rem; }
+/* Reserve room for the longest status pill, including both cell and pill padding. */
+.master-data-page .master-table th:nth-child(3) { width: 8rem; }
+.master-data-page .master-table th:nth-child(4) { width: 7rem; }
+.master-data-page .master-table .management-status {
+    width: max-content;
+    flex-shrink: 0;
+    justify-content: center;
+    padding-inline: var(--space-3);
+    white-space: nowrap;
+}
 .directory-pagination { margin-top: auto; }
 
 .workspace-page[data-workspace-page='detail'] .progress-list { margin: 0; padding-top: 0; }
@@ -755,3 +789,120 @@
 .profile-section-heading { margin-bottom: .5rem; }
 
 .master-data-page .master-row-actions { flex-wrap: nowrap; gap: .25rem; }
+
+/* Readability within the existing compact geometry: no spacing or height changes. */
+.workspace-page :is(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+    font-size: var(--font-size-body);
+    color: var(--color-text);
+}
+.workspace-page :is(.user-table-primary, .user-table-date, .reservation-info-item strong,
+    .user-info-item strong, .account-details dd) {
+    font-size: var(--font-size-body);
+    font-variant-numeric: tabular-nums;
+}
+.workspace-page :is(.rv-field, .calendar-field, .ra-field, .management-search-field,
+    .facility-search-field, .system-search-field, .user-filter-field) > label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+}
+/* Match the label row so compact filter actions retain their alignment. */
+.workspace-page :is(.rv-filter-actions, .calendar-filter-actions, .ra-filter-actions,
+    .management-search-actions, .facility-search-actions, .system-search-actions, .user-filter-actions) {
+    padding-top: calc(var(--font-size-xs) * var(--line-height) + var(--space-1));
+}
+@supports (grid-template-rows: subgrid) {
+    .workspace-page :is(.rv-filter-actions, .calendar-filter-actions, .ra-filter-actions,
+        .management-search-actions, .facility-search-actions, .system-search-actions, .user-filter-actions) {
+        padding-top: 0;
+    }
+}
+.ui-field-help, .table-edit-dialog :is(.field-help, .master-field-help,
+    .facility-field-help, .closures-field-help) {
+    font-size: var(--font-size-xs);
+}
+.workspace-page :is(h1, h2), .table-edit-dialog h2 {
+    text-wrap: balance;
+}
+.workspace-page :is(.panel-heading, .user-card-heading, .user-data-heading) h2 {
+    color: var(--color-text);
+    font-weight: var(--font-weight-bold);
+}
+.table-edit-dialog .modal-form-actions {
+    border-top: var(--border-width) solid var(--color-border);
+}
+
+/* Essential booking terms remain visible in both full-page and modal forms. */
+.booking-policy {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+/* History filters reuse the compact directory controls and component scrolling. */
+.workspace-page .reservation-history-filter {
+    grid-template-columns: minmax(10rem, 2fr) repeat(2, minmax(8rem, 1fr)) auto;
+}
+@media (max-width: 900px) {
+    .workspace-page .reservation-history-filter { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.ra-field > .control-label { font-size: var(--font-size-xs); color: var(--color-text); font-weight: var(--font-weight-medium); }
+
+/* Complex report filters participate in the same label/control/guidance rows. */
+.workspace-page .ra-field.report-facility-field { grid-template-columns: minmax(0, 1fr); }
+.workspace-page .ra-field.report-facility-field > .control-label { grid-row: 1; }
+.workspace-page .ra-field.report-facility-field > details { grid-row: 2; align-self: stretch; }
+.workspace-page .ra-field.report-facility-field > .field-help { grid-row: 3; margin: 0; font-size: .6875rem; color: var(--color-text-muted); }
+.report-facility-filter > summary { display: flex; align-items: center; gap: var(--space-1); min-height: var(--control-height); padding: var(--space-1) var(--space-3); list-style: none; }
+.report-facility-filter > summary::-webkit-details-marker { display: none; }
+.report-facility-filter > summary > .icon { margin-left: auto; }
+.keyboard-tools .keyboard-help-trigger.icon-button { height: var(--control-height); padding-block: var(--space-1); }
+
+/* Optional help is compact and aligned with its label, including switch rows. */
+.help-label-row { display: flex; align-items: center; gap: .25rem; min-width: 0; }
+.help-label-row > :is(label, h2, h3) { margin: 0; }
+.help-label-row .ui-hint { flex: 0 0 auto; }
+.help-label-row .ui-hint :is(summary, button), .ui-hint :is(summary, button) {
+    display: inline-grid; place-items: center; border: 0; background: transparent;
+    color: var(--color-text-muted); cursor: pointer; font: inherit;
+    width: 1.5rem; height: 1.5rem; min-height: 0;
+    border-radius: 50%; padding: 0;
+}
+.ui-hint :is(summary, button) .icon { width: .9375rem; height: .9375rem; }
+.ui-hint :is(summary, button):is(:hover, [aria-expanded='true']) { background: var(--color-canvas); color: var(--color-text); }
+.ui-hint :is(summary, button):focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.table-edit-dialog :is(.master-form-group, .facility-form-group):has(input[name='is_active']) > .help-label-row { margin-right: auto; }
+.hint-popover {
+    width: max-content; max-width: min(15rem, calc(100vw - 1rem));
+    padding: .5rem .625rem; border: 1px solid var(--color-border); border-radius: .5rem;
+    background: var(--color-surface); color: var(--color-text);
+    overflow: visible;
+    box-shadow: 0 .2rem .6rem rgb(0 0 0 / 15%);
+    font-family: inherit; font-size: .6875rem; line-height: 1.45;
+    text-align: left;
+}
+
+.help-tip-text { max-height: calc(100dvh - 3rem); overflow: auto; }
+.hint-popover::before {
+    content: ''; position: absolute; width: 8px; height: 8px;
+    background: inherit; transform: rotate(45deg); pointer-events: none;
+}
+.hint-popover[data-side='right']::before { left: -4px; top: calc(var(--help-arrow) - 4px); }
+.hint-popover[data-side='left']::before { right: -4px; top: calc(var(--help-arrow) - 4px); }
+.hint-popover[data-side='bottom']::before { top: -4px; left: calc(var(--help-arrow) - 4px); }
+.hint-popover[data-side='top']::before { bottom: -4px; left: calc(var(--help-arrow) - 4px); }
+
+.hint-popover[data-side='right']::before { border-left: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+.hint-popover[data-side='left']::before { border-right: 1px solid var(--color-border); border-top: 1px solid var(--color-border); }
+.hint-popover[data-side='bottom']::before { border-left: 1px solid var(--color-border); border-top: 1px solid var(--color-border); }
+.hint-popover[data-side='top']::before { border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+
+.ui-hint[hidden] { display: none !important; }
+.modal-description:empty { display: none; }
+
+.appearance-settings { border: 0; border-bottom: var(--border-width) solid var(--color-border); padding: 0 0 var(--space-4); margin: 0; min-width: 0; }
+.appearance-settings legend { font-size: var(--font-size-xs); font-weight: 700; padding: 0; margin-bottom: var(--space-2); }
+.appearance-options { display: inline-flex; gap: var(--space-1); padding: var(--space-1); background: var(--color-surface-subtle); border-radius: var(--radius-pill); }
+.appearance-options button { border: 0; border-radius: var(--radius-pill); padding: .4rem .875rem; background: transparent; color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.appearance-options button[aria-pressed='true'] { background: var(--color-primary); color: var(--color-on-primary); }

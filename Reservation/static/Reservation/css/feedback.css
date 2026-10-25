@@ -54,7 +54,7 @@
     .rv-form-alert, .facility-form-alert, .master-form-alert, .closures-form-alert,
     .system-form-alert, .user-rejection-notice, .workspace-page .closures-conflict-card) {
     background: var(--state-surface, var(--color-info-surface));
-    border: 1px solid var(--state-border, var(--color-info-border));
+    border: var(--border-width) solid var(--state-border, var(--color-info-border));
     border-left: 3px solid var(--state-text, var(--color-info-text));
     color: var(--state-text, var(--color-info-text));
 }
@@ -64,7 +64,7 @@
 }
 :is(input, select, textarea, .control-trigger)[aria-invalid='true'],
 :is(input, select, textarea):user-invalid {
-    border: 1px solid var(--color-danger-text);
+    border: var(--border-width) solid var(--color-danger-text);
     background: var(--color-danger-surface);
 }
 :is(input, select, textarea, .control-trigger)[aria-invalid='true']:focus-visible {
@@ -130,7 +130,7 @@
     grid-column: 1 / -1;
     padding: var(--space-3);
     margin-bottom: var(--space-3);
-    border: 1px solid var(--color-danger-border);
+    border: var(--border-width) solid var(--color-danger-border);
     border-radius: var(--radius-sm);
     background: var(--color-danger-surface);
     color: var(--color-danger-text);
@@ -157,7 +157,7 @@ form:is(.master-detail-form, .rv-stacked-form, .system-settings-form, .auth-form
     flex-wrap: wrap;
     gap: var(--space-2);
     padding: var(--space-3);
-    border: 1px solid var(--color-info-border);
+    border: var(--border-width) solid var(--color-info-border);
     border-radius: var(--radius-sm);
     background: var(--color-info-surface);
     color: var(--color-info-text);
@@ -215,7 +215,7 @@ form:is(.master-detail-form, .rv-stacked-form, .system-settings-form, .auth-form
     background: var(--color-surface);
     box-shadow: 0 4px 18px rgb(0 0 0 / 12%);
     font-size: var(--font-size-xs);
-    animation: toast-enter 260ms cubic-bezier(.16, 1, .3, 1) both;
+    animation: toast-enter var(--duration-toast-enter) var(--ease-standard) both;
 }
 @keyframes toast-enter {
     from { opacity: 0; transform: translateY(-10px); }
@@ -244,7 +244,7 @@ form:is(.master-detail-form, .rv-stacked-form, .system-settings-form, .auth-form
     border: 0;
     border-radius: var(--radius-pill);
     background: transparent;
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-bold);
 }

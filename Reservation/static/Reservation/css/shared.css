@@ -42,7 +42,7 @@ h1  {
     line-height: 1.5;
     padding-block: 2px;
     overflow-wrap: anywhere;
-    letter-spacing: -.045em;
+    letter-spacing: -.02em;
 }
 
 h2  {
@@ -79,7 +79,7 @@ img, svg  {
     flex: 0 0 auto;
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.75;
+    stroke-width: var(--icon-stroke-width);
     stroke-linecap: round;
     stroke-linejoin: round;
     vertical-align: middle;
@@ -114,7 +114,7 @@ img, svg  {
     gap: var(--space-2);
     min-height: var(--control-height);
     padding: var(--space-2) var(--space-5);
-    border: 1px solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
     color: var(--color-text);
@@ -180,7 +180,7 @@ input:not([type='checkbox']):not([type='hidden']), select, textarea  {
     min-width: 0;
     min-height: var(--control-height);
     padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     background: var(--color-surface);
@@ -210,9 +210,9 @@ input::-webkit-outer-spin-button {
     height: 1.125rem;
     flex-shrink: 0;
     margin: 0;
-    border: 1px solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-pill);
-    background: var(--clr-neutral-300);
+    background: var(--color-switch-track);
     cursor: pointer;
     vertical-align: middle;
 }
@@ -224,7 +224,7 @@ input[type='checkbox'][name='is_active']::before {
     width: .75rem;
     height: .75rem;
     border-radius: 50%;
-    background: var(--color-surface);
+    background: var(--color-on-primary);
 }
 input[type='checkbox'][name='is_active']:checked {
     background: var(--color-primary);
@@ -273,7 +273,7 @@ input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='
 .notice, .user-flash-message, .user-form-alert, .auth-alert  {
     padding: var(--space-4) var(--space-5);
     background: var(--color-canvas);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-sm);
 }
 
@@ -374,7 +374,7 @@ input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='
     min-width: var(--control-height);
     min-height: var(--control-height);
     padding: var(--space-2);
-    border: 1px solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-sm);
 }
 
@@ -409,7 +409,7 @@ input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='
 .ui-hint-content {
     max-width: 32rem;
     padding: var(--space-3);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-surface-subtle);
     overflow-wrap: anywhere;
@@ -425,3 +425,5 @@ h2:has(+ .ui-hint), h3:has(+ .ui-hint) {
     scrollbar-width: thin;
     scrollbar-color: var(--color-border-strong) transparent;
 }
+
+:root[data-theme='dark'] .user-danger-button:hover { color: var(--color-surface); }

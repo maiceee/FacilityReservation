@@ -91,7 +91,7 @@
     gap: var(--space-1);
     margin-top: var(--space-2);
     padding-top: var(--space-2);
-    border-top: 1px solid var(--color-sidebar-active);
+    border-top: var(--border-width) solid var(--color-sidebar-active);
 }
 .sidebar-profile {
     display: flex;
@@ -132,7 +132,7 @@
     gap: var(--space-4);
     min-height: 3.5rem;
     margin-inline: var(--page-padding);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
 }
 .topbar-left, .topbar-right {
     display: flex;
@@ -224,7 +224,7 @@
     .system-table-card, .system-settings-card) {
     min-width: 0;
     overflow: hidden;
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
     background: var(--color-surface);
 }
@@ -422,7 +422,7 @@
     gap: var(--space-3);
     margin-top: var(--space-6);
     padding-top: var(--space-5);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
 }
 
 /* Buttons share the same shape and semantic colors as the user portal. */
@@ -442,7 +442,7 @@
     gap: var(--space-2);
     min-height: var(--control-height);
     padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
     color: var(--color-text);
@@ -509,7 +509,7 @@
     top: 0;
     z-index: 1;
     padding: var(--space-3) var(--space-5);
-    border-block: 1px solid var(--color-border);
+    border-block: var(--border-width) solid var(--color-border);
     background: var(--color-surface-subtle);
     color: var(--color-text-muted);
     font-size: var(--font-size-xs);
@@ -517,7 +517,7 @@
 }
 .admin-page td {
     padding: var(--table-cell-padding) var(--space-4);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
     vertical-align: middle;
     overflow-wrap: anywhere;
 }
@@ -628,7 +628,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-pill);
     background: var(--color-canvas);
     color: var(--color-text);
@@ -661,12 +661,12 @@
     flex-wrap: wrap;
     gap: var(--space-2);
     padding: var(--space-5) var(--space-6) var(--space-2);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
 }
 .rv-pagination :is(a, span) {
     min-width: 2rem;
     padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-sm);
     font-size: var(--font-size-xs);
     text-align: center;
@@ -703,7 +703,7 @@
     align-content: start;
     gap: var(--space-3);
     padding: var(--panel-padding);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-sm);
 }
 .reservation-action-form h3 {
@@ -723,7 +723,7 @@
 }
 .reservation-history-item {
     padding: var(--panel-padding);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-sm);
 }
 .user-detail-profile-card, .user-detail-profile-main, .user-detail-identity {
@@ -806,7 +806,7 @@
 .calendar-day-heading {
     padding: var(--space-2) var(--space-3);
     gap: var(--space-1);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
 }
 .calendar-day-weekday {
     color: var(--color-text-muted);
@@ -861,7 +861,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
     font-size: var(--font-size-xs);
     font-weight: 700;
 }
@@ -911,7 +911,7 @@
 .message, .rv-form-alert, .facility-form-alert, .master-form-alert,
 .closures-form-alert, .system-form-alert {
     padding: var(--table-cell-padding) var(--space-4);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-left: 3px solid var(--color-text);
     border-radius: var(--radius-sm);
     background: var(--color-canvas);
@@ -947,7 +947,7 @@
     display: grid;
     gap: var(--space-4);
     padding: var(--panel-padding);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-sm);
 }
 .closures-conflict-grid {
@@ -964,7 +964,7 @@
 }
 .system-settings-field {
     padding-bottom: var(--space-5);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
 }
 .system-number-input {
     display: flex;
@@ -1008,7 +1008,7 @@
     width: min(100%, 32rem);
     max-height: calc(100dvh - var(--space-8));
     overflow: auto;
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
     background: var(--color-surface);
     box-shadow: var(--shadow-dialog);
@@ -1021,7 +1021,7 @@
     padding: var(--space-3) var(--panel-padding);
 }
 .admin-modal-header {
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
 }
 .admin-modal-body {
     display: grid;
@@ -1031,14 +1031,14 @@
 .admin-modal-footer {
     justify-content: flex-end;
     flex-wrap: wrap;
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
 }
 .admin-modal-close {
     display: grid;
     place-items: center;
     width: 2rem;
     height: 2rem;
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-canvas);
     color: var(--color-text);
@@ -1118,7 +1118,7 @@
         display: inline-flex;
         align-items: center;
         padding: var(--space-2);
-        border: 1px solid var(--color-border);
+        border: var(--border-width) solid var(--color-border);
         border-radius: var(--radius-sm);
     }
     .sidebar-toggle:focus-visible ~ .main-shell .mobile-menu-button {
@@ -1163,7 +1163,7 @@
     max-height: calc(100dvh - var(--space-8));
     overflow: auto;
     padding: var(--page-padding);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
     color: var(--color-text);
     background: var(--color-surface);

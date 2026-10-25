@@ -1,0 +1,15 @@
+{% load static %}
+<div class="notification-center" data-notification-center data-feed="{% url 'notification_feed' %}" data-read="{% url 'notification_read' %}">
+    <button type="button" class="icon-button notification-bell" data-inbox-toggle aria-label="Notifications" aria-expanded="false" aria-controls="notification-inbox">
+        {% include 'Reservation/components/icon.html' with name='bell' %}
+        <span class="notification-count" data-inbox-count hidden></span>
+    </button>
+    <p class="sr-only" data-inbox-live role="status" aria-live="polite" aria-atomic="true"></p>
+    <section id="notification-inbox" class="notification-inbox" aria-label="Notifications" hidden>
+        <header class="inbox-heading"><h2>Notifications</h2><button type="button" class="inbox-text-button" data-inbox-read-all>Mark all as read</button></header>
+        <div class="inbox-tabs" role="group" aria-label="Notification filter"><button type="button" data-inbox-tab="unread" aria-pressed="true">Unread</button><button type="button" data-inbox-tab="all" aria-pressed="false">All</button></div>
+        <div class="inbox-items" data-inbox-items aria-busy="false"></div>
+        <footer class="inbox-pagination"><button type="button" class="inbox-text-button" data-inbox-prev>Previous</button><span data-inbox-page>Page 1</span><button type="button" class="inbox-text-button" data-inbox-next>Next</button></footer>
+        <form hidden data-inbox-csrf>{% csrf_token %}</form>
+    </section>
+</div>

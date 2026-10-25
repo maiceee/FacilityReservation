@@ -3,7 +3,7 @@
     width: min(24rem, calc(100% - 2rem));
     max-height: calc(100dvh - 2rem);
     padding: var(--space-4);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
     background: var(--color-surface);
     color: var(--color-text);
@@ -31,7 +31,7 @@
     max-height: calc(100dvh - 1.5rem);
     overflow: auto;
     padding: var(--space-3);
-    border: 1px solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
     color: var(--color-text);
@@ -72,7 +72,7 @@
 kbd {
     display: inline-block;
     padding: 1px var(--space-1);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: .25rem;
     background: var(--color-surface-subtle);
     color: var(--color-text-muted);
@@ -105,7 +105,7 @@ kbd {
     gap: var(--space-2);
     padding-top: var(--space-2);
     margin-top: var(--space-1);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
     font-size: var(--font-size-xs);
 }
 .keyboard-help small {
@@ -172,7 +172,7 @@ kbd {
     width: min(42rem, calc(100% - 2rem));
     max-height: calc(100dvh - 2rem);
     padding: 0;
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-card);
     background: var(--color-surface);
     color: var(--color-text);
@@ -193,7 +193,7 @@ kbd {
     flex-shrink: 0;
     gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
 }
 .workspace-dialog-body {
     min-height: 0;
@@ -206,7 +206,7 @@ kbd {
     display: grid;
     gap: var(--space-2);
     padding: var(--space-3);
-    border: 1px solid var(--color-border);
+    border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-sm);
     margin-bottom: var(--space-3);
     overflow-wrap: anywhere;
@@ -241,7 +241,7 @@ kbd {
     min-height: var(--control-height);
     gap: var(--space-2);
     padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     background: var(--color-surface);
@@ -256,7 +256,7 @@ kbd {
     position: fixed;
     margin: 0;
     padding: var(--space-2);
-    border: 1px solid var(--color-border-strong);
+    border: var(--border-width) solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     background: var(--color-surface);
@@ -367,7 +367,58 @@ kbd {
     color: var(--color-on-primary);
 }
 .date-picker-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
     padding-top: var(--space-2);
     margin-top: var(--space-2);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--border-width) solid var(--color-border);
+}
+.date-picker-popover:popover-open {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    overflow: hidden;
+}
+.date-picker-popover .date-picker-grid {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.date-picker-footer > .button {
+    min-width: max-content;
+    white-space: nowrap;
+    height: var(--control-height);
+}
+.date-picker-time {
+    min-width: 0;
+}
+.date-picker-time-label {
+    display: block;
+    margin-bottom: var(--space-1);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+.date-picker-time-segments {
+    display: grid;
+    grid-template-columns: minmax(2.25rem, 1fr) auto minmax(2.25rem, 1fr) minmax(3.5rem, 1.25fr);
+    align-items: center;
+    gap: var(--space-1);
+}
+.date-picker-time-segments > input,
+.date-picker-time-segments > select {
+    width: 100%;
+    min-width: 0;
+    height: var(--control-height);
+    padding: var(--space-1);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    text-align: center;
+}
+.date-picker-time-error {
+    margin: var(--space-2) 0 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-danger-text);
 }

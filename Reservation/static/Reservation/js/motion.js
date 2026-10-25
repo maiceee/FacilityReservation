@@ -38,7 +38,7 @@
                 if (!dialog.open) cleanup();
                 return;
             }
-            const duration = durationFor(dialog, '--duration-dialog', 220);
+            const duration = durationFor(dialog, '--duration-dialog-exit', 160);
             pending.set(dialog, { cleanup, timer: setTimeout(() => finish(dialog), duration + 30) });
         }
     };

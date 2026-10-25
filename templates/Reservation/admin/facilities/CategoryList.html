@@ -92,7 +92,7 @@
                                                     class="icon-button master-archive-button"
                                                     data-category-name="{{ category.name }}"
                                                     data-form-id="category-archive-{{ category.id }}"
-                                                    onclick="openCategoryArchive(this)" aria-label="Deactivate {{ category.name }}" title="Deactivate {{ category.name }}">{% include 'Reservation/components/icon.html' with name='x' %}</button>
+                                                    onclick="openCategoryArchive(this)" aria-label="Deactivate {{ category.name }}" title="Deactivate {{ category.name }}">{% include 'Reservation/components/icon.html' with name='circle-x' %}</button>
 
                                             <form method="post"
                                                   action="{% url 'category_archive' category.id %}"

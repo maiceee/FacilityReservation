@@ -473,6 +473,14 @@ class ReservationRequestForm(forms.ModelForm):
             maximum_datetime
         )
 
+    def clean_start_datetime(self):
+        start = self.cleaned_data['start_datetime']
+        if start <= timezone.now():
+            raise forms.ValidationError(
+                'This start time has passed. Choose a future start time.'
+            )
+        return start
+
 
 # =========================================================
 # ADMIN RESERVATION DECISION
@@ -581,7 +589,6 @@ class ClosureBlockForm(forms.ModelForm):
 
         help_texts = {
             'facility': 'Only active facilities can be selected.',
-            'start_datetime': 'Use Philippine local date and time.',
             'end_datetime': 'The facility becomes available after this time.',
             'reason': 'Briefly explain why the facility will be unavailable.',
         }
