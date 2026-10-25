@@ -7,61 +7,36 @@ A Django web application for requesting, approving, and tracking campus facility
 
 
 Team
-
-
 Beltran, Maicee Annlei J.
-
 De Guzman, Dan Nico C.
-
 Eusebio, Kurt Yanzie
-
 Reyes, Kurt Ivan
-
 Sabiaga, John Raven V.
 
 
 Features
-
 Basic User (/portal/)
 
-
-
-Register, log in, and update a profile
-
-Search facilities by name, code, or location; filter by category and minimum capacity
-
-View facility details, amenities, availability, and closures
-
-Submit reservation requests with automatic validation
-
-View own reservations and cancel Pending or Approved ones before they start
-
+Register, log in, and update a profile. 
+Search facilities by name, code, or location; filter by category and minimum capacity. 
+View facility details, amenities, availability, and closures. 
+Submit reservation requests with automatic validation. 
+View own reservations and cancel Pending or Approved ones before they start. 
 
 Administrator (/manage/)
 
-
-
-Dashboard with pending requests, upcoming events, booking trends, and facility usage
-
-Manage users, categories, amenities, and facilities (archive instead of delete)
-
-Review requests: approve or reject with a required reason
-
-Reschedule or cancel approved reservations with a required reason
-
-Check in, complete (with incident notes), or mark no-show
-
-Facility closures with conflict detection
-
-Reservation slip and completion summary
-
-Reports with date filters and CSV exports (reservations and facility utilization)
-
-Audit log and system settings (maximum event duration, advance-booking days)
+Dashboard with pending requests, upcoming events, booking trends, and facility usage. 
+Manage users, categories, amenities, and facilities (archive instead of delete). 
+Review requests: approve or reject with a required reason. 
+Reschedule or cancel approved reservations with a required reason. 
+Check in, complete (with incident notes), or mark no-show. 
+Facility closures with conflict detection. 
+Reservation slip and completion summary. 
+Reports with date filters and CSV exports (reservations and facility utilization). 
+Audit log and system settings (maximum event duration, advance-booking days). 
 
 
 Reservation Rules
-
 Every request, approval, and reschedule is validated for: active facility and category, attendees within capacity, a future start, end after start, same-day schedule, facility operating hours, maximum duration (default 4 hours), booking window (default 30 days), closure overlap, and conflicts with blocking reservations. Time ranges are half-open, so back-to-back bookings are allowed. Approval and rescheduling lock the records inside a database transaction so two overlapping requests cannot both succeed.
 
 
@@ -69,24 +44,19 @@ Status flow: Pending → Approved → Checked In → Completed. Other outcomes: 
 
 
 Tech Stack
+Python and Django 6.1.2.
 
+SQLite (development and demonstration). 
 
-Python and Django 6.1.2
+Django templates, plain CSS, and vanilla JavaScript. 
 
-SQLite (development and demonstration)
-
-Django templates, plain CSS, and vanilla JavaScript
-
-Chart.js 4.4.7 (bundled locally)
-
+Chart.js 4.4.7 (bundled locally). 
 
 Requirements
 
-
-Python 3.12 or newer (confirm against the Django 6.1 release notes)
+Python 3.12 or newer. 
 
 Git
-
 
 Setup
 
@@ -144,7 +114,6 @@ Running Checks and Tests
 
 Run these before every merge or submission:
 
-
 python manage.py check
 python manage.py makemigrations --check --dry-run
 python manage.py test
@@ -187,15 +156,10 @@ Use fictional data for demonstrations.
 
 Known Limitations
 
-
 SQLite is suitable for demonstration. Use PostgreSQL for sustained production use.
-
 No email notifications.
-
 No recurring reservations.
-
 Reservations cannot span midnight.
-
 Accessibility checks and formal user testing results must be recorded separately in the project documentation.
 
 
